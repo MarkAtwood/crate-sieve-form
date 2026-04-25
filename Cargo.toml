@@ -1,0 +1,13 @@
+[package]
+name = "sieve-form"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+description = "Sieve email filter language (RFC 5228 + RFC 5229) on a uniform form representation"
+repository = "https://github.com/MarkAtwood/crate-sieve-form"
+keywords = ["sieve", "email", "filter", "rfc5228", "imap"]
+categories = ["email", "parser-implementations"]
+
+[dependencies]
+fancy-regex = "0.13"

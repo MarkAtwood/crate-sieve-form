@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyrus Sieve &mdash; Cyrus IMAP 3.12.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/cyrus.css" type="text/css" />
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Cyrus NNTP" href="nntp.html" />
+    <link rel="prev" title="Supported Quota Types" href="quotas/quotatypes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Cyrus IMAP
+          </a>
+              <div class="version">
+                3.12.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Cyrus IMAP</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../download.html">Download</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../operations.html">Operations</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../manpages/index.html">Man pages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../admin.html">Administrator Guide</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../admin.html#architecture">Architecture</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../admin.html#management">Management</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="locations.html">File &amp; Directory Locations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ports-sockets.html">Ports and Sockets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="access-control.html">Access Control</a></li>
+<li class="toctree-l4"><a class="reference internal" href="quotas.html">Quotas</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Cyrus Sieve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nntp.html">Cyrus NNTP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="protlayer.html">Cyrus Prot Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sop.html">Standard Operating Procedures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eventsource.html">Cyrus Event Source</a></li>
+<li class="toctree-l4"><a class="reference internal" href="monitoring.html">Monitoring</a></li>
+<li class="toctree-l4"><a class="reference internal" href="config-mailboxdistribution.html">Mailbox Distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="murder/murder.html">Cyrus Murder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tweaking.html">Tweaking Cyrus IMAP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developers.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support/Community</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Cyrus SASL</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="http://www.cyrusimap.org/sasl">Cyrus SASL</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cyrus IMAP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../operations.html">Operations</a></li>
+          <li class="breadcrumb-item"><a href="../admin.html">Administrator Guide</a></li>
+      <li class="breadcrumb-item active">Cyrus Sieve</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/cyrusimap/cyrus-imapd/blob/master/docsrc/imap/reference/admin/sieve.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cyrus-sieve">
+<span id="id1"></span><h1><a class="toc-backref" href="#id4" role="doc-backlink">Cyrus Sieve</a><a class="headerlink" href="#cyrus-sieve" title="Permalink to this heading"></a></h1>
+<nav class="contents" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cyrus-sieve" id="id4">Cyrus Sieve</a></p>
+<ul>
+<li><p><a class="reference internal" href="#introduction" id="id5">Introduction</a></p></li>
+<li><p><a class="reference internal" href="#installing-sieve" id="id6">Installing Sieve</a></p>
+<ul>
+<li><p><a class="reference internal" href="#configure-sieve" id="id7">Configure sieve</a></p></li>
+<li><p><a class="reference internal" href="#configure-outgoing-mail" id="id8">Configure outgoing mail</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#managing-sieve-scripts" id="id9">Managing Sieve Scripts</a></p>
+<ul>
+<li><p><a class="reference internal" href="#sieve-scripts-in-shared-folders" id="id10">Sieve scripts in shared folders</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#testing-the-sieve-server" id="id11">Testing the Sieve Server</a></p></li>
+<li><p><a class="reference internal" href="#cyrus-sieve-support" id="id12">Cyrus Sieve Support</a></p>
+<ul>
+<li><p><a class="reference internal" href="#special-use-folders" id="id13">Special use folders</a></p></li>
+<li><p><a class="reference internal" href="#supported-extensions" id="id14">Supported extensions</a></p></li>
+<li><p><a class="reference internal" href="#cyrus-imap-specific-extensions" id="id15">Cyrus IMAP Specific Extensions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#log" id="id16">log</a></p></li>
+<li><p><a class="reference internal" href="#processimip" id="id17">processimip</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#sieve-tools" id="id18">Sieve Tools</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#writing-sieve" id="id19">Writing Sieve</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="introduction">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
+<p>Cyrus Sieve is an implementation of the Sieve mail filtering language
+( <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3028.html"><strong>RFC 3028</strong></a> ). It allows a series of tests to be applied against an incoming
+message, with actions to take place if there is a match.</p>
+<p>Mail filtering occurs on delivery of the message (within lmtpd).</p>
+<p>Cyrus compiles sieve scripts to bytecode to reduce the overhead of parsing the
+scripts fully inside of lmtpd. This occurs automatically if
+<a class="reference internal" href="../manpages/usercommands/sieveshell.html#std-cyrusman-sieveshell-1">sieveshell(1)</a> is used to place the scripts on the server.</p>
+<p>Sieve scripts can be placed either by the <a class="reference internal" href="../manpages/systemcommands/timsieved.html#std-cyrusman-timsieved-8">timsieved(8)</a> daemon
+(implementing the ManageSieve protocol <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5804.html"><strong>RFC 5804</strong></a>; this is the preferred
+options since it allows for syntax checking) or in the user's home directory
+as a .sieve file.</p>
+</section>
+<section id="installing-sieve">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Installing Sieve</a><a class="headerlink" href="#installing-sieve" title="Permalink to this heading"></a></h2>
+<p>This section assumes that you <a class="reference internal" href="../../developer/compiling.html#compiling"><span class="std std-ref">compiled Cyrus</span></a> with sieve
+support. If you specified <code class="docutils literal notranslate"><span class="pre">--disable-sieve</span></code> when running <code class="docutils literal notranslate"><span class="pre">./configure</span></code>,
+you did NOT compile the server with sieve support.</p>
+<section id="configure-sieve">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Configure sieve</a><a class="headerlink" href="#configure-sieve" title="Permalink to this heading"></a></h3>
+<p>Depending on what's in your <code class="docutils literal notranslate"><span class="pre">/etc/services</span></code> file, sieve will usually be set
+to listen on port 2000 (old convention) or port 4190 (as specified by <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5804.html"><strong>RFC 5804</strong></a>).</p>
+<p>Add lines to the SERVICES section of <a class="reference internal" href="../manpages/configs/cyrus.conf.html#std-cyrusman-cyrus.conf-5">cyrus.conf(5)</a> to make the
+server listen to the right ports for sieveshell commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sieve</span>         <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;timsieved&quot;</span> <span class="n">listen</span><span class="o">=</span><span class="s2">&quot;servername:sieve&quot;</span> <span class="n">prefork</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">managesieve</span>   <span class="n">cmd</span><span class="o">=</span><span class="s2">&quot;timsieved&quot;</span> <span class="n">listen</span><span class="o">=</span><span class="s2">&quot;servername:4190&quot;</span> <span class="n">prefork</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>Sieve scripts are stored in the directory hierarchy specified by the
+<strong>sievedir</strong> <a class="reference internal" href="../manpages/configs/imapd.conf.html#std-cyrusman-imapd.conf-5">imapd.conf(5)</a> option (default: <code class="docutils literal notranslate"><span class="pre">/usr/sieve</span></code>).
+This directory must exist and be writeable by the cyrus user for <code class="docutils literal notranslate"><span class="pre">timsieved</span></code>
+to function, so organise that now.</p>
+</section>
+<section id="configure-outgoing-mail">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Configure outgoing mail</a><a class="headerlink" href="#configure-outgoing-mail" title="Permalink to this heading"></a></h3>
+<p>Some Sieve actions (redirect, vacation) can send outgoing mail.</p>
+<p>You'll need to make sure that lmtpd can send outgoing messages. Currently, it
+invokes <code class="docutils literal notranslate"><span class="pre">/usr/lib/sendmail</span></code> by default to send messages. Change this by
+adding a line like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sendmail</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">sendmail</span>
+</pre></div>
+</div>
+<p>in your <a class="reference internal" href="../manpages/configs/imapd.conf.html#std-cyrusman-imapd.conf-5">imapd.conf(5)</a>. If you're using Postfix or another MTA, make
+sure that the sendmail referenced in &quot;/etc/imapd.conf&quot; is Sendmail-compatible.</p>
+</section>
+</section>
+<section id="managing-sieve-scripts">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Managing Sieve Scripts</a><a class="headerlink" href="#managing-sieve-scripts" title="Permalink to this heading"></a></h2>
+<p>Since Cyrus is based around the concept of a sealed-server, the normal way for
+users to manipulate Sieve scripts is through the <a class="reference internal" href="../manpages/usercommands/sieveshell.html#std-cyrusman-sieveshell-1">sieveshell(1)</a>
+utility, in communication with the <a class="reference internal" href="../manpages/systemcommands/timsieved.html#std-cyrusman-timsieved-8">timsieved(8)</a> service.</p>
+<p>If, for some reason, you do have user home directories on the server, you can
+use the <strong>sieveusehomedir</strong> option in <a class="reference internal" href="../manpages/configs/imapd.conf.html#std-cyrusman-imapd.conf-5">imapd.conf(5)</a> and have the
+sieve script stored in the home directory of the user as <code class="docutils literal notranslate"><span class="pre">~/.sieve</span></code>.</p>
+<section id="sieve-scripts-in-shared-folders">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">Sieve scripts in shared folders</a><a class="headerlink" href="#sieve-scripts-in-shared-folders" title="Permalink to this heading"></a></h3>
+<p>Cyrus has two types of repositories where Sieve scripts can live:</p>
+<ol class="arabic simple">
+<li><p><strong>Personal</strong> is per user and</p></li>
+<li><p><strong>Global</strong> is for every user. Global scripts aren't applied on incoming
+messages by default: users must include them in their scripts.  Note that
+there are two types of Global scripts: <strong>global</strong> and <strong>global per domain</strong>.</p></li>
+</ol>
+<p>When you log into Cyrus IMAP with <a class="reference internal" href="../manpages/usercommands/sieveshell.html#std-cyrusman-sieveshell-1">sieveshell(1)</a> you have the
+following combinations (Assuming there is <code class="docutils literal notranslate"><span class="pre">manager</span></code> and
+<code class="docutils literal notranslate"><span class="pre">manager&#64;example.com</span></code> as admin in <a class="reference internal" href="../manpages/configs/imapd.conf.html#std-cyrusman-imapd.conf-5">imapd.conf(5)</a>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sieveshell</span> <span class="pre">-a</span> <span class="pre">manager</span> <span class="pre">-u</span> <span class="pre">manager</span> <span class="pre">localhost</span></code> - To edit global scripts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sieveshell</span> <span class="pre">-a</span> <span class="pre">manager&#64;example.com</span> <span class="pre">-u</span> <span class="pre">manager&#64;example.com</span> <span class="pre">localhost</span></code> - To
+edit global script of example.com domain.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sieveshell</span> <span class="pre">-a</span> <span class="pre">user&#64;example.com</span> <span class="pre">-u</span> <span class="pre">user&#64;example.com</span> <span class="pre">localhost</span></code> - To edit
+personal scripts of some user.</p></li>
+</ul>
+<p>Scripts for shared folders work different from user scripts. The last ones are
+loaded to the user's repository and attached to the inbox when activated. The
+first ones must be loaded to the global domain repository and attached to a
+shared folder by a user that has permission on it. Use the second combination
+listed above to load them and cyradm (or another compatible client) to do the
+attach:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sieveshell</span> <span class="o">-</span><span class="n">u</span> <span class="n">manager</span><span class="nd">@example</span><span class="o">.</span><span class="n">com</span> <span class="o">-</span><span class="n">a</span> <span class="n">manager</span><span class="nd">@example</span><span class="o">.</span><span class="n">com</span> <span class="n">localhost</span>
+<span class="o">&gt;</span> <span class="n">put</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">my_script</span> <span class="n">my_script</span>
+<span class="n">cyradm</span> <span class="o">-</span><span class="n">u</span> <span class="n">user</span><span class="nd">@example</span><span class="o">.</span><span class="n">com</span> <span class="n">localhost</span>
+<span class="n">localhost</span><span class="o">.</span><span class="n">localdomain</span><span class="o">&gt;</span> <span class="n">mboxcfg</span> <span class="n">shared</span><span class="o">.</span><span class="n">folder</span><span class="nd">@example</span><span class="o">.</span><span class="n">com</span> <span class="n">sieve</span> <span class="n">my_script</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="testing-the-sieve-server">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Testing the Sieve Server</a><a class="headerlink" href="#testing-the-sieve-server" title="Permalink to this heading"></a></h2>
+<p>The Sieve server, <a class="reference internal" href="../manpages/systemcommands/timsieved.html#std-cyrusman-timsieved-8">timsieved(8)</a>, is used for transporting user Sieve
+scripts to the sealed IMAP server. It is incompatible with the
+<strong>sieveusehomedir</strong> option. It is named after the principal author, Tim Martin,
+who desperately wanted something named after him in the Cyrus distribution.</p>
+<p>From your normal account, telnet to the sieve port on the server you're setting
+up:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">telnet</span> <span class="n">servername</span> <span class="n">sieve</span>
+</pre></div>
+</div>
+<p>If your server is running, you'll get a message similar to the following one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Trying</span> <span class="mf">128.2.10.192</span><span class="o">...</span>
+<span class="n">Connected</span> <span class="n">to</span> <span class="n">servername</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">tld</span><span class="o">.</span>
+<span class="n">Escape</span> <span class="n">character</span> <span class="ow">is</span> <span class="s1">&#39;^]&#39;</span><span class="o">.</span>
+<span class="s2">&quot;IMPLEMENTATION&quot;</span> <span class="s2">&quot;Cyrus timsieved v3.8.3&quot;</span>
+<span class="s2">&quot;VERSION&quot;</span> <span class="s2">&quot;1.0&quot;</span>
+<span class="s2">&quot;SASL&quot;</span> <span class="s2">&quot;ANONYMOUS PLAIN GSSAPI&quot;</span>
+<span class="s2">&quot;SIEVE&quot;</span> <span class="s2">&quot;fileinto reject envelope vacation imapflags notify subaddress regex&quot;</span>
+<span class="s2">&quot;NOTIFY&quot;</span> <span class="s2">&quot;mailto&quot;</span>
+<span class="s2">&quot;UNAUTHENTICATE&quot;</span>
+<span class="n">OK</span>
+</pre></div>
+</div>
+<p>Any message other than one similar to the one above means there is a problem.
+Make sure all of authentication methods you wish to support are listed. This
+list should be identical to the one listed by &quot;imapd&quot; earlier. Next terminate
+the connection, by typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">logout</span>
+</pre></div>
+</div>
+<p>Next test authenticating to the sieve server. To do this run the
+<a class="reference internal" href="../manpages/usercommands/sieveshell.html#std-cyrusman-sieveshell-1">sieveshell(1)</a> utility. You must specify the server. If you run this
+utility from a different machine without the &quot;sieve&quot; entry in &quot;/etc/services&quot;,
+port 2000 will be used.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sieveshell</span> <span class="n">servername</span>
+<span class="n">Please</span> <span class="n">enter</span> <span class="n">your</span> <span class="n">password</span><span class="p">:</span> <span class="o">******</span>
+<span class="o">&gt;</span> <span class="n">quit</span>
+</pre></div>
+</div>
+<p>This should produce the message &quot;Authentication failed&quot; with a description of
+the failure if there was a problem.</p>
+<p>Next you should attempt to place a sieve script on the server. To do this
+create a file named <code class="docutils literal notranslate"><span class="pre">myscript.script</span></code> with the following lines. Replace
+&quot;<a class="reference external" href="mailto:foo&#37;&#52;&#48;example&#46;org">foo<span>&#64;</span>example<span>&#46;</span>org</a>&quot; with an email address you can send mail from, but that is
+not the one you are working on now.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">require</span> <span class="p">[</span><span class="s2">&quot;reject&quot;</span><span class="p">,</span><span class="s2">&quot;fileinto&quot;</span><span class="p">];</span>
+<span class="k">if</span> <span class="n">address</span> <span class="p">:</span><span class="ow">is</span> <span class="p">:</span><span class="nb">all</span> <span class="s2">&quot;From&quot;</span> <span class="s2">&quot;foo@example.org&quot;</span>
+<span class="p">{</span>
+    <span class="n">reject</span> <span class="s2">&quot;testing&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>To place this script on the server run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sieveshell</span> <span class="n">servername</span>
+<span class="n">Please</span> <span class="n">enter</span> <span class="n">your</span> <span class="n">password</span><span class="p">:</span> <span class="o">******</span>
+<span class="o">&gt;</span> <span class="n">put</span> <span class="n">myscript</span><span class="o">.</span><span class="n">script</span>
+<span class="o">&gt;</span> <span class="n">activate</span> <span class="n">myscript</span>
+<span class="o">&gt;</span> <span class="n">quit</span>
+</pre></div>
+</div>
+<p>This should place your script on the server and make it the active script.</p>
+<p>Test that the sieve script is actually run. Send a message to the address
+you're working on from the address mentioned in the sieve script. The message
+should be rejected.</p>
+<p>When you're done, don't forget to delete your testing script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sieveshell</span> <span class="n">servername</span>
+<span class="n">Please</span> <span class="n">enter</span> <span class="n">your</span> <span class="n">password</span><span class="p">:</span> <span class="o">******</span>
+<span class="o">&gt;</span> <span class="n">delete</span> <span class="n">myscript</span><span class="o">.</span><span class="n">script</span>
+<span class="o">&gt;</span> <span class="n">quit</span>
+</pre></div>
+</div>
+</section>
+<section id="cyrus-sieve-support">
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Cyrus Sieve Support</a><a class="headerlink" href="#cyrus-sieve-support" title="Permalink to this heading"></a></h2>
+<section id="special-use-folders">
+<span id="cyrus-sieve-specialuse"></span><h3><a class="toc-backref" href="#id13" role="doc-backlink">Special use folders</a><a class="headerlink" href="#special-use-folders" title="Permalink to this heading"></a></h3>
+<p>Some mail clients allow users to rename the system folders, such as Archive and
+Trash. This can make sieve scripts break if they are using folder names
+explicitly. Fortunately such folders have a special use flag, allowing you to
+access them from sieve without needing to know their current titles.</p>
+<ul class="simple">
+<li><p>\Archive</p></li>
+<li><p>\Drafts</p></li>
+<li><p>\Junk - also known as the Spam folder</p></li>
+<li><p>\Sent</p></li>
+<li><p>\Trash</p></li>
+</ul>
+</section>
+<section id="supported-extensions">
+<span id="cyrus-sieve-extensions"></span><h3><a class="toc-backref" href="#id14" role="doc-backlink">Supported extensions</a><a class="headerlink" href="#supported-extensions" title="Permalink to this heading"></a></h3>
+<p>Sieve has a lot of
+<a class="reference external" href="http://www.iana.org/assignments/sieve-extensions/sieve-extensions.xhtml">extensions</a>.
+Cyrus supports a subset of these:</p>
+<ul class="simple">
+<li><p>Sieve language reference <span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5228.html"><strong>RFC 5228</strong></a></p></li>
+<li><p>Vacation Extension <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5230.html"><strong>RFC 5230</strong></a></p></li>
+<li><p>Vacation Seconds <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6131.html"><strong>RFC 6131</strong></a></p></li>
+<li><p>Relational Tests <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5231.html"><strong>RFC 5231</strong></a></p></li>
+<li><p>Subaddress Extension <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5233.html"><strong>RFC 5233</strong></a></p></li>
+<li><p>Copying Without Side Effects <span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3894.html"><strong>RFC 3894</strong></a></p></li>
+<li><p>Regular Expression Extension <a class="reference external" href="https://tools.ietf.org/html/draft-ietf-sieve-regex">draft-ietf-sieve-regex</a></p></li>
+<li><p>Checking Mailbox Status and Accessing Mailbox Metadata <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5490.html"><strong>RFC 5490</strong></a></p></li>
+<li><p>Notify Extension <span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5435.html"><strong>RFC 5435</strong></a></p></li>
+<li><p>Include <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6609.html"><strong>RFC 6609</strong></a></p></li>
+<li><p>Date <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5260.html"><strong>RFC 5260</strong></a></p></li>
+<li><p>Index <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5260.html"><strong>RFC 5260</strong></a></p></li>
+<li><p>Variables <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5229.html"><strong>RFC 5229</strong></a></p></li>
+<li><p>Editheader Extension <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5293.html"><strong>RFC 5293</strong></a></p></li>
+<li><p>Reject and Extended Reject <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5429.html"><strong>RFC 5429</strong></a></p></li>
+<li><p>Externally Stored Lists <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6134.html"><strong>RFC 6134</strong></a></p></li>
+<li><p>Duplicate Extension <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7352.html"><strong>RFC 7352</strong></a></p></li>
+<li><p>Ihave Extension <span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5463.html"><strong>RFC 5463</strong></a></p></li>
+<li><p>Delivering to Special-Use Mailboxes <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8579.html"><strong>RFC 8579</strong></a></p></li>
+<li><p>IMAP flag Extension <span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5232.html"><strong>RFC 5232</strong></a></p></li>
+<li><p>Body Extension <span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5173.html"><strong>RFC 5173</strong></a></p></li>
+</ul>
+</section>
+<section id="cyrus-imap-specific-extensions">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Cyrus IMAP Specific Extensions</a><a class="headerlink" href="#cyrus-imap-specific-extensions" title="Permalink to this heading"></a></h3>
+<section id="log">
+<span id="vnd-cyrus-log"></span><h4><a class="toc-backref" href="#id16" role="doc-backlink">log</a><a class="headerlink" href="#log" title="Permalink to this heading"></a></h4>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">require</span> <span class="s2">&quot;vnd.cyrus.log&quot;</span><span class="p">;</span>
+<span class="n">log</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The <strong>log</strong> action sends the string to syslog with INFO priority.</p>
+</section>
+<section id="processimip">
+<span id="id2"></span><h4><a class="toc-backref" href="#id17" role="doc-backlink">processimip</a><a class="headerlink" href="#processimip" title="Permalink to this heading"></a></h4>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">require</span> <span class="s2">&quot;vnd.cyrus.imip&quot;</span><span class="p">;</span>
+<span class="n">processimip</span> <span class="p">[</span> <span class="s2">&quot;:invitesonly&quot;</span> <span class="o">/</span> <span class="s2">&quot;:deletecanceled&quot;</span> <span class="p">]</span> <span class="p">[</span> <span class="s2">&quot;:outcome&quot;</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">]</span> <span class="p">[</span> <span class="s2">&quot;:errstr&quot;</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">]</span> <span class="p">[</span> <span class="s2">&quot;:calendarid&quot;</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">];</span>
+<span class="n">processimip</span> <span class="s2">&quot;:updatesonly&quot;</span> <span class="p">[</span> <span class="s2">&quot;:deletecanceled&quot;</span> <span class="p">]</span> <span class="p">[</span> <span class="s2">&quot;:outcome&quot;</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">]</span> <span class="p">[</span> <span class="s2">&quot;:errstr&quot;</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">];</span>
+</pre></div>
+</div>
+<p>The <strong>processimip</strong> action processes iMIP messages during LMTP delivery.  It handles the first possibly nested <em>text/calendar</em> MIME part and ignores the <em>application/ics</em> MIME part.</p>
+<p>If present, the variable pointed after the <code class="docutils literal notranslate"><span class="pre">:outcome</span></code> parameter contains the enacted action.  Problems are communicated with the variable named after the <code class="docutils literal notranslate"><span class="pre">:errstr</span></code> parameter.  The <code class="docutils literal notranslate"><span class="pre">:errstr</span></code> and <code class="docutils literal notranslate"><span class="pre">:outcome</span></code> parameters can be used only with <code class="docutils literal notranslate"><span class="pre">require</span> <span class="pre">&quot;variables&quot;;</span></code>.</p>
+<p><strong>processimip</strong> does not affect the implicit keep.  The action sends to syslog with INFO priority <em>outcome</em> and <em>errstr</em>, even when these parameters were not used.  <strong>processimip</strong> does not change the <em>PARTSTAT</em> property parameter value and in turn does not send replies to the <em>ORGANIZER</em>.  <strong>processimip</strong> does not produce runtime errors, if it is used together with the <em>[e]reject</em> action.  The handled <em>text/calendar</em> MIME part is stored in the scheduling Inbox.</p>
+<p>The string after the <code class="docutils literal notranslate"><span class="pre">:calendarid</span></code> parameter indicates in which calendar to create new iCalendar messages.  The default destination depends on the scheduling Inbox’s <strong>CALDAV:schedule-default-calendar-URL</strong> WebDAV property.</p>
+<p>When method CANCEL is received, by default the iCalendar object is retained and its STATUS property is changed to CANCELLED.  With parameter <code class="docutils literal notranslate"><span class="pre">:deletecanceled</span></code> the iCalendar object is deleted on method CANCEL.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">Example</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>require [&quot;ereject&quot;, &quot;variables&quot;, &quot;vnd.cyrus.imip&quot;];
+if envelope &quot;to&quot; &quot;me+imip@domain&quot; {
+    processimip :outcome &quot;outcome&quot; :errstr &quot;errstr&quot;;
+    if string &quot;${outcome}&quot; &quot;error&quot; {
+        ereject &quot;iMIP handling failed: ${errstr}&quot;;
+    }
+}
+</pre></div>
+</div>
+</div>
+<p>After <strong>processimip</strong> returns the <em>outcome</em> and <em>errstr</em> variables have one of these values:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>outcome</p></th>
+<th class="head"><p>errstr</p></th>
+<th class="head"><p>Remark</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>error</p></td>
+<td><p>could not autoprovision calendars</p></td>
+<td><p>Default calendars cannot be created.</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>no component to schedule</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>error</p></td>
+<td><p>missing UID property</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>invalid iCalendar data: …</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>error</p></td>
+<td><p>missing ORGANIZER property</p></td>
+<td><p>When method is ADD, CANCEL, POLLSTATUS or REQUEST.</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>missing ATTENDEE property</p></td>
+<td><p>When method is REPLY.</p></td>
+</tr>
+<tr class="row-even"><td><p>error</p></td>
+<td><p>unsupported method: …</p></td>
+<td><p>E.g. when VPOLL component is used with method ADD.</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>unsupported component: …</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>error</p></td>
+<td><p>failed to deliver iMIP message: …</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>could not find matching ATTENDEE property</p></td>
+<td><p>When method is ADD, CANCEL, POLLSTATUS, PUBLISH or REQUEST.</p></td>
+</tr>
+<tr class="row-even"><td><p>no_action</p></td>
+<td><p>unable to parse iMIP message</p></td>
+<td><p>The email cannot be parsed.</p></td>
+</tr>
+<tr class="row-odd"><td><p>no_action</p></td>
+<td><p>unable to find &amp; parse text/calendar part</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>no_action</p></td>
+<td><p>missing METHOD property</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>no_action</p></td>
+<td><p>configured to NOT process updates</p></td>
+<td><p>When method is ADD, CANCEL or POLLSTATUS and <code class="docutils literal notranslate"><span class="pre">:invitesonly</span></code> is provided.</p></td>
+</tr>
+<tr class="row-even"><td><p>no_action</p></td>
+<td><p>configured to NOT process replies</p></td>
+<td><p>When method is REPLY and <code class="docutils literal notranslate"><span class="pre">:invitesonly</span></code> is provided.</p></td>
+</tr>
+<tr class="row-odd"><td><p>no_action</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>added</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>updated</p></td>
+<td></td>
+<td><p>Also on method CANCEL.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="sieve-tools">
+<h3><a class="toc-backref" href="#id18" role="doc-backlink">Sieve Tools</a><a class="headerlink" href="#sieve-tools" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="../manpages/systemcommands/timsieved.html#std-cyrusman-timsieved-8">timsieved(8)</a> - server side daemon to accept requests from
+sieveshell</p></li>
+<li><p><a class="reference internal" href="../manpages/systemcommands/sievec.html#std-cyrusman-sievec-8">sievec(8)</a> - compile a script into bytecode. See sieved.</p></li>
+<li><p><a class="reference internal" href="../manpages/systemcommands/sieved.html#std-cyrusman-sieved-8">sieved(8)</a> - decompile a script back from bytecode. See sievec.</p></li>
+<li><p><a class="reference internal" href="../manpages/systemcommands/masssievec.html#std-cyrusman-masssievec-8">masssievec(8)</a> - compiles all the scripts in <strong>sievedir</strong> from
+<code class="docutils literal notranslate"><span class="pre">imapd.conf</span></code>.</p></li>
+<li><p><a class="reference internal" href="../manpages/usercommands/sivtest.html#std-cyrusman-sivtest-1">sivtest(1)</a> - authenticate and test against a MANAGESIEVE server
+such as timsieved.</p></li>
+<li><p><a class="reference internal" href="../manpages/usercommands/sieveshell.html#std-cyrusman-sieveshell-1">sieveshell(1)</a> - allow users to manage scripts on a remote server,
+via MANAGESIEVE</p></li>
+<li><p><a class="reference internal" href="../manpages/systemcommands/translatesieve.html#std-cyrusman-translatesieve-8">translatesieve(8)</a> - utility script to translate sieve scripts to
+use <strong>unixhierarchysep</strong> and/or <strong>altnamespace</strong></p></li>
+</ul>
+</section>
+</section>
+<section id="writing-sieve">
+<h2><a class="toc-backref" href="#id19" role="doc-backlink">Writing Sieve</a><a class="headerlink" href="#writing-sieve" title="Permalink to this heading"></a></h2>
+<p>Sieve scripts can be used to automatically delete or forward messages; to send
+autoreplies; to sort them in folders; to mark messages as read or flagged; to
+test messages for spam or viruses; or to reject messages at or after delivery.
+<a class="reference external" href="http://sieve.info">Sieve.info</a> has more information on sieve and its uses.</p>
+<p>There's a <a class="reference external" href="http://thsmi.github.io/sieve-reference/en/index.html">good sieve reference</a>
+online which describes the language.</p>
+<p>For those who prefer a client to write code in, Sieve.info has a
+<a class="reference external" href="http://sieve.info/clients">list of desktop, web and command line clients</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quotas/quotatypes.html" class="btn btn-neutral float-left" title="Supported Quota Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="nntp.html" class="btn btn-neutral float-right" title="Cyrus NNTP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 1993–2026, The Cyrus Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ 
+
+
+
+</body>
+</html>
