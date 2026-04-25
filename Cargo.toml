@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.80"
 license = "MIT"
+readme = "README.md"
 description = "Sieve email filter language (RFC 5228 + RFC 5229) on a uniform form representation"
 repository = "https://github.com/MarkAtwood/crate-sieve-form"
 keywords = ["sieve", "email", "filter", "rfc5228", "imap"]

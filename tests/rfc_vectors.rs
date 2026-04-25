@@ -536,6 +536,45 @@ fn test_variables_case_insensitive_name() {
     assert_eq!(actions, vec![SieveAction::FileInto("hello".to_string())]);
 }
 
+/// RFC 5229 §3 — variable substitution in test string arguments.
+/// RFC 5229 §3: "Variable substitution is performed on all string arguments
+/// ... in test commands."  A variable used as the key in a header test must
+/// be expanded before matching.
+#[test]
+fn test_variables_expanded_in_header_test() {
+    let script = compile(
+        b"require [\"variables\", \"fileinto\"];\
+          set \"keyword\" \"urgent\";\
+          if header :contains \"Subject\" \"${keyword}\" {\
+              fileinto \"Priority\";\
+          }",
+    )
+    .expect("compile failed");
+
+    // Subject contains "urgent" which matches the expanded variable value.
+    let msg = make_message(
+        "boss@example.com",
+        "me@example.com",
+        "urgent: meeting now",
+        "Come now.",
+    );
+    let actions = evaluate(&script, &msg, "boss@example.com", "me@example.com");
+    assert_eq!(
+        actions,
+        vec![SieveAction::FileInto("Priority".to_string())]
+    );
+
+    // Subject does not contain "urgent" — variable still expands, no match.
+    let msg2 = make_message(
+        "friend@example.com",
+        "me@example.com",
+        "lunch plans",
+        "See you at noon.",
+    );
+    let actions2 = evaluate(&script, &msg2, "friend@example.com", "me@example.com");
+    assert_eq!(actions2, vec![SieveAction::Keep]);
+}
+
 /// RFC 5229 §3 — an undefined variable expands to the empty string.
 #[test]
 fn test_variables_undefined_expands_to_empty() {

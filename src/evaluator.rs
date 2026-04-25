@@ -8,6 +8,15 @@ use crate::SieveAction;
 use std::cmp::Reverse;
 use std::collections::HashMap;
 
+/// Extensions that this evaluator implements.
+///
+/// Consulted by `compile()` to enforce the RFC 5228 §2.6 rule that unknown
+/// extensions in `require` must cause a compile-time failure.  Adding a new
+/// extension to the evaluator requires adding its name here — the compile
+/// step will then accept scripts that declare it.
+pub(crate) const KNOWN_EXTENSIONS: &[&str] =
+    &["fileinto", "reject", "envelope", "variables", "regex"];
+
 // ---------------------------------------------------------------------------
 // Evaluation context
 // ---------------------------------------------------------------------------
@@ -268,36 +277,23 @@ enum Comparator {
 
 /// Scan `forms` for a match-type tag; remove it and return (type, rest).
 ///
-/// All extraction functions operate on `&[&Form]` so they can be chained
-/// without cloning: each one consumes a `Vec<&Form>` and produces another.
+/// All extraction functions take `&[&Form]` and return a filtered `Vec<&Form>`
+/// so they can be chained without cloning.
 fn extract_match_type<'a>(forms: &[&'a Form]) -> (MatchType, Vec<&'a Form>) {
     let mut mt = MatchType::Is;
-    let remaining: Vec<&Form> = forms
-        .iter()
-        .copied()
-        .filter(|f| match f {
-            Form::Tag(t) => match t.as_str() {
-                "is" => {
-                    mt = MatchType::Is;
-                    false
-                }
-                "contains" => {
-                    mt = MatchType::Contains;
-                    false
-                }
-                "matches" => {
-                    mt = MatchType::Matches;
-                    false
-                }
-                "regex" => {
-                    mt = MatchType::Regex;
-                    false
-                }
-                _ => true,
-            },
-            _ => true,
-        })
-        .collect();
+    let mut remaining = Vec::with_capacity(forms.len());
+    for &f in forms {
+        if let Form::Tag(t) = f {
+            match t.as_str() {
+                "is" => { mt = MatchType::Is; continue; }
+                "contains" => { mt = MatchType::Contains; continue; }
+                "matches" => { mt = MatchType::Matches; continue; }
+                "regex" => { mt = MatchType::Regex; continue; }
+                _ => {}
+            }
+        }
+        remaining.push(f);
+    }
     (mt, remaining)
 }
 
@@ -305,57 +301,42 @@ fn extract_match_type<'a>(forms: &[&'a Form]) -> (MatchType, Vec<&'a Form>) {
 /// (Comparator, rest).
 fn extract_comparator<'a>(forms: &[&'a Form]) -> (Comparator, Vec<&'a Form>) {
     let mut cmp = Comparator::AsciiCasemap;
-    let mut skip_next = false;
-    let remaining: Vec<&Form> = forms
-        .iter()
-        .copied()
-        .filter(|f| {
-            if skip_next {
-                skip_next = false;
-                if let Form::Str(s) = f {
+    let mut remaining = Vec::with_capacity(forms.len());
+    let mut i = 0;
+    while i < forms.len() {
+        if let Form::Tag(t) = forms[i] {
+            if t == "comparator" {
+                // Consume :comparator and the following name string together.
+                if let Some(Form::Str(s)) = forms.get(i + 1) {
                     if s == "i;octet" {
                         cmp = Comparator::Octet;
                     }
-                }
-                return false;
-            }
-            if let Form::Tag(t) = f {
-                if t == "comparator" {
-                    skip_next = true;
-                    return false;
+                    i += 2;
+                    continue;
                 }
             }
-            true
-        })
-        .collect();
+        }
+        remaining.push(forms[i]);
+        i += 1;
+    }
     (cmp, remaining)
 }
 
 /// Scan `forms` for an address-part tag; remove it and return (part, rest).
 fn extract_address_part<'a>(forms: &[&'a Form]) -> (&'static str, Vec<&'a Form>) {
     let mut part = "all";
-    let remaining: Vec<&Form> = forms
-        .iter()
-        .copied()
-        .filter(|f| match f {
-            Form::Tag(t) => match t.as_str() {
-                "localpart" => {
-                    part = "localpart";
-                    false
-                }
-                "domain" => {
-                    part = "domain";
-                    false
-                }
-                "all" => {
-                    part = "all";
-                    false
-                }
-                _ => true,
-            },
-            _ => true,
-        })
-        .collect();
+    let mut remaining = Vec::with_capacity(forms.len());
+    for &f in forms {
+        if let Form::Tag(t) = f {
+            match t.as_str() {
+                "localpart" => { part = "localpart"; continue; }
+                "domain" => { part = "domain"; continue; }
+                "all" => { part = "all"; continue; }
+                _ => {}
+            }
+        }
+        remaining.push(f);
+    }
     (part, remaining)
 }
 
@@ -424,8 +405,8 @@ fn str_matches_regex(value: &str, pattern: &str, casemap: bool) -> bool {
 }
 
 fn str_matches_regex_pat(value: &str, anchored: &str, casemap: bool) -> bool {
-    // PERF(qc9j.1): regex is recompiled on every call; compile once in
-    // CompiledScript and pass pre-built Regex values to the evaluator.
+    // PERF: regex is recompiled on every call; a future optimisation is to
+    // compile patterns once in CompiledScript and cache the Regex objects.
     let pat = if casemap {
         format!("(?i){anchored}")
     } else {
@@ -487,7 +468,10 @@ fn eval_header_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let (mt, after_mt) = extract_match_type(&refs);
     let (cmp, after_cmp) = extract_comparator(&after_mt);
     let casemap = cmp == Comparator::AsciiCasemap;
-    let (field_names, keys) = collect_two_string_lists(&after_cmp);
+    let (raw_names, raw_keys) = collect_two_string_lists(&after_cmp);
+    // RFC 5229 §3: variable substitution applies to all string args in tests.
+    let field_names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
+    let keys: Vec<String> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
 
     for (hdr_name, hdr_value) in &ctx.headers {
         for fname in &field_names {
@@ -509,7 +493,10 @@ fn eval_address_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let (cmp, after_cmp) = extract_comparator(&after_mt);
     let casemap = cmp == Comparator::AsciiCasemap;
     let (part, after_part) = extract_address_part(&after_cmp);
-    let (field_names, keys) = collect_two_string_lists(&after_part);
+    let (raw_names, raw_keys) = collect_two_string_lists(&after_part);
+    // RFC 5229 §3: variable substitution applies to all string args in tests.
+    let field_names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
+    let keys: Vec<String> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
 
     for (hdr_name, hdr_value) in &ctx.headers {
         for fname in &field_names {
@@ -532,10 +519,14 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let (cmp, after_cmp) = extract_comparator(&after_mt);
     let casemap = cmp == Comparator::AsciiCasemap;
     let (part, after_part) = extract_address_part(&after_cmp);
-    let (part_names, keys) = collect_two_string_lists(&after_part);
+    let (raw_names, raw_keys) = collect_two_string_lists(&after_part);
+    // RFC 5229 §3: variable substitution applies to all string args in tests.
+    let part_names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
+    let keys: Vec<String> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
 
     for pname in &part_names {
-        let raw_addr = match pname.to_ascii_lowercase().as_str() {
+        let lower = pname.to_ascii_lowercase();
+        let raw_addr = match lower.as_str() {
             "from" => ctx.envelope_from,
             "to" => ctx.envelope_to,
             _ => continue,
@@ -552,7 +543,9 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
 
 fn eval_exists_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let tmp: Vec<&Form> = forms.iter().collect();
-    let names = collect_one_string_list(&tmp);
+    let raw_names = collect_one_string_list(&tmp);
+    // RFC 5229 §3: variable substitution applies to all string args in tests.
+    let names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
     names.iter().all(|name| {
         ctx.headers
             .iter()

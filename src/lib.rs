@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 
-//! Native (dependency-free) Sieve script compiler and evaluator.
+//! Sieve email filter language (RFC 5228 + RFC 5229 variables extension).
 //!
-//! This crate provides the same public API as `stoa-sieve` but with
-//! no external runtime dependencies beyond `fancy-regex`.  The compiler and
-//! evaluator are implemented from scratch against RFC 5228 (base Sieve) and
-//! RFC 5229 (variables extension).
+//! The core contribution of this crate is the *form layer*: a uniform,
+//! recursive representation of Sieve scripts inspired by Lisp forms.  Every
+//! Sieve statement is a flat `Vec<Form>`, making the parsed AST easy to
+//! inspect, serialize, and extend without touching the parser.
 //!
-//! The internal pipeline is:
+//! The only external dependency is [`fancy-regex`](https://crates.io/crates/fancy-regex),
+//! used for the `:regex` match type and Sieve glob-to-regex conversion.
+//!
+//! ## Internal pipeline
 //!
 //! 1. [`lexer::tokenize`] — raw source → `Vec<Token>`
 //! 2. [`form::read_script`] — tokens → `Script` (a uniform form tree)
-//! 3. `evaluator::eval_script` — `Script` + message → `Vec<SieveAction>`
+//! 3. evaluator — `Script` + message → `Vec<SieveAction>` (internal, not pub)
 
 use std::sync::Arc;
 
@@ -73,8 +76,9 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
         kind: SieveErrorKind::Parse,
     })?;
 
-    // Validate require extensions.
-    const KNOWN: &[&str] = &["fileinto", "reject", "envelope", "variables", "regex"];
+    // Validate require extensions against the set the evaluator implements.
+    // The canonical list lives in the evaluator so adding a new extension
+    // only requires updating one place.
     for stmt in &parsed {
         if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
             if w == "require" {
@@ -87,7 +91,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                     })
                     .collect();
                 for ext in extensions {
-                    if !KNOWN.contains(&ext) {
+                    if !evaluator::KNOWN_EXTENSIONS.contains(&ext) {
                         return Err(SieveError {
                             message: format!("unsupported Sieve extension: {ext}"),
                             kind: SieveErrorKind::UnsupportedExtension(ext.to_string()),
@@ -131,7 +135,7 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
                     if !KNOWN_COMPARATORS.contains(&name.as_str()) {
                         return Err(SieveError {
                             message: format!("unsupported comparator: {name}"),
-                            kind: SieveErrorKind::Parse,
+                            kind: SieveErrorKind::UnsupportedComparator(name.clone()),
                         });
                     }
                 }
@@ -193,75 +197,11 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
     Ok(())
 }
 
-/// Implemented by the embedding application to handle Sieve side effects.
-///
-/// Implement this trait to intercept actions produced by a Sieve script.
-/// The evaluator calls these methods as it executes commands.  Unknown or
-/// extension commands call [`SieveRuntime::unknown_command`]; the default
-/// implementation silently ignores them.
-///
-/// Use [`DefaultRuntime`] when you only need the resulting [`Vec<SieveAction>`].
-pub trait SieveRuntime {
-    /// The script executed `fileinto <folder>`.
-    fn file_into(&mut self, folder: &str);
-    /// The script executed `reject <reason>`.
-    fn reject(&mut self, reason: &str);
-    /// The script executed `discard`.
-    fn discard(&mut self);
-    /// Called for any command the evaluator does not recognise.
-    ///
-    /// Return `true` if the command was handled; return `false` to silently
-    /// ignore it (the default).
-    fn unknown_command(&mut self, name: &str, args: &[form::Form]) -> bool {
-        let _ = (name, args);
-        false
-    }
-}
-
-/// A [`SieveRuntime`] implementation that collects actions into a `Vec`.
-///
-/// Passed to [`evaluate`] implicitly; also available for callers that want to
-/// inspect the raw action list without implementing [`SieveRuntime`] themselves.
-#[derive(Debug, Default)]
-pub struct DefaultRuntime {
-    actions: Vec<SieveAction>,
-}
-
-impl DefaultRuntime {
-    /// Create an empty runtime.
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Consume the runtime and return the collected actions.
-    pub fn into_actions(self) -> Vec<SieveAction> {
-        self.actions
-    }
-}
-
-impl SieveRuntime for DefaultRuntime {
-    fn file_into(&mut self, folder: &str) {
-        self.actions.push(SieveAction::FileInto(folder.to_string()));
-    }
-
-    fn reject(&mut self, reason: &str) {
-        self.actions.push(SieveAction::Reject(reason.to_string()));
-    }
-
-    fn discard(&mut self) {
-        self.actions.push(SieveAction::Discard);
-    }
-}
-
 /// Evaluate a compiled Sieve script against a raw RFC 5322 message.
 ///
 /// `envelope_from` and `envelope_to` are the SMTP envelope addresses.
 /// Returns the list of actions the script requests; defaults to `[Keep]`
 /// when the script produces no explicit disposition (RFC 5228 §2.10.2).
-///
-/// Internally uses [`DefaultRuntime`].  To intercept actions as they are
-/// produced, implement [`SieveRuntime`] and call the evaluator directly
-/// once the evaluator layer is wired to accept a runtime (planned follow-up).
 pub fn evaluate(
     script: &CompiledScript,
     raw_message: &[u8],
