@@ -9,6 +9,16 @@ description = "Sieve email filter language (RFC 5228 + RFC 5229) on a uniform fo
 repository = "https://github.com/MarkAtwood/crate-sieve-form"
 keywords = ["sieve", "email", "filter", "rfc5228", "imap"]
 categories = ["email", "parser-implementations"]
+exclude = [
+    "audit/",
+    ".beads/",
+    ".claude/",
+    "docs/",
+    "scripts/",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "PROJECT.md",
+]
 
 [dependencies]
 fancy-regex = "0.13"

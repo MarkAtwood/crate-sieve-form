@@ -5,3 +5,8 @@
 .dolt/
 *.db
 .beads-credential-key
+
+# Fetched RFC/draft/vendor reference documents (fetch with scripts/fetch-docs.sh)
+docs/rfc/
+docs/drafts/
+docs/vendor/
