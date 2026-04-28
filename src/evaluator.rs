@@ -754,7 +754,8 @@ fn apply_set_modifiers(value: String, modifiers: &[&str]) -> String {
                     } else {
                         pos
                     };
-                    v[..end].to_string()
+                    v.truncate(end);
+                    v
                 } else {
                     v
                 }
