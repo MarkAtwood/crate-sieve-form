@@ -2,6 +2,14 @@
 
 //! RFC 5322 message header extraction utilities.
 
+/// The part of an RFC 5322 address to extract.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum AddressPart {
+    All,
+    LocalPart,
+    Domain,
+}
+
 /// Extract all headers from raw RFC 5322 message bytes.
 ///
 /// Returns `Vec<(lowercase_name, value)>`.  Folds continuation lines
@@ -49,34 +57,29 @@ pub fn extract_headers(raw: &[u8]) -> Vec<(String, String)> {
 
 /// Extract one part of an RFC 5322 address string.
 ///
-/// `part`:
-/// - `"localpart"` — the text before `@`
-/// - `"domain"`    — the text after `@`
-/// - anything else (including `"all"`) — the full address string
-///
 /// The address is first stripped of angle-bracket delimiters and any
 /// display-name prefix before extracting the part.  Returns `""` on a
-/// malformed address when `localpart` or `domain` was requested.
-pub fn address_part(addr: &str, part: &str) -> String {
+/// malformed address when `LocalPart` or `Domain` was requested.
+pub(crate) fn address_part(addr: &str, part: AddressPart) -> String {
     // Normalise: strip display name and angle brackets.
     let bare = bare_address(addr);
 
     match part {
-        "localpart" => {
+        AddressPart::LocalPart => {
             if let Some(at) = bare.rfind('@') {
                 bare[..at].to_string()
             } else {
                 String::new()
             }
         }
-        "domain" => {
+        AddressPart::Domain => {
             if let Some(at) = bare.rfind('@') {
                 bare[at + 1..].to_string()
             } else {
                 String::new()
             }
         }
-        _ => bare,
+        AddressPart::All => bare,
     }
 }
 

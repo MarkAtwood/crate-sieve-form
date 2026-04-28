@@ -4,7 +4,9 @@
 
 use crate::form::{Form, Script, Stmt};
 use crate::message;
+use crate::message::AddressPart;
 use crate::SieveAction;
+use std::borrow::Cow;
 use std::cmp::Reverse;
 use std::collections::HashMap;
 
@@ -30,6 +32,7 @@ pub struct Ctx<'a> {
     /// Whether `require ["variables"]` was declared (RFC 5229).
     /// `${name}` substitution is only active when this is true.
     pub variables_enabled: bool,
+    pub regex_cache: &'a HashMap<String, fancy_regex::Regex>,
 }
 
 // ---------------------------------------------------------------------------
@@ -45,6 +48,11 @@ enum StmtResult {
     Stop,
 }
 
+enum SizeDir {
+    Over,
+    Under,
+}
+
 // ---------------------------------------------------------------------------
 // Public entry point
 // ---------------------------------------------------------------------------
@@ -55,6 +63,7 @@ enum StmtResult {
 /// no explicit disposition, `[Keep]` is appended per RFC 5228 §2.10.2.
 pub fn eval_script(
     script: &Script,
+    regex_cache: &HashMap<String, fancy_regex::Regex>,
     raw_message: &[u8],
     envelope_from: &str,
     envelope_to: &str,
@@ -83,21 +92,16 @@ pub fn eval_script(
         envelope_to,
         variables: HashMap::new(),
         variables_enabled,
+        regex_cache,
     };
 
-    let mut actions: Vec<SieveAction> = Vec::new();
-
-    match eval_stmt_list(script, &mut ctx) {
-        None | Some(StmtResult::Continue) | Some(StmtResult::Stop) => {
-            actions.push(SieveAction::Keep);
-        }
-        Some(StmtResult::Keep) => actions.push(SieveAction::Keep),
-        Some(StmtResult::Discard) => actions.push(SieveAction::Discard),
-        Some(StmtResult::FileInto(folder)) => actions.push(SieveAction::FileInto(folder)),
-        Some(StmtResult::Reject(reason)) => actions.push(SieveAction::Reject(reason)),
-    }
-
-    actions
+    let action = match eval_stmt_list(script, &mut ctx) {
+        Some(StmtResult::Discard) => SieveAction::Discard,
+        Some(StmtResult::FileInto(folder)) => SieveAction::FileInto(folder),
+        Some(StmtResult::Reject(reason)) => SieveAction::Reject(reason),
+        _ => SieveAction::Keep,
+    };
+    vec![action]
 }
 
 // ---------------------------------------------------------------------------
@@ -124,12 +128,12 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
 
         // fileinto "folder"
         [Form::Word(w), Form::Str(folder)] if w == "fileinto" => {
-            StmtResult::FileInto(expand_vars(folder, ctx))
+            StmtResult::FileInto(expand_vars(folder, ctx).into_owned())
         }
 
         // reject "reason"
         [Form::Word(w), Form::Str(reason)] if w == "reject" => {
-            StmtResult::Reject(expand_vars(reason, ctx))
+            StmtResult::Reject(expand_vars(reason, ctx).into_owned())
         }
 
         // discard
@@ -156,7 +160,7 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
             }
             if let (Some(Form::Str(name)), Some(Form::Str(value))) = (rest.get(i), rest.get(i + 1))
             {
-                let expanded = expand_vars(value, ctx);
+                let expanded = expand_vars(value, ctx).into_owned();
                 let modified = apply_set_modifiers(expanded, &modifier_names);
                 ctx.variables.insert(name.to_lowercase(), modified);
             }
@@ -261,7 +265,7 @@ fn eval_anyof(rest: &[Form], ctx: &mut Ctx<'_>) -> bool {
 // Match type / comparator / address-part extraction
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MatchType {
     Is,
     Contains,
@@ -269,7 +273,7 @@ enum MatchType {
     Regex,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Comparator {
     AsciiCasemap,
     Octet,
@@ -285,10 +289,22 @@ fn extract_match_type<'a>(forms: &[&'a Form]) -> (MatchType, Vec<&'a Form>) {
     for &f in forms {
         if let Form::Tag(t) = f {
             match t.as_str() {
-                "is" => { mt = MatchType::Is; continue; }
-                "contains" => { mt = MatchType::Contains; continue; }
-                "matches" => { mt = MatchType::Matches; continue; }
-                "regex" => { mt = MatchType::Regex; continue; }
+                "is" => {
+                    mt = MatchType::Is;
+                    continue;
+                }
+                "contains" => {
+                    mt = MatchType::Contains;
+                    continue;
+                }
+                "matches" => {
+                    mt = MatchType::Matches;
+                    continue;
+                }
+                "regex" => {
+                    mt = MatchType::Regex;
+                    continue;
+                }
                 _ => {}
             }
         }
@@ -323,15 +339,24 @@ fn extract_comparator<'a>(forms: &[&'a Form]) -> (Comparator, Vec<&'a Form>) {
 }
 
 /// Scan `forms` for an address-part tag; remove it and return (part, rest).
-fn extract_address_part<'a>(forms: &[&'a Form]) -> (&'static str, Vec<&'a Form>) {
-    let mut part = "all";
+fn extract_address_part<'a>(forms: &[&'a Form]) -> (AddressPart, Vec<&'a Form>) {
+    let mut part = AddressPart::All;
     let mut remaining = Vec::with_capacity(forms.len());
     for &f in forms {
         if let Form::Tag(t) = f {
             match t.as_str() {
-                "localpart" => { part = "localpart"; continue; }
-                "domain" => { part = "domain"; continue; }
-                "all" => { part = "all"; continue; }
+                "localpart" => {
+                    part = AddressPart::LocalPart;
+                    continue;
+                }
+                "domain" => {
+                    part = AddressPart::Domain;
+                    continue;
+                }
+                "all" => {
+                    part = AddressPart::All;
+                    continue;
+                }
                 _ => {}
             }
         }
@@ -344,33 +369,63 @@ fn extract_address_part<'a>(forms: &[&'a Form]) -> (&'static str, Vec<&'a Form>)
 // String matching helpers
 // ---------------------------------------------------------------------------
 
-fn str_is(a: &str, b: &str, casemap: bool) -> bool {
-    if casemap {
+fn str_is(a: &str, b: &str, comparator: Comparator) -> bool {
+    if comparator == Comparator::AsciiCasemap {
         a.eq_ignore_ascii_case(b)
     } else {
         a == b
     }
 }
 
-fn str_contains(haystack: &str, needle: &str, casemap: bool) -> bool {
-    if casemap {
-        haystack
-            .to_ascii_lowercase()
-            .contains(&needle.to_ascii_lowercase())
-    } else {
-        haystack.contains(needle)
+fn str_contains(haystack: &str, needle: &str, comparator: Comparator) -> bool {
+    if comparator != Comparator::AsciiCasemap {
+        return haystack.contains(needle);
     }
+    if needle.is_empty() {
+        return true;
+    }
+    // i;ascii-casemap: byte-level case-insensitive search.
+    // Safe for ASCII-only case mapping per RFC 4790.
+    let hb = haystack.as_bytes();
+    let nb = needle.as_bytes();
+    if nb.len() > hb.len() {
+        return false;
+    }
+    hb.windows(nb.len()).any(|w| {
+        w.iter()
+            .zip(nb.iter())
+            .all(|(a, b)| a.eq_ignore_ascii_case(b))
+    })
 }
 
 /// Sieve glob matching (RFC 5228 §2.7.1).
 /// `*` = zero or more chars, `?` = exactly one char, `\*`/`\?` = literals.
-fn str_matches_glob(value: &str, pattern: &str, casemap: bool) -> bool {
+fn str_matches_glob(
+    value: &str,
+    pattern: &str,
+    comparator: Comparator,
+    regex_cache: &HashMap<String, fancy_regex::Regex>,
+) -> bool {
+    // Fast path: glob patterns are pre-compiled into the cache at compile()
+    // time under the key "glob:{pattern}" (or "(?i)glob:{pattern}" for
+    // case-insensitive).  Avoid calling sieve_glob_to_regex at eval time.
+    let base_key = format!("glob:{pattern}");
+    if comparator == Comparator::AsciiCasemap {
+        let ci_key = format!("(?i){base_key}");
+        if let Some(re) = regex_cache.get(&ci_key) {
+            return re.is_match(value).unwrap_or(false);
+        }
+    } else if let Some(re) = regex_cache.get(&base_key) {
+        return re.is_match(value).unwrap_or(false);
+    }
+    // Defensive fallback: compile on the fly (should not occur for validated
+    // scripts whose patterns were pre-cached at compile time).
     let regex_pat = sieve_glob_to_regex(pattern);
-    str_matches_regex_pat(value, &regex_pat, casemap)
+    str_matches_regex_pat(value, &regex_pat, comparator, regex_cache)
 }
 
 /// Convert a Sieve glob pattern to an anchored regex string.
-fn sieve_glob_to_regex(pattern: &str) -> String {
+pub(crate) fn sieve_glob_to_regex(pattern: &str) -> String {
     let mut out = String::from("(?s)\\A");
     let mut chars = pattern.chars().peekable();
     while let Some(ch) = chars.next() {
@@ -379,10 +434,18 @@ fn sieve_glob_to_regex(pattern: &str) -> String {
                 if let Some(&next) = chars.peek() {
                     chars.next();
                     match next {
-                        '*' | '?' => out.push_str(&fancy_regex::escape(&next.to_string())),
+                        '*' | '?' => {
+                            let mut buf = [0u8; 4];
+                            let s = next.encode_utf8(&mut buf);
+                            out.push_str(&fancy_regex::escape(s));
+                        }
                         other => {
-                            out.push_str(&fancy_regex::escape(&ch.to_string()));
-                            out.push_str(&fancy_regex::escape(&other.to_string()));
+                            let mut buf = [0u8; 4];
+                            let s = ch.encode_utf8(&mut buf);
+                            out.push_str(&fancy_regex::escape(s));
+                            let mut buf2 = [0u8; 4];
+                            let s2 = other.encode_utf8(&mut buf2);
+                            out.push_str(&fancy_regex::escape(s2));
                         }
                     }
                 } else {
@@ -391,7 +454,11 @@ fn sieve_glob_to_regex(pattern: &str) -> String {
             }
             '*' => out.push_str(".*"),
             '?' => out.push('.'),
-            other => out.push_str(&fancy_regex::escape(&other.to_string())),
+            other => {
+                let mut buf = [0u8; 4];
+                let s = other.encode_utf8(&mut buf);
+                out.push_str(&fancy_regex::escape(s));
+            }
         }
     }
     out.push_str("\\z");
@@ -399,31 +466,56 @@ fn sieve_glob_to_regex(pattern: &str) -> String {
 }
 
 /// Match `value` against a regex extension pattern (anchored to whole value).
-fn str_matches_regex(value: &str, pattern: &str, casemap: bool) -> bool {
+fn str_matches_regex(
+    value: &str,
+    pattern: &str,
+    comparator: Comparator,
+    regex_cache: &HashMap<String, fancy_regex::Regex>,
+) -> bool {
     let anchored = format!("(?s)\\A(?:{pattern})\\z");
-    str_matches_regex_pat(value, &anchored, casemap)
+    str_matches_regex_pat(value, &anchored, comparator, regex_cache)
 }
 
-fn str_matches_regex_pat(value: &str, anchored: &str, casemap: bool) -> bool {
-    // PERF: regex is recompiled on every call; a future optimisation is to
-    // compile patterns once in CompiledScript and cache the Regex objects.
-    let pat = if casemap {
-        format!("(?i){anchored}")
+fn str_matches_regex_pat(
+    value: &str,
+    anchored: &str,
+    comparator: Comparator,
+    regex_cache: &HashMap<String, fancy_regex::Regex>,
+) -> bool {
+    if comparator == Comparator::AsciiCasemap {
+        let pat = format!("(?i){anchored}");
+        if let Some(re) = regex_cache.get(&pat) {
+            return re.is_match(value).unwrap_or(false);
+        }
+        // Fallback: compile on the fly (should not occur for validated scripts).
+        match fancy_regex::Regex::new(&pat) {
+            Ok(re) => re.is_match(value).unwrap_or(false),
+            Err(_) => false,
+        }
     } else {
-        anchored.to_string()
-    };
-    match fancy_regex::Regex::new(&pat) {
-        Ok(re) => re.is_match(value).unwrap_or(false),
-        Err(_) => false,
+        if let Some(re) = regex_cache.get(anchored) {
+            return re.is_match(value).unwrap_or(false);
+        }
+        // Fallback: compile on the fly (should not occur for validated scripts).
+        match fancy_regex::Regex::new(anchored) {
+            Ok(re) => re.is_match(value).unwrap_or(false),
+            Err(_) => false,
+        }
     }
 }
 
-fn apply_match(value: &str, key: &str, mt: MatchType, casemap: bool) -> bool {
+fn apply_match(
+    value: &str,
+    key: &str,
+    mt: MatchType,
+    comparator: Comparator,
+    regex_cache: &HashMap<String, fancy_regex::Regex>,
+) -> bool {
     match mt {
-        MatchType::Is => str_is(value, key, casemap),
-        MatchType::Contains => str_contains(value, key, casemap),
-        MatchType::Matches => str_matches_glob(value, key, casemap),
-        MatchType::Regex => str_matches_regex(value, key, casemap),
+        MatchType::Is => str_is(value, key, comparator),
+        MatchType::Contains => str_contains(value, key, comparator),
+        MatchType::Matches => str_matches_glob(value, key, comparator, regex_cache),
+        MatchType::Regex => str_matches_regex(value, key, comparator, regex_cache),
     }
 }
 
@@ -446,19 +538,6 @@ fn collect_two_string_lists<'a>(forms: &[&'a Form]) -> (Vec<&'a str>, Vec<&'a st
     (names, keys)
 }
 
-/// Return a single string list from forms.
-fn collect_one_string_list<'a>(forms: &[&'a Form]) -> Vec<&'a str> {
-    let mut result: Vec<&str> = Vec::new();
-    for f in forms {
-        match f {
-            Form::Str(s) => result.push(s.as_str()),
-            Form::StringList(v) => result.extend(v.iter().map(String::as_str)),
-            _ => {}
-        }
-    }
-    result
-}
-
 // ---------------------------------------------------------------------------
 // Individual test implementations
 // ---------------------------------------------------------------------------
@@ -467,17 +546,16 @@ fn eval_header_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let refs: Vec<&Form> = forms.iter().collect();
     let (mt, after_mt) = extract_match_type(&refs);
     let (cmp, after_cmp) = extract_comparator(&after_mt);
-    let casemap = cmp == Comparator::AsciiCasemap;
     let (raw_names, raw_keys) = collect_two_string_lists(&after_cmp);
     // RFC 5229 §3: variable substitution applies to all string args in tests.
-    let field_names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
-    let keys: Vec<String> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
+    let field_names: Vec<Cow<'_, str>> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
+    let keys: Vec<Cow<'_, str>> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
 
     for (hdr_name, hdr_value) in &ctx.headers {
         for fname in &field_names {
-            if hdr_name.eq_ignore_ascii_case(fname) {
+            if hdr_name.eq_ignore_ascii_case(fname.as_ref()) {
                 for key in &keys {
-                    if apply_match(hdr_value, key, mt, casemap) {
+                    if apply_match(hdr_value, key.as_ref(), mt, cmp, ctx.regex_cache) {
                         return true;
                     }
                 }
@@ -491,19 +569,18 @@ fn eval_address_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let refs: Vec<&Form> = forms.iter().collect();
     let (mt, after_mt) = extract_match_type(&refs);
     let (cmp, after_cmp) = extract_comparator(&after_mt);
-    let casemap = cmp == Comparator::AsciiCasemap;
     let (part, after_part) = extract_address_part(&after_cmp);
     let (raw_names, raw_keys) = collect_two_string_lists(&after_part);
     // RFC 5229 §3: variable substitution applies to all string args in tests.
-    let field_names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
-    let keys: Vec<String> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
+    let field_names: Vec<Cow<'_, str>> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
+    let keys: Vec<Cow<'_, str>> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
 
     for (hdr_name, hdr_value) in &ctx.headers {
         for fname in &field_names {
-            if hdr_name.eq_ignore_ascii_case(fname) {
+            if hdr_name.eq_ignore_ascii_case(fname.as_ref()) {
                 let addr = message::address_part(hdr_value, part);
                 for key in &keys {
-                    if apply_match(&addr, key, mt, casemap) {
+                    if apply_match(&addr, key.as_ref(), mt, cmp, ctx.regex_cache) {
                         return true;
                     }
                 }
@@ -517,15 +594,14 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     let refs: Vec<&Form> = forms.iter().collect();
     let (mt, after_mt) = extract_match_type(&refs);
     let (cmp, after_cmp) = extract_comparator(&after_mt);
-    let casemap = cmp == Comparator::AsciiCasemap;
     let (part, after_part) = extract_address_part(&after_cmp);
     let (raw_names, raw_keys) = collect_two_string_lists(&after_part);
     // RFC 5229 §3: variable substitution applies to all string args in tests.
-    let part_names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
-    let keys: Vec<String> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
+    let part_names: Vec<Cow<'_, str>> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
+    let keys: Vec<Cow<'_, str>> = raw_keys.iter().map(|s| expand_vars(s, ctx)).collect();
 
     for pname in &part_names {
-        let lower = pname.to_ascii_lowercase();
+        let lower = pname.as_ref().to_ascii_lowercase();
         let raw_addr = match lower.as_str() {
             "from" => ctx.envelope_from,
             "to" => ctx.envelope_to,
@@ -533,7 +609,7 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
         };
         let addr = message::address_part(raw_addr, part);
         for key in &keys {
-            if apply_match(&addr, key, mt, casemap) {
+            if apply_match(&addr, key.as_ref(), mt, cmp, ctx.regex_cache) {
                 return true;
             }
         }
@@ -542,42 +618,50 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
 }
 
 fn eval_exists_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
-    let tmp: Vec<&Form> = forms.iter().collect();
-    let raw_names = collect_one_string_list(&tmp);
+    // Iterate directly to avoid collecting intermediate Vecs.
     // RFC 5229 §3: variable substitution applies to all string args in tests.
-    let names: Vec<String> = raw_names.iter().map(|s| expand_vars(s, ctx)).collect();
-    names.iter().all(|name| {
-        ctx.headers
-            .iter()
-            .any(|(n, _)| n.eq_ignore_ascii_case(name))
-    })
+    for f in forms {
+        let raw_names: &[String] = match f {
+            Form::Str(s) => std::slice::from_ref(s),
+            Form::StringList(v) => v.as_slice(),
+            _ => continue,
+        };
+        for s in raw_names {
+            let name = expand_vars(s, ctx);
+            if !ctx
+                .headers
+                .iter()
+                .any(|(n, _)| n.eq_ignore_ascii_case(name.as_ref()))
+            {
+                return false;
+            }
+        }
+    }
+    true
 }
 
 fn eval_size_test(forms: &[Form], message_size: usize) -> bool {
-    let mut over = false;
-    let mut under = false;
+    let mut dir: Option<SizeDir> = None;
     let mut limit: Option<u64> = None;
 
     for f in forms {
         match f {
-            Form::Tag(t) if t == "over" => over = true,
-            Form::Tag(t) if t == "under" => under = true,
+            Form::Tag(t) if t == "over" => dir = Some(SizeDir::Over),
+            Form::Tag(t) if t == "under" => dir = Some(SizeDir::Under),
             Form::Num(n) => limit = Some(*n),
             _ => {}
         }
     }
 
     let limit = match limit {
-        Some(l) => l as usize,
+        Some(l) => usize::try_from(l).unwrap_or(usize::MAX),
         None => return false,
     };
 
-    if over {
-        message_size > limit
-    } else if under {
-        message_size < limit
-    } else {
-        false
+    match dir {
+        Some(SizeDir::Over) => message_size > limit,
+        Some(SizeDir::Under) => message_size < limit,
+        None => false,
     }
 }
 
@@ -589,17 +673,24 @@ fn eval_size_test(forms: &[Form], message_size: usize) -> bool {
 ///
 /// Substitution is skipped entirely when `ctx.variables_enabled` is false
 /// (i.e. `require ["variables"]` was not declared — RFC 5229 §3).
-fn expand_vars(s: &str, ctx: &Ctx<'_>) -> String {
+/// Returns `Cow::Borrowed(s)` when no substitution occurs (zero allocation).
+fn expand_vars<'a>(s: &'a str, ctx: &Ctx<'_>) -> Cow<'a, str> {
     if !ctx.variables_enabled {
-        return s.to_string();
+        return Cow::Borrowed(s);
+    }
+    // Fast path: if there are no trigger characters, return borrowed.
+    if !s.contains('$') && !s.contains('\\') {
+        return Cow::Borrowed(s);
     }
     let mut out = String::with_capacity(s.len());
     let mut chars = s.chars().peekable();
+    let mut modified = false;
     while let Some(ch) = chars.next() {
         if ch == '\\' {
             if chars.peek() == Some(&'$') {
                 chars.next();
                 out.push('$');
+                modified = true;
             } else {
                 out.push('\\');
             }
@@ -624,6 +715,7 @@ fn expand_vars(s: &str, ctx: &Ctx<'_>) -> String {
                     .map(String::as_str)
                     .unwrap_or("");
                 out.push_str(val);
+                modified = true;
             } else {
                 // Unclosed brace — emit literally.
                 out.push_str("${");
@@ -633,7 +725,11 @@ fn expand_vars(s: &str, ctx: &Ctx<'_>) -> String {
         }
         out.push(ch);
     }
-    out
+    if modified {
+        Cow::Owned(out)
+    } else {
+        Cow::Borrowed(s)
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -664,7 +760,7 @@ fn apply_set_modifiers(value: String, modifiers: &[&str]) -> String {
     }
 
     let mut sorted: Vec<&str> = modifiers.to_vec();
-    sorted.sort_by_key(|m| Reverse(precedence(m)));
+    sorted.sort_unstable_by_key(|m| Reverse(precedence(m)));
 
     let mut v = value;
     for m in sorted {

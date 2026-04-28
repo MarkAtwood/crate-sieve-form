@@ -559,10 +559,7 @@ fn test_variables_expanded_in_header_test() {
         "Come now.",
     );
     let actions = evaluate(&script, &msg, "boss@example.com", "me@example.com");
-    assert_eq!(
-        actions,
-        vec![SieveAction::FileInto("Priority".to_string())]
-    );
+    assert_eq!(actions, vec![SieveAction::FileInto("Priority".to_string())]);
 
     // Subject does not contain "urgent" — variable still expands, no match.
     let msg2 = make_message(

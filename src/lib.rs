@@ -16,6 +16,7 @@
 //! 2. [`form::read_script`] — tokens → `Script` (a uniform form tree)
 //! 3. evaluator — `Script` + message → `Vec<SieveAction>` (internal, not pub)
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 pub mod form;
@@ -29,10 +30,25 @@ mod message;
 
 /// A compiled Sieve script, ready for evaluation.
 ///
-/// Opaque to callers; contains the parsed form tree.  `Send + Sync` because
-/// the inner `Arc<form::Script>` contains only `Send + Sync` types.
-#[derive(Debug)]
-pub struct CompiledScript(Arc<form::Script>);
+/// Opaque to callers; contains the parsed form tree and a pre-compiled regex
+/// cache.  `Send + Sync` because all contained types are `Send + Sync`.
+#[derive(Clone)]
+pub struct CompiledScript {
+    script: Arc<form::Script>,
+    regex_cache: Arc<HashMap<String, fancy_regex::Regex>>,
+}
+
+impl std::fmt::Debug for CompiledScript {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CompiledScript")
+            .field("script", &self.script)
+            .field(
+                "regex_cache",
+                &format!("<{} compiled patterns>", self.regex_cache.len()),
+            )
+            .finish()
+    }
+}
 
 // Explicit assertion that CompiledScript is Send + Sync.
 const _: () = {
@@ -44,6 +60,7 @@ const _: () = {
 };
 
 /// Disposition returned after evaluating a Sieve script against a message.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SieveAction {
     Keep,
@@ -67,14 +84,8 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
         message: format!("invalid UTF-8: {e}"),
         kind: SieveErrorKind::Utf8,
     })?;
-    let tokens = lexer::tokenize(source).map_err(|e| SieveError {
-        message: e.to_string(),
-        kind: SieveErrorKind::Lex,
-    })?;
-    let parsed = form::read_script(&tokens).map_err(|e| SieveError {
-        message: e.to_string(),
-        kind: SieveErrorKind::Parse,
-    })?;
+    let tokens = lexer::tokenize(source).map_err(SieveError::from)?;
+    let parsed = form::read_script(&tokens).map_err(SieveError::from)?;
 
     // Validate require extensions against the set the evaluator implements.
     // The canonical list lives in the evaluator so adding a new extension
@@ -82,20 +93,27 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     for stmt in &parsed {
         if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
             if w == "require" {
-                let extensions: Vec<&str> = rest
-                    .iter()
-                    .flat_map(|f| match f {
-                        form::Form::Str(s) => vec![s.as_str()],
-                        form::Form::StringList(v) => v.iter().map(String::as_str).collect(),
-                        _ => vec![],
-                    })
-                    .collect();
-                for ext in extensions {
-                    if !evaluator::KNOWN_EXTENSIONS.contains(&ext) {
-                        return Err(SieveError {
-                            message: format!("unsupported Sieve extension: {ext}"),
-                            kind: SieveErrorKind::UnsupportedExtension(ext.to_string()),
-                        });
+                for f in rest {
+                    match f {
+                        form::Form::Str(s) => {
+                            if !evaluator::KNOWN_EXTENSIONS.contains(&s.as_str()) {
+                                return Err(SieveError {
+                                    message: format!("unsupported Sieve extension: {s}"),
+                                    kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
+                                });
+                            }
+                        }
+                        form::Form::StringList(v) => {
+                            for s in v {
+                                if !evaluator::KNOWN_EXTENSIONS.contains(&s.as_str()) {
+                                    return Err(SieveError {
+                                        message: format!("unsupported Sieve extension: {s}"),
+                                        kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
+                                    });
+                                }
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }
@@ -104,7 +122,12 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
 
     validate_script(&parsed)?;
 
-    Ok(CompiledScript(Arc::new(parsed)))
+    let regex_cache = build_regex_cache(&parsed);
+
+    Ok(CompiledScript {
+        script: Arc::new(parsed),
+        regex_cache,
+    })
 }
 
 /// Walk every statement in a script (recursing into blocks and test lists)
@@ -121,10 +144,43 @@ fn validate_script(script: &form::Script) -> Result<(), SieveError> {
     Ok(())
 }
 
+fn validate_regex_in_clause(clause: &[form::Form]) -> Result<(), SieveError> {
+    let last_str_pos = clause
+        .iter()
+        .rposition(|f| matches!(f, form::Form::Str(_) | form::Form::StringList(_)));
+    if let Some(pos) = last_str_pos {
+        match &clause[pos] {
+            form::Form::Str(pattern) => {
+                let anchored = format!("(?s)\\A(?:{pattern})\\z");
+                fancy_regex::Regex::new(&anchored).map_err(|e| SieveError {
+                    message: format!("invalid regex pattern {pattern:?}: {e}"),
+                    kind: SieveErrorKind::InvalidRegex(pattern.clone()),
+                })?;
+            }
+            form::Form::StringList(patterns) => {
+                for pattern in patterns {
+                    let anchored = format!("(?s)\\A(?:{pattern})\\z");
+                    fancy_regex::Regex::new(&anchored).map_err(|e| SieveError {
+                        message: format!("invalid regex pattern {pattern:?}: {e}"),
+                        kind: SieveErrorKind::InvalidRegex(pattern.clone()),
+                    })?;
+                }
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
 fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
     // Scan the flat form list for Tag("comparator") followed by Str(name).
     // Also detect Tag("regex") and validate all Str patterns in the stmt.
+    //
+    // An if/elsif/else chain is represented as a single flat Stmt where clauses
+    // are separated by Form::Block.  Regex state is scoped per clause so that
+    // an invalid pattern in one clause is not shadowed by strings from another.
     let mut has_regex_tag = false;
+    let mut clause_start = 0;
     let mut i = 0;
     while i < stmt.len() {
         match &stmt[i] {
@@ -138,18 +194,26 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
                             kind: SieveErrorKind::UnsupportedComparator(name.clone()),
                         });
                     }
+                    i += 2; // consume tag + name
+                    continue;
                 }
-                i += 2; // consume tag + name
-                continue;
+                // No Str follows the tag; advance past the tag only.
             }
             form::Form::Tag(t) if t == "regex" => {
                 has_regex_tag = true;
             }
             form::Form::Block(stmts) => {
-                // Recurse into braced blocks.
+                // End of a clause: validate regex patterns collected since
+                // clause_start, recurse into the block, then reset for the
+                // next clause (elsif/else).
+                if has_regex_tag {
+                    validate_regex_in_clause(&stmt[clause_start..i])?;
+                }
                 for inner in stmts {
                     validate_stmt(inner)?;
                 }
+                has_regex_tag = false;
+                clause_start = i + 1;
             }
             form::Form::TestList(tests) => {
                 // Recurse into parenthesised test lists.
@@ -162,39 +226,122 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
         i += 1;
     }
 
-    // If this statement uses :regex, validate only the key-list (pattern) strings.
-    // In every Sieve test that accepts :regex, the key-list is the LAST Str or
-    // StringList before the Block.  Scanning backwards avoids mistaking field-name
-    // strings (e.g. "X[Special]") for regex patterns — field names are in the
-    // second-to-last position and are not valid regex in general.
+    // Validate regex for any trailing clause (after the last Block, or the
+    // whole stmt when there is no Block).
     if has_regex_tag {
-        let last_str_pos = stmt
-            .iter()
-            .rposition(|f| matches!(f, form::Form::Str(_) | form::Form::StringList(_)));
-        if let Some(pos) = last_str_pos {
-            match &stmt[pos] {
-                form::Form::Str(pattern) => {
-                    let anchored = format!("(?s)\\A(?:{pattern})\\z");
-                    fancy_regex::Regex::new(&anchored).map_err(|e| SieveError {
-                        message: format!("invalid regex pattern {pattern:?}: {e}"),
-                        kind: SieveErrorKind::InvalidRegex(pattern.clone()),
-                    })?;
-                }
-                form::Form::StringList(patterns) => {
-                    for pattern in patterns {
-                        let anchored = format!("(?s)\\A(?:{pattern})\\z");
-                        fancy_regex::Regex::new(&anchored).map_err(|e| SieveError {
-                            message: format!("invalid regex pattern {pattern:?}: {e}"),
-                            kind: SieveErrorKind::InvalidRegex(pattern.clone()),
-                        })?;
-                    }
-                }
-                _ => {}
-            }
-        }
+        validate_regex_in_clause(&stmt[clause_start..])?;
     }
 
     Ok(())
+}
+
+/// Whether patterns in a clause are raw regexes or Sieve glob patterns.
+#[derive(Clone, Copy)]
+enum PatternKind {
+    Regex,
+    Glob,
+}
+
+fn build_regex_cache(script: &form::Script) -> Arc<HashMap<String, fancy_regex::Regex>> {
+    let mut cache = HashMap::new();
+    for stmt in script {
+        collect_regex_patterns(stmt, &mut cache);
+    }
+    Arc::new(cache)
+}
+
+fn cache_patterns_in_clause(
+    clause: &[form::Form],
+    kind: PatternKind,
+    cache: &mut HashMap<String, fancy_regex::Regex>,
+) {
+    let last_pos = clause
+        .iter()
+        .rposition(|f| matches!(f, form::Form::Str(_) | form::Form::StringList(_)));
+    if let Some(pos) = last_pos {
+        match &clause[pos] {
+            form::Form::Str(p) => match kind {
+                PatternKind::Glob => cache_glob_pattern(p, cache),
+                PatternKind::Regex => cache_pattern(p, cache),
+            },
+            form::Form::StringList(ps) => {
+                for p in ps {
+                    match kind {
+                        PatternKind::Glob => cache_glob_pattern(p, cache),
+                        PatternKind::Regex => cache_pattern(p, cache),
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_regex::Regex>) {
+    let mut has_regex_tag = false;
+    let mut has_matches_tag = false;
+    let mut clause_start = 0;
+    let mut i = 0;
+    while i < stmt.len() {
+        match &stmt[i] {
+            form::Form::Tag(t) if t == "regex" => {
+                has_regex_tag = true;
+            }
+            form::Form::Tag(t) if t == "matches" => {
+                has_matches_tag = true;
+            }
+            form::Form::Block(stmts) => {
+                if has_regex_tag {
+                    cache_patterns_in_clause(&stmt[clause_start..i], PatternKind::Regex, cache);
+                } else if has_matches_tag {
+                    cache_patterns_in_clause(&stmt[clause_start..i], PatternKind::Glob, cache);
+                }
+                for inner in stmts {
+                    collect_regex_patterns(inner, cache);
+                }
+                has_regex_tag = false;
+                has_matches_tag = false;
+                clause_start = i + 1;
+            }
+            form::Form::TestList(tests) => {
+                for test in tests {
+                    collect_regex_patterns(test, cache);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    if has_regex_tag {
+        cache_patterns_in_clause(&stmt[clause_start..], PatternKind::Regex, cache);
+    } else if has_matches_tag {
+        cache_patterns_in_clause(&stmt[clause_start..], PatternKind::Glob, cache);
+    }
+}
+
+fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
+    let base = format!("(?s)\\A(?:{pattern})\\z");
+    // Errors were already caught by validate_script; ignore here.
+    if let Ok(re) = fancy_regex::Regex::new(&base) {
+        cache.insert(base.clone(), re);
+    }
+    let ci = format!("(?i){base}");
+    if let Ok(re) = fancy_regex::Regex::new(&ci) {
+        cache.insert(ci, re);
+    }
+}
+
+fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
+    let regex_str = evaluator::sieve_glob_to_regex(pattern);
+    let base_key = format!("glob:{pattern}");
+    if let Ok(re) = fancy_regex::Regex::new(&regex_str) {
+        cache.insert(base_key.clone(), re);
+    }
+    let ci_str = format!("(?i){regex_str}");
+    let ci_key = format!("(?i){base_key}");
+    if let Ok(re) = fancy_regex::Regex::new(&ci_str) {
+        cache.insert(ci_key, re);
+    }
 }
 
 /// Evaluate a compiled Sieve script against a raw RFC 5322 message.
@@ -208,7 +355,13 @@ pub fn evaluate(
     envelope_from: &str,
     envelope_to: &str,
 ) -> Vec<SieveAction> {
-    evaluator::eval_script(&script.0, raw_message, envelope_from, envelope_to)
+    evaluator::eval_script(
+        &script.script,
+        &script.regex_cache,
+        raw_message,
+        envelope_from,
+        envelope_to,
+    )
 }
 
 #[cfg(test)]
@@ -495,6 +648,20 @@ mod tests {
         assert!(
             result.is_err(),
             "invalid regex in key StringList must fail at compile"
+        );
+    }
+
+    #[test]
+    fn compile_regex_invalid_in_if_clause_with_elsif() {
+        // Regression for ruj.31: the invalid pattern is in the if clause; the
+        // elsif clause must not shadow it by providing a valid Str later in the
+        // combined flat stmt.
+        let result = compile(
+            b"require [\"regex\"]; if header :regex \"Subject\" \"[invalid\" { keep; } elsif header :is \"To\" \"key\" { keep; }",
+        );
+        assert!(
+            result.is_err(),
+            "invalid regex in if clause must fail even when elsif is present"
         );
     }
 

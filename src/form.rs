@@ -11,7 +11,8 @@ use crate::lexer::Token;
 use crate::parse_error::ParseError;
 
 /// A single form: a uniform, recursive representation of one syntactic element.
-#[derive(Debug, Clone)]
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Form {
     /// An identifier keyword.
     Word(String),
@@ -74,9 +75,9 @@ fn read_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError
                 return Ok((stmt, pos));
             }
             return Err(ParseError {
-                message: "unexpected end of input in statement (missing ';'?)".to_string(),
-                line: 0,
-                col: 0,
+                message: "unexpected end of input in statement (missing ';'?)".to_owned(),
+                line: None,
+                col: None,
             });
         }
 
@@ -139,9 +140,9 @@ fn read_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError
 
             Token::Comma => {
                 return Err(ParseError {
-                    message: "unexpected ',' outside string list or test list".to_string(),
-                    line: 0,
-                    col: 0,
+                    message: "unexpected ',' outside string list or test list".to_owned(),
+                    line: None,
+                    col: None,
                 });
             }
 
@@ -153,8 +154,8 @@ fn read_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError
                         "unexpected closing delimiter '{}'",
                         token_char(&tokens[pos])
                     ),
-                    line: 0,
-                    col: 0,
+                    line: None,
+                    col: None,
                 });
             }
         }
@@ -172,9 +173,9 @@ fn read_string_list(tokens: &[Token], start: usize) -> Result<(Vec<String>, usiz
     loop {
         if pos >= tokens.len() {
             return Err(ParseError {
-                message: "unclosed '[' in string list".to_string(),
-                line: 0,
-                col: 0,
+                message: "unclosed '[' in string list".to_owned(),
+                line: None,
+                col: None,
             });
         }
 
@@ -187,9 +188,9 @@ fn read_string_list(tokens: &[Token], start: usize) -> Result<(Vec<String>, usiz
             Token::Comma => {
                 if !expect_comma {
                     return Err(ParseError {
-                        message: "unexpected ',' in string list".to_string(),
-                        line: 0,
-                        col: 0,
+                        message: "unexpected ',' in string list".to_owned(),
+                        line: None,
+                        col: None,
                     });
                 }
                 expect_comma = false;
@@ -199,9 +200,9 @@ fn read_string_list(tokens: &[Token], start: usize) -> Result<(Vec<String>, usiz
             Token::StringLit(s) => {
                 if expect_comma {
                     return Err(ParseError {
-                        message: "expected ',' between string list elements".to_string(),
-                        line: 0,
-                        col: 0,
+                        message: "expected ',' between string list elements".to_owned(),
+                        line: None,
+                        col: None,
                     });
                 }
                 list.push(s.clone());
@@ -215,8 +216,8 @@ fn read_string_list(tokens: &[Token], start: usize) -> Result<(Vec<String>, usiz
                         "non-string token {:?} inside string list",
                         token_char(other)
                     ),
-                    line: 0,
-                    col: 0,
+                    line: None,
+                    col: None,
                 });
             }
         }
@@ -234,9 +235,9 @@ fn read_test_list(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), 
     loop {
         if pos >= tokens.len() {
             return Err(ParseError {
-                message: "unclosed '(' in test list".to_string(),
-                line: 0,
-                col: 0,
+                message: "unclosed '(' in test list".to_owned(),
+                line: None,
+                col: None,
             });
         }
 
@@ -253,9 +254,9 @@ fn read_test_list(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), 
         // After a test, expect ',' or ')'.
         if pos >= tokens.len() {
             return Err(ParseError {
-                message: "unclosed '(' in test list".to_string(),
-                line: 0,
-                col: 0,
+                message: "unclosed '(' in test list".to_owned(),
+                line: None,
+                col: None,
             });
         }
         match &tokens[pos] {
@@ -268,9 +269,9 @@ fn read_test_list(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), 
             }
             _ => {
                 return Err(ParseError {
-                    message: "expected ',' or ')' after test in test list".to_string(),
-                    line: 0,
-                    col: 0,
+                    message: "expected ',' or ')' after test in test list".to_owned(),
+                    line: None,
+                    col: None,
                 });
             }
         }
@@ -290,9 +291,9 @@ fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), Parse
                 return Ok((stmt, pos));
             }
             return Err(ParseError {
-                message: "unexpected end of input in test expression".to_string(),
-                line: 0,
-                col: 0,
+                message: "unexpected end of input in test expression".to_owned(),
+                line: None,
+                col: None,
             });
         }
 
@@ -339,9 +340,9 @@ fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), Parse
             }
             Token::Semicolon => {
                 return Err(ParseError {
-                    message: "unexpected ';' inside test list".to_string(),
-                    line: 0,
-                    col: 0,
+                    message: "unexpected ';' inside test list".to_owned(),
+                    line: None,
+                    col: None,
                 });
             }
             Token::RBracket | Token::RBrace => {
@@ -350,8 +351,8 @@ fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), Parse
                         "unexpected closing delimiter '{}' inside test expression",
                         token_char(&tokens[pos])
                     ),
-                    line: 0,
-                    col: 0,
+                    line: None,
+                    col: None,
                 });
             }
         }
@@ -368,9 +369,9 @@ fn read_block(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), Pars
     loop {
         if pos >= tokens.len() {
             return Err(ParseError {
-                message: "unclosed '{' — missing '}'".to_string(),
-                line: 0,
-                col: 0,
+                message: "unclosed '{' — missing '}'".to_owned(),
+                line: None,
+                col: None,
             });
         }
 

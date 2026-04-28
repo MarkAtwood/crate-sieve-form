@@ -3,29 +3,38 @@
 /// A parse error from the lexer or form parser.
 ///
 /// `line` and `col` are 1-based positions set by the lexer.  The form parser
-/// does not track positions, so form-layer errors always have `line == 0`.
-/// When `line == 0`, no source location is available.
-#[derive(Debug, Clone, PartialEq)]
+/// does not track positions, so form-layer errors always have `line == None`.
+/// When `line == None`, no source location is available.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseError {
     pub message: String,
-    pub line: usize,
-    pub col: usize,
+    pub line: Option<usize>,
+    pub col: Option<usize>,
 }
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // line/col are 0 when the error source has no position tracking (form layer).
+        // line/col are None when the error source has no position tracking (form layer).
         // Only include them when they carry real information.
-        if self.line > 0 {
-            write!(f, "parse error at {}:{}: {}", self.line, self.col, self.message)
+        if let Some(line) = self.line {
+            write!(
+                f,
+                "parse error at {}:{}: {}",
+                line,
+                self.col.unwrap_or(0),
+                self.message
+            )
         } else {
             write!(f, "parse error: {}", self.message)
         }
     }
 }
 
+impl std::error::Error for ParseError {}
+
 /// A typed error returned by [`crate::compile`].
-#[derive(Debug, Clone)]
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SieveError {
     pub message: String,
     pub kind: SieveErrorKind,
@@ -35,7 +44,7 @@ pub struct SieveError {
 ///
 /// Marked `#[non_exhaustive]` so that adding new variants as more Sieve
 /// extensions are implemented does not break callers' existing match arms.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum SieveErrorKind {
     /// The script bytes are not valid UTF-8.
@@ -59,3 +68,17 @@ impl std::fmt::Display for SieveError {
 }
 
 impl std::error::Error for SieveError {}
+
+impl From<ParseError> for SieveError {
+    fn from(e: ParseError) -> Self {
+        let kind = if e.line.is_some() {
+            SieveErrorKind::Lex
+        } else {
+            SieveErrorKind::Parse
+        };
+        SieveError {
+            message: e.to_string(),
+            kind,
+        }
+    }
+}

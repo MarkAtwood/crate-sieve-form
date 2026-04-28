@@ -5,7 +5,7 @@
 use crate::parse_error::ParseError;
 
 /// Tokens produced by the Sieve lexer.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token {
     /// An identifier: `[a-zA-Z_][a-zA-Z0-9_]*`
     Word(String),
@@ -31,120 +31,109 @@ pub enum Token {
 ///
 /// Returns a [`ParseError`] on any unrecognised character or malformed token.
 pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
-    let chars: Vec<char> = src.chars().collect();
-    let len = chars.len();
-    let mut pos = 0usize;
+    let mut chars = src.chars().peekable();
     // 1-based line/col tracking for error messages.
     let mut line = 1usize;
     let mut col = 1usize;
 
-    // Advance pos by one character, updating line/col.
-    macro_rules! advance {
-        () => {{
-            let ch = chars[pos];
-            pos += 1;
-            if ch == '\n' {
-                line += 1;
-                col = 1;
-            } else {
-                col += 1;
-            }
-            ch
-        }};
-    }
-
     macro_rules! err {
         ($msg:expr) => {
             return Err(ParseError {
-                message: $msg.to_string(),
-                line,
-                col,
+                message: $msg.into(),
+                line: Some(line),
+                col: Some(col),
             })
         };
     }
 
     let mut tokens: Vec<Token> = Vec::new();
 
-    while pos < len {
-        let ch = chars[pos];
-
+    while let Some(&ch) = chars.peek() {
         // --- Whitespace ---
         if ch.is_ascii_whitespace() {
-            advance!();
+            advance(&mut chars, &mut line, &mut col);
             continue;
         }
 
         // --- Line comment ---
         if ch == '#' {
-            while pos < len && chars[pos] != '\n' {
-                advance!();
+            while chars.peek().is_some_and(|&c| c != '\n') {
+                advance(&mut chars, &mut line, &mut col);
             }
             continue;
         }
 
         // --- Block comment ---
-        if ch == '/' && pos + 1 < len && chars[pos + 1] == '*' {
+        // Consume '/' first, then check if next char is '*'.
+        if ch == '/' {
             let err_line = line;
             let err_col = col;
-            advance!(); // '/'
-            advance!(); // '*'
-            loop {
-                if pos >= len {
-                    return Err(ParseError {
-                        message: "unterminated block comment".to_string(),
-                        line: err_line,
-                        col: err_col,
-                    });
+            advance(&mut chars, &mut line, &mut col); // consume '/'
+            if chars.peek() == Some(&'*') {
+                advance(&mut chars, &mut line, &mut col); // consume '*'
+                loop {
+                    if chars.peek().is_none() {
+                        return Err(ParseError {
+                            message: "unterminated block comment".to_owned(),
+                            line: Some(err_line),
+                            col: Some(err_col),
+                        });
+                    }
+                    let c = advance(&mut chars, &mut line, &mut col);
+                    if c == '*' && chars.peek() == Some(&'/') {
+                        advance(&mut chars, &mut line, &mut col); // consume '/'
+                        break;
+                    }
                 }
-                if chars[pos] == '*' && pos + 1 < len && chars[pos + 1] == '/' {
-                    advance!(); // '*'
-                    advance!(); // '/'
-                    break;
-                }
-                advance!();
+                continue;
             }
-            continue;
+            // Not a block comment — fall through to the error path.
+            return Err(ParseError {
+                message: "unexpected character '/'".to_owned(),
+                line: Some(err_line),
+                col: Some(err_col),
+            });
         }
 
         // --- Punctuation ---
         match ch {
             '[' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::LBracket);
                 continue;
             }
             ']' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::RBracket);
                 continue;
             }
             '(' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::LParen);
                 continue;
             }
             ')' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::RParen);
                 continue;
             }
             '{' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::LBrace);
                 continue;
             }
             '}' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::RBrace);
                 continue;
             }
             ';' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::Semicolon);
                 continue;
             }
             ',' => {
-                advance!();
+                advance(&mut chars, &mut line, &mut col);
                 tokens.push(Token::Comma);
                 continue;
             }
@@ -155,18 +144,23 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
         if ch == ':' {
             let err_line = line;
             let err_col = col;
-            advance!(); // consume ':'
-            if pos >= len || !(chars[pos].is_ascii_alphabetic() || chars[pos] == '_') {
+            advance(&mut chars, &mut line, &mut col); // consume ':'
+            if !chars
+                .peek()
+                .is_some_and(|&c| c.is_ascii_alphabetic() || c == '_')
+            {
                 return Err(ParseError {
-                    message: "expected identifier after ':'".to_string(),
-                    line: err_line,
-                    col: err_col,
+                    message: "expected identifier after ':'".to_owned(),
+                    line: Some(err_line),
+                    col: Some(err_col),
                 });
             }
             let mut ident = String::new();
-            while pos < len && (chars[pos].is_ascii_alphanumeric() || chars[pos] == '_') {
-                ident.push(chars[pos]);
-                advance!();
+            while chars
+                .peek()
+                .is_some_and(|&c| c.is_ascii_alphanumeric() || c == '_')
+            {
+                ident.push(advance(&mut chars, &mut line, &mut col));
             }
             tokens.push(Token::Tag(ident));
             continue;
@@ -175,38 +169,33 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
         // --- Number ---
         if ch.is_ascii_digit() {
             let mut num_str = String::new();
-            while pos < len && chars[pos].is_ascii_digit() {
-                num_str.push(chars[pos]);
-                advance!();
+            while chars.peek().is_some_and(|&c| c.is_ascii_digit()) {
+                num_str.push(advance(&mut chars, &mut line, &mut col));
             }
             let base: u64 = num_str.parse().map_err(|_| ParseError {
                 message: format!("number overflow: {num_str}"),
-                line,
-                col,
+                line: Some(line),
+                col: Some(col),
             })?;
-            let multiplier: u64 = if pos < len {
-                match chars[pos] {
-                    'K' | 'k' => {
-                        advance!();
-                        1024
-                    }
-                    'M' | 'm' => {
-                        advance!();
-                        1024 * 1024
-                    }
-                    'G' | 'g' => {
-                        advance!();
-                        1024 * 1024 * 1024
-                    }
-                    _ => 1,
+            let multiplier: u64 = match chars.peek().copied() {
+                Some('K' | 'k') => {
+                    advance(&mut chars, &mut line, &mut col);
+                    1024
                 }
-            } else {
-                1
+                Some('M' | 'm') => {
+                    advance(&mut chars, &mut line, &mut col);
+                    1024 * 1024
+                }
+                Some('G' | 'g') => {
+                    advance(&mut chars, &mut line, &mut col);
+                    1024 * 1024 * 1024
+                }
+                _ => 1,
             };
             let value = base.checked_mul(multiplier).ok_or_else(|| ParseError {
                 message: format!("number overflow applying multiplier to {base}"),
-                line,
-                col,
+                line: Some(line),
+                col: Some(col),
             })?;
             tokens.push(Token::Number(value));
             continue;
@@ -215,48 +204,49 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
         // --- Word: identifier ---
         if ch.is_ascii_alphabetic() || ch == '_' {
             let mut word = String::new();
-            while pos < len && (chars[pos].is_ascii_alphanumeric() || chars[pos] == '_') {
-                word.push(chars[pos]);
-                advance!();
+            while chars
+                .peek()
+                .is_some_and(|&c| c.is_ascii_alphanumeric() || c == '_')
+            {
+                word.push(advance(&mut chars, &mut line, &mut col));
             }
             // Check for multiline string: word "text" followed immediately by ':'
-            if word == "text" && pos < len && chars[pos] == ':' {
+            if word == "text" && chars.peek() == Some(&':') {
                 let err_line = line;
                 let err_col = col;
-                advance!(); // consume ':'
-                            // Consume optional CR/LF or CRLF to end the `text:` header line.
-                if pos < len && chars[pos] == '\r' {
-                    advance!();
+                advance(&mut chars, &mut line, &mut col); // consume ':'
+                                                          // Consume optional CR/LF or CRLF to end the `text:` header line.
+                if chars.peek() == Some(&'\r') {
+                    advance(&mut chars, &mut line, &mut col);
                 }
-                if pos < len && chars[pos] == '\n' {
-                    advance!();
+                if chars.peek() == Some(&'\n') {
+                    advance(&mut chars, &mut line, &mut col);
                 } else {
                     return Err(ParseError {
-                        message: "expected newline after 'text:'".to_string(),
-                        line: err_line,
-                        col: err_col,
+                        message: "expected newline after 'text:'".to_owned(),
+                        line: Some(err_line),
+                        col: Some(err_col),
                     });
                 }
                 // Collect lines until a line that is exactly "." (RFC 5228 §2.3.1).
                 let mut content = String::new();
                 loop {
-                    if pos >= len {
+                    if chars.peek().is_none() {
                         return Err(ParseError {
                             message: "unterminated multiline string (missing '.' terminator)"
-                                .to_string(),
-                            line: err_line,
-                            col: err_col,
+                                .to_owned(),
+                            line: Some(err_line),
+                            col: Some(err_col),
                         });
                     }
                     // Read a full line.
                     let mut line_buf = String::new();
-                    while pos < len && chars[pos] != '\n' {
-                        line_buf.push(chars[pos]);
-                        advance!();
+                    while chars.peek().is_some_and(|&c| c != '\n') {
+                        line_buf.push(advance(&mut chars, &mut line, &mut col));
                     }
                     // Consume the newline.
-                    if pos < len {
-                        advance!(); // '\n'
+                    if chars.peek().is_some() {
+                        advance(&mut chars, &mut line, &mut col); // '\n'
                     }
                     // Strip trailing CR if present (CRLF line ending).
                     let line_trimmed = line_buf.strip_suffix('\r').unwrap_or(&line_buf);
@@ -286,32 +276,29 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
         if ch == '"' {
             let err_line = line;
             let err_col = col;
-            advance!(); // consume opening '"'
+            advance(&mut chars, &mut line, &mut col); // consume opening '"'
             let mut s = String::new();
             loop {
-                if pos >= len {
+                if chars.peek().is_none() {
                     return Err(ParseError {
-                        message: "unterminated string literal".to_string(),
-                        line: err_line,
-                        col: err_col,
+                        message: "unterminated string literal".to_owned(),
+                        line: Some(err_line),
+                        col: Some(err_col),
                     });
                 }
-                let c = chars[pos];
+                let c = advance(&mut chars, &mut line, &mut col);
                 if c == '"' {
-                    advance!();
                     break;
                 }
                 if c == '\\' {
-                    advance!(); // consume '\'
-                    if pos >= len {
+                    if chars.peek().is_none() {
                         return Err(ParseError {
-                            message: "unexpected end of input after backslash".to_string(),
-                            line: err_line,
-                            col: err_col,
+                            message: "unexpected end of input after backslash".to_owned(),
+                            line: Some(err_line),
+                            col: Some(err_col),
                         });
                     }
-                    let escaped = chars[pos];
-                    advance!();
+                    let escaped = advance(&mut chars, &mut line, &mut col);
                     match escaped {
                         '"' => s.push('"'),
                         '\\' => s.push('\\'),
@@ -325,7 +312,6 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
                     continue;
                 }
                 s.push(c);
-                advance!();
             }
             tokens.push(Token::StringLit(s));
             continue;
@@ -335,4 +321,21 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
     }
 
     Ok(tokens)
+}
+
+// Consume one character from the iterator, updating line/col tracking.
+// called only when chars.peek().is_some() is guaranteed
+fn advance(
+    chars: &mut std::iter::Peekable<std::str::Chars<'_>>,
+    line: &mut usize,
+    col: &mut usize,
+) -> char {
+    let ch = chars.next().expect("advance called on empty iterator");
+    if ch == '\n' {
+        *line += 1;
+        *col = 1;
+    } else {
+        *col += 1;
+    }
+    ch
 }
