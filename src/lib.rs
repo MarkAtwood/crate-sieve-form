@@ -23,7 +23,7 @@ pub mod form;
 pub mod lexer;
 pub mod parse_error;
 
-pub use parse_error::{SieveError, SieveErrorKind};
+pub use parse_error::{ParseError, SieveError, SieveErrorKind};
 
 mod evaluator;
 mod message;
@@ -36,12 +36,16 @@ mod message;
 pub struct CompiledScript {
     script: Arc<form::Script>,
     regex_cache: Arc<HashMap<String, fancy_regex::Regex>>,
+    pub(crate) variables_enabled: bool,
 }
 
 impl std::fmt::Debug for CompiledScript {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CompiledScript")
-            .field("script", &self.script)
+            .field(
+                "script",
+                &format!("Script {{ commands: {} }}", self.script.len()),
+            )
             .field(
                 "regex_cache",
                 &format!("<{} compiled patterns>", self.regex_cache.len()),
@@ -67,6 +71,7 @@ pub enum SieveAction {
     FileInto(String),
     Discard,
     Reject(String),
+    Redirect(String),
 }
 
 /// Compile a Sieve script from raw source bytes.
@@ -79,17 +84,36 @@ pub enum SieveAction {
 ///
 /// Returns `Err` if the script is not valid UTF-8, if tokenising or parsing
 /// fails, or if the script requires an unsupported extension.
+///
+/// # Implementation notes
+///
+/// Unknown commands encountered during evaluation are silently ignored per
+/// RFC 5228 §2.9.  Callers should not rely on unknown commands having any
+/// effect.
+///
+/// There are no built-in size limits on script size; callers are responsible
+/// for bounding inputs before calling this function.
+///
+/// # Security
+///
+/// The `:regex` match type uses `fancy-regex`, which supports backtracking
+/// for extended patterns.  Untrusted `:regex` patterns can cause catastrophic
+/// backtracking (ReDoS).  Callers should validate pattern complexity or
+/// restrict who can supply `:regex` tests.
 pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     let source = std::str::from_utf8(script).map_err(|e| SieveError {
         message: format!("invalid UTF-8: {e}"),
         kind: SieveErrorKind::Utf8,
+        source: None,
     })?;
     let tokens = lexer::tokenize(source).map_err(SieveError::from)?;
     let parsed = form::read_script(&tokens).map_err(SieveError::from)?;
 
-    // Validate require extensions against the set the evaluator implements.
-    // The canonical list lives in the evaluator so adding a new extension
-    // only requires updating one place.
+    // Collect declared extensions and validate them against the set the
+    // evaluator implements.  The canonical list lives in the evaluator so
+    // adding a new extension only requires updating one place.
+    let mut declared_extensions: std::collections::HashSet<String> =
+        std::collections::HashSet::new();
     for stmt in &parsed {
         if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
             if w == "require" {
@@ -100,8 +124,10 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                                 return Err(SieveError {
                                     message: format!("unsupported Sieve extension: {s}"),
                                     kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
+                                    source: None,
                                 });
                             }
+                            declared_extensions.insert(s.clone());
                         }
                         form::Form::StringList(v) => {
                             for s in v {
@@ -109,8 +135,10 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                                     return Err(SieveError {
                                         message: format!("unsupported Sieve extension: {s}"),
                                         kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
+                                        source: None,
                                     });
                                 }
+                                declared_extensions.insert(s.clone());
                             }
                         }
                         _ => {}
@@ -120,6 +148,16 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
         }
     }
 
+    // RFC 5228 §6.1: extension commands must be declared before use.
+    // Base commands (keep, discard, stop, redirect, if, elsif, else, require,
+    // allof, anyof, not, header, address, envelope, exists, size) need no
+    // require declaration.
+    for stmt in &parsed {
+        check_extension_use(stmt, &declared_extensions)?;
+    }
+
+    let variables_enabled = declared_extensions.contains("variables");
+
     validate_script(&parsed)?;
 
     let regex_cache = build_regex_cache(&parsed);
@@ -127,7 +165,49 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     Ok(CompiledScript {
         script: Arc::new(parsed),
         regex_cache,
+        variables_enabled,
     })
+}
+
+/// Check that extension commands used in `stmt` have been declared in the
+/// script's `require` list (RFC 5228 §6.1).
+///
+/// Extension commands that must be declared: `fileinto`, `reject`.
+/// Recurses into blocks and test lists.
+fn check_extension_use(
+    stmt: &form::Stmt,
+    declared: &std::collections::HashSet<String>,
+) -> Result<(), SieveError> {
+    // Extension commands that require a prior require declaration.
+    const EXTENSION_COMMANDS: &[&str] = &["fileinto", "reject"];
+
+    if let [form::Form::Word(w), ..] = stmt.as_slice() {
+        if EXTENSION_COMMANDS.contains(&w.as_str()) && !declared.contains(w.as_str()) {
+            return Err(SieveError {
+                message: format!("extension command \"{w}\" used without require declaration"),
+                kind: SieveErrorKind::UnsupportedExtension(w.clone()),
+                source: None,
+            });
+        }
+    }
+
+    // Recurse into blocks and test lists.
+    for form in stmt.as_slice() {
+        match form {
+            form::Form::Block(stmts) => {
+                for inner in stmts {
+                    check_extension_use(inner, declared)?;
+                }
+            }
+            form::Form::TestList(tests) => {
+                for test in tests {
+                    check_extension_use(test, declared)?;
+                }
+            }
+            _ => {}
+        }
+    }
+    Ok(())
 }
 
 /// Walk every statement in a script (recursing into blocks and test lists)
@@ -155,6 +235,7 @@ fn validate_regex_in_clause(clause: &[form::Form]) -> Result<(), SieveError> {
                 fancy_regex::Regex::new(&anchored).map_err(|e| SieveError {
                     message: format!("invalid regex pattern {pattern:?}: {e}"),
                     kind: SieveErrorKind::InvalidRegex(pattern.clone()),
+                    source: None,
                 })?;
             }
             form::Form::StringList(patterns) => {
@@ -163,6 +244,7 @@ fn validate_regex_in_clause(clause: &[form::Form]) -> Result<(), SieveError> {
                     fancy_regex::Regex::new(&anchored).map_err(|e| SieveError {
                         message: format!("invalid regex pattern {pattern:?}: {e}"),
                         kind: SieveErrorKind::InvalidRegex(pattern.clone()),
+                        source: None,
                     })?;
                 }
             }
@@ -192,6 +274,7 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
                         return Err(SieveError {
                             message: format!("unsupported comparator: {name}"),
                             kind: SieveErrorKind::UnsupportedComparator(name.clone()),
+                            source: None,
                         });
                     }
                     i += 2; // consume tag + name
@@ -349,6 +432,17 @@ fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Re
 /// `envelope_from` and `envelope_to` are the SMTP envelope addresses.
 /// Returns the list of actions the script requests; defaults to `[Keep]`
 /// when the script produces no explicit disposition (RFC 5228 §2.10.2).
+///
+/// # Implementation notes
+///
+/// The current implementation returns at most one action.  A script that
+/// takes an explicit action (`fileinto`, `discard`, `reject`, `redirect`)
+/// returns that action; a script with no explicit action returns
+/// `SieveAction::Keep`.  RFC 5228 permits multiple simultaneous actions
+/// (e.g., keep + fileinto), but this is not yet implemented.
+///
+/// There are no built-in size limits on message size; callers are responsible
+/// for bounding inputs before calling this function.
 pub fn evaluate(
     script: &CompiledScript,
     raw_message: &[u8],
@@ -358,6 +452,7 @@ pub fn evaluate(
     evaluator::eval_script(
         &script.script,
         &script.regex_cache,
+        script.variables_enabled,
         raw_message,
         envelope_from,
         envelope_to,

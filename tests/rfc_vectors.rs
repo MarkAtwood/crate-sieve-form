@@ -608,3 +608,70 @@ fn test_stop_terminates_execution() {
     // stop with no prior disposition → implicit keep (RFC 5228 §2.10.2).
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
+
+// ---------------------------------------------------------------------------
+// RFC 5228 §5.1 — address test with multi-address headers (issue 10p.33)
+// ---------------------------------------------------------------------------
+
+/// RFC 5228 §5.1 — when a header contains multiple comma-separated addresses,
+/// each one is tested independently.  A match on any single address suffices.
+///
+/// Expected output derived by hand: the To header contains two addresses;
+/// the address test with :is must match the second one individually.
+#[test]
+fn test_address_multi_address_header_match() {
+    let script = compile(
+        b"require [\"fileinto\"];\
+          if address :is \"To\" \"bob@example.com\" {\
+              fileinto \"Found\";\
+          }",
+    )
+    .expect("compile failed");
+
+    // To header has two addresses; "bob@example.com" is the second.
+    let msg = b"From: alice@example.com\r\nTo: carol@example.com, bob@example.com\r\nSubject: Hi\r\n\r\nBody.\r\n";
+    let actions = evaluate(&script, msg, "alice@example.com", "bob@example.com");
+    assert_eq!(actions, vec![SieveAction::FileInto("Found".to_string())]);
+}
+
+/// Same setup but the address under test is NOT in the To header — expect Keep.
+#[test]
+fn test_address_multi_address_header_no_match() {
+    let script = compile(
+        b"require [\"fileinto\"];\
+          if address :is \"To\" \"unknown@example.com\" {\
+              fileinto \"Found\";\
+          }",
+    )
+    .expect("compile failed");
+
+    let msg = b"From: alice@example.com\r\nTo: carol@example.com, bob@example.com\r\nSubject: Hi\r\n\r\nBody.\r\n";
+    let actions = evaluate(&script, msg, "alice@example.com", "bob@example.com");
+    assert_eq!(actions, vec![SieveAction::Keep]);
+}
+
+// ---------------------------------------------------------------------------
+// RFC 5228 §5.7 — exists with empty argument list (issue 10p.35)
+// ---------------------------------------------------------------------------
+
+/// exists with an empty string-list must return false, not vacuously true.
+///
+/// RFC 5228 §5.7: exists tests that every listed header is present.
+/// With no headers listed there is nothing to assert present — the result
+/// is false, not a vacuous truth.  Expected output hand-traced: no match
+/// → implicit keep.
+#[test]
+fn test_exists_empty_list_is_false() {
+    let script = compile(
+        b"require [\"fileinto\"];\
+          if exists [] {\
+              fileinto \"Matched\";\
+          }",
+    )
+    .expect("compile failed");
+
+    let msg = make_message("a@example.com", "b@example.com", "Test", ".");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    // Empty list → false → branch not taken → implicit keep.
+    assert_eq!(actions, vec![SieveAction::Keep]);
+}

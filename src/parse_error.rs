@@ -5,6 +5,7 @@
 /// `line` and `col` are 1-based positions set by the lexer.  The form parser
 /// does not track positions, so form-layer errors always have `line == None`.
 /// When `line == None`, no source location is available.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseError {
     pub message: String,
@@ -38,6 +39,7 @@ impl std::error::Error for ParseError {}
 pub struct SieveError {
     pub message: String,
     pub kind: SieveErrorKind,
+    pub(crate) source: Option<ParseError>,
 }
 
 /// The category of error produced by [`crate::compile`].
@@ -67,7 +69,11 @@ impl std::fmt::Display for SieveError {
     }
 }
 
-impl std::error::Error for SieveError {}
+impl std::error::Error for SieveError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        self.source.as_ref().map(|e| e as &dyn std::error::Error)
+    }
+}
 
 impl From<ParseError> for SieveError {
     fn from(e: ParseError) -> Self {
@@ -79,6 +85,7 @@ impl From<ParseError> for SieveError {
         SieveError {
             message: e.to_string(),
             kind,
+            source: Some(e),
         }
     }
 }

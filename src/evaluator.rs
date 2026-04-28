@@ -23,16 +23,16 @@ pub(crate) const KNOWN_EXTENSIONS: &[&str] =
 // Evaluation context
 // ---------------------------------------------------------------------------
 
-pub struct Ctx<'a> {
-    pub headers: Vec<(String, String)>,
-    pub message_size: usize,
-    pub envelope_from: &'a str,
-    pub envelope_to: &'a str,
-    pub variables: HashMap<String, String>,
+pub(crate) struct Ctx<'a> {
+    pub(crate) headers: Vec<(String, String)>,
+    pub(crate) message_size: usize,
+    pub(crate) envelope_from: &'a str,
+    pub(crate) envelope_to: &'a str,
+    pub(crate) variables: HashMap<String, String>,
     /// Whether `require ["variables"]` was declared (RFC 5229).
     /// `${name}` substitution is only active when this is true.
-    pub variables_enabled: bool,
-    pub regex_cache: &'a HashMap<String, fancy_regex::Regex>,
+    pub(crate) variables_enabled: bool,
+    pub(crate) regex_cache: &'a HashMap<String, fancy_regex::Regex>,
 }
 
 // ---------------------------------------------------------------------------
@@ -45,6 +45,7 @@ enum StmtResult {
     Discard,
     FileInto(String),
     Reject(String),
+    Redirect(String),
     Stop,
 }
 
@@ -64,26 +65,12 @@ enum SizeDir {
 pub fn eval_script(
     script: &Script,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
+    variables_enabled: bool,
     raw_message: &[u8],
     envelope_from: &str,
     envelope_to: &str,
 ) -> Vec<SieveAction> {
     let headers = message::extract_headers(raw_message);
-
-    // Detect whether `require ["variables"]` appears in the script (RFC 5229 §3).
-    // Variable substitution is only active when the script declares this extension.
-    let variables_enabled = script.iter().any(|stmt| {
-        if let [Form::Word(w), rest @ ..] = stmt.as_slice() {
-            if w == "require" {
-                return rest.iter().any(|f| match f {
-                    Form::Str(s) => s == "variables",
-                    Form::StringList(v) => v.iter().any(|s| s == "variables"),
-                    _ => false,
-                });
-            }
-        }
-        false
-    });
 
     let mut ctx = Ctx {
         headers,
@@ -99,6 +86,7 @@ pub fn eval_script(
         Some(StmtResult::Discard) => SieveAction::Discard,
         Some(StmtResult::FileInto(folder)) => SieveAction::FileInto(folder),
         Some(StmtResult::Reject(reason)) => SieveAction::Reject(reason),
+        Some(StmtResult::Redirect(addr)) => SieveAction::Redirect(addr),
         _ => SieveAction::Keep,
     };
     vec![action]
@@ -136,6 +124,11 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
             StmtResult::Reject(expand_vars(reason, ctx).into_owned())
         }
 
+        // redirect "address"  (RFC 5228 §4.4 — base action, no extension required)
+        [Form::Word(w), Form::Str(addr)] if w == "redirect" => {
+            StmtResult::Redirect(expand_vars(addr, ctx).into_owned())
+        }
+
         // discard
         [Form::Word(w)] if w == "discard" => StmtResult::Discard,
 
@@ -167,7 +160,7 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
             StmtResult::Continue
         }
 
-        // Unknown command — ignore per RFC 5228 §2.9.
+        // RFC 5228 §2.9: implementations MUST silently ignore unknown commands.
         _ => StmtResult::Continue,
     }
 }
@@ -482,6 +475,10 @@ fn str_matches_regex_pat(
     comparator: Comparator,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
 ) -> bool {
+    // SECURITY: fancy-regex uses backtracking for extended patterns.
+    // Untrusted :regex patterns can cause catastrophic backtracking (ReDoS).
+    // Callers should validate pattern complexity or restrict who can supply
+    // :regex tests.
     if comparator == Comparator::AsciiCasemap {
         let pat = format!("(?i){anchored}");
         if let Some(re) = regex_cache.get(&pat) {
@@ -578,10 +575,14 @@ fn eval_address_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     for (hdr_name, hdr_value) in &ctx.headers {
         for fname in &field_names {
             if hdr_name.eq_ignore_ascii_case(fname.as_ref()) {
-                let addr = message::address_part(hdr_value, part);
-                for key in &keys {
-                    if apply_match(&addr, key.as_ref(), mt, cmp, ctx.regex_cache) {
-                        return true;
+                // RFC 5228 §5.1: multi-address headers must be split and each
+                // address tested independently.
+                for raw_addr in message::split_addresses(hdr_value) {
+                    let addr = message::address_part(&raw_addr, part);
+                    for key in &keys {
+                        if apply_match(&addr, key.as_ref(), mt, cmp, ctx.regex_cache) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -620,6 +621,10 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
 fn eval_exists_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     // Iterate directly to avoid collecting intermediate Vecs.
     // RFC 5229 §3: variable substitution applies to all string args in tests.
+    //
+    // An empty argument list has no header names to check, so there is
+    // nothing that "exists" — return false rather than vacuously true.
+    let mut found_any_name = false;
     for f in forms {
         let raw_names: &[String] = match f {
             Form::Str(s) => std::slice::from_ref(s),
@@ -627,6 +632,7 @@ fn eval_exists_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
             _ => continue,
         };
         for s in raw_names {
+            found_any_name = true;
             let name = expand_vars(s, ctx);
             if !ctx
                 .headers
@@ -637,7 +643,7 @@ fn eval_exists_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
             }
         }
     }
-    true
+    found_any_name
 }
 
 fn eval_size_test(forms: &[Form], message_size: usize) -> bool {
@@ -654,6 +660,9 @@ fn eval_size_test(forms: &[Form], message_size: usize) -> bool {
     }
 
     let limit = match limit {
+        // On 32-bit targets, limits exceeding u32::MAX saturate to usize::MAX,
+        // making :over always false and :under always true for such limits.
+        // This is benign in practice (no real email exceeds 4 GB).
         Some(l) => usize::try_from(l).unwrap_or(usize::MAX),
         None => return false,
     };
