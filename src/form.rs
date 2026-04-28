@@ -150,10 +150,7 @@ fn read_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError
                 // Closing delimiters are handled by the caller; reaching one here
                 // means a mismatched or unexpected closer.
                 return Err(ParseError {
-                    message: format!(
-                        "unexpected closing delimiter '{}'",
-                        token_char(&tokens[pos])
-                    ),
+                    message: format!("unexpected closing delimiter {}", token_char(&tokens[pos])),
                     line: None,
                     col: None,
                 });
@@ -212,10 +209,7 @@ fn read_string_list(tokens: &[Token], start: usize) -> Result<(Vec<String>, usiz
 
             other => {
                 return Err(ParseError {
-                    message: format!(
-                        "non-string token {:?} inside string list",
-                        token_char(other)
-                    ),
+                    message: format!("non-string token {} inside string list", token_char(other)),
                     line: None,
                     col: None,
                 });
@@ -348,7 +342,7 @@ fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), Parse
             Token::RBracket | Token::RBrace => {
                 return Err(ParseError {
                     message: format!(
-                        "unexpected closing delimiter '{}' inside test expression",
+                        "unexpected closing delimiter {} inside test expression",
                         token_char(&tokens[pos])
                     ),
                     line: None,
@@ -394,17 +388,20 @@ fn read_block(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), Pars
     }
 }
 
-/// Return a single-character label for a token (used in error messages).
-fn token_char(t: &Token) -> char {
+/// Return a short description of a token (used in error messages).
+fn token_char(t: &Token) -> &'static str {
     match t {
-        Token::LBracket => '[',
-        Token::RBracket => ']',
-        Token::LParen => '(',
-        Token::RParen => ')',
-        Token::LBrace => '{',
-        Token::RBrace => '}',
-        Token::Semicolon => ';',
-        Token::Comma => ',',
-        _ => '?',
+        Token::LBracket => "'['",
+        Token::RBracket => "']'",
+        Token::LParen => "'('",
+        Token::RParen => "')'",
+        Token::LBrace => "'{'",
+        Token::RBrace => "'}'",
+        Token::Semicolon => "';'",
+        Token::Comma => "','",
+        Token::Word(_) => "word",
+        Token::Tag(_) => "tag",
+        Token::StringLit(_) => "string",
+        Token::Number(_) => "number",
     }
 }

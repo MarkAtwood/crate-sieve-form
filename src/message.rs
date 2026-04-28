@@ -2,6 +2,8 @@
 
 //! RFC 5322 message header extraction utilities.
 
+use std::borrow::Cow;
+
 /// The part of an RFC 5322 address to extract.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum AddressPart {
@@ -72,32 +74,24 @@ pub(crate) fn address_part(addr: &str, part: AddressPart) -> String {
     let bare = bare_address(addr);
 
     match part {
-        AddressPart::LocalPart => {
-            if let Some(at) = bare.rfind('@') {
-                bare[..at].to_string()
-            } else {
-                String::new()
-            }
-        }
-        AddressPart::Domain => {
-            if let Some(at) = bare.rfind('@') {
-                bare[at + 1..].to_string()
-            } else {
-                String::new()
-            }
-        }
-        AddressPart::All => bare,
+        AddressPart::LocalPart => bare
+            .rfind('@')
+            .map_or_else(String::new, |at| bare[..at].to_string()),
+        AddressPart::Domain => bare
+            .rfind('@')
+            .map_or_else(String::new, |at| bare[at + 1..].to_string()),
+        AddressPart::All => bare.into_owned(),
     }
 }
 
 /// Return the bare `local@domain` address from an RFC 5322 address string,
 /// stripping any display name, angle brackets, and trailing comments.
-fn bare_address(addr: &str) -> String {
+fn bare_address(addr: &str) -> Cow<'_, str> {
     let addr = addr.trim();
     // If there is a `<...>` section, use what is inside it.
     if let Some(start) = addr.rfind('<') {
         if let Some(end) = addr[start..].find('>') {
-            return addr[start + 1..start + end].trim().to_string();
+            return Cow::Owned(addr[start + 1..start + end].trim().to_string());
         }
     }
     // No angle brackets — strip any trailing RFC 5322 comment `(...)` or
@@ -110,16 +104,16 @@ fn bare_address(addr: &str) -> String {
 ///
 /// Finds the first `(` that is not inside a `"..."` quoted string and
 /// truncates the string there, then trims any remaining whitespace.
-fn strip_trailing_comment(s: &str) -> String {
+fn strip_trailing_comment(s: &str) -> Cow<'_, str> {
     let mut in_quotes = false;
     for (i, ch) in s.char_indices() {
         match ch {
             '"' => in_quotes = !in_quotes,
-            '(' if !in_quotes => return s[..i].trim().to_string(),
+            '(' if !in_quotes => return Cow::Owned(s[..i].trim().to_string()),
             _ => {}
         }
     }
-    s.to_string()
+    Cow::Borrowed(s)
 }
 
 /// Find the byte offset of the header/body separator in a raw RFC 5322

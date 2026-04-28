@@ -42,6 +42,13 @@ pub struct SieveError {
     /// Structured category of the error, suitable for programmatic matching.
     /// Use this field — not the message string — to distinguish error kinds.
     pub kind: SieveErrorKind,
+    /// The underlying parse error, if any.
+    ///
+    /// Accessible to external callers via [`std::error::Error::source`], which
+    /// returns it as `&dyn std::error::Error`.  Use
+    /// `err.source().and_then(|e| e.downcast_ref::<ParseError>())` if you need
+    /// the concrete type (requires re-exporting `ParseError` as a public type,
+    /// which this crate does via `pub use`).
     pub(crate) source: Option<ParseError>,
 }
 
@@ -69,6 +76,28 @@ pub enum SieveErrorKind {
     InvalidRegex(String),
 }
 
+impl std::fmt::Display for SieveErrorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SieveErrorKind::Utf8 => write!(f, "invalid UTF-8"),
+            SieveErrorKind::Lex => write!(f, "lexer error"),
+            SieveErrorKind::Parse => write!(f, "parse error"),
+            SieveErrorKind::UnsupportedExtension(ext) => {
+                write!(f, "unsupported extension: {ext}")
+            }
+            SieveErrorKind::UnsupportedComparator(cmp) => {
+                write!(f, "unsupported comparator: {cmp}")
+            }
+            SieveErrorKind::MissingRequire(ext) => {
+                write!(f, "missing require declaration for: {ext}")
+            }
+            SieveErrorKind::InvalidRegex(pat) => {
+                write!(f, "invalid regex pattern: {pat:?}")
+            }
+        }
+    }
+}
+
 impl std::fmt::Display for SieveError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.message)
@@ -83,6 +112,9 @@ impl std::error::Error for SieveError {
 
 impl From<ParseError> for SieveError {
     fn from(e: ParseError) -> Self {
+        // Invariant: the lexer always sets line/col; the form parser never does
+        // (it has no position tracking). So line.is_some() reliably identifies
+        // the error source. See ParseError doc comment.
         let kind = if e.line.is_some() {
             SieveErrorKind::Lex
         } else {

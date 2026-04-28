@@ -762,7 +762,7 @@ fn test_not_anyof_one_present_branch_skipped() {
 #[test]
 fn test_envelope_from_match() {
     let script = compile(
-        b"require [\"fileinto\"];\
+        b"require [\"fileinto\", \"envelope\"];\
           if envelope :is \"from\" \"sender@example.com\" { fileinto \"Inbox\"; }",
     )
     .expect("compile failed");
@@ -777,7 +777,7 @@ fn test_envelope_from_match() {
 #[test]
 fn test_envelope_from_no_match() {
     let script = compile(
-        b"require [\"fileinto\"];\
+        b"require [\"fileinto\", \"envelope\"];\
           if envelope :is \"from\" \"sender@example.com\" { fileinto \"Inbox\"; }",
     )
     .expect("compile failed");
