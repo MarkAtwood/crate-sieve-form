@@ -68,7 +68,6 @@ fn test_fileinto() {
     );
 }
 
-/// RFC 5228 §4.3 — redirect is not implemented; this tests discard instead.
 /// RFC 5228 §4.4 — discard: silently drops the message.
 #[test]
 fn test_discard() {
@@ -673,5 +672,150 @@ fn test_exists_empty_list_is_false() {
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
     let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
     // Empty list → false → branch not taken → implicit keep.
+    assert_eq!(actions, vec![SieveAction::Keep]);
+}
+
+// ---------------------------------------------------------------------------
+// RFC 5228 §5.8 — not operator
+// ---------------------------------------------------------------------------
+
+/// RFC 5228 §5.8 — not inverts a true test to false; the action is skipped.
+///
+/// Script: if not header :is "X-Spam" "yes" { keep; }
+/// When X-Spam: yes is present the header test is true; not makes it false
+/// so the keep branch is NOT taken.  No explicit action → implicit keep, but
+/// the branch body keep is not reached — the implicit keep at script end fires.
+/// Either way the result is Keep; what we are asserting is that the branch is
+/// NOT entered when the condition is true (the action inside would differ from
+/// implicit keep in a non-trivial variant — see the discard variant below).
+///
+/// We test with discard inside so we can distinguish "branch taken" from
+/// "implicit keep".
+#[test]
+fn test_not_single_condition_branch_skipped() {
+    // X-Spam: yes — the header :is test is true, not makes it false.
+    // discard inside the if must NOT execute → implicit keep.
+    let script =
+        compile(b"if not header :is \"X-Spam\" \"yes\" { discard; }").expect("compile failed");
+
+    let msg = make_message_with_header("X-Spam", "yes");
+    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com");
+    // Branch skipped; implicit keep.
+    assert_eq!(actions, vec![SieveAction::Keep]);
+}
+
+/// RFC 5228 §5.8 — not inverts a false test to true; the action IS executed.
+///
+/// Same script; this time the header is absent so the inner test is false,
+/// not makes it true, and discard executes.
+#[test]
+fn test_not_single_condition_branch_taken() {
+    let script =
+        compile(b"if not header :is \"X-Spam\" \"yes\" { discard; }").expect("compile failed");
+
+    // No X-Spam header — header :is is false, not makes it true.
+    let msg = make_message("clean@example.com", "user@example.com", "Normal", "Hi.");
+    let actions = evaluate(&script, &msg, "clean@example.com", "user@example.com");
+    assert_eq!(actions, vec![SieveAction::Discard]);
+}
+
+/// RFC 5228 §5.8 — not with anyof: the action fires only when both sub-tests
+/// are false (i.e. anyof is false → not anyof is true).
+///
+/// Script: if not anyof (header :is "A" "1", header :is "B" "2") { discard; }
+/// Expected output hand-traced: neither header present → anyof false → not
+/// true → discard.
+#[test]
+fn test_not_anyof_neither_present() {
+    let script =
+        compile(b"if not anyof (header :is \"A\" \"1\", header :is \"B\" \"2\") { discard; }")
+            .expect("compile failed");
+
+    // Neither A nor B header — anyof is false, not anyof is true.
+    let msg = make_message("a@example.com", "b@example.com", "Test", ".");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    assert_eq!(actions, vec![SieveAction::Discard]);
+}
+
+/// RFC 5228 §5.8 — not anyof: branch must NOT be taken when one sub-test
+/// matches (anyof is true → not anyof is false).
+#[test]
+fn test_not_anyof_one_present_branch_skipped() {
+    let script =
+        compile(b"if not anyof (header :is \"A\" \"1\", header :is \"B\" \"2\") { discard; }")
+            .expect("compile failed");
+
+    // Header A: 1 matches — anyof is true, not anyof is false.
+    let msg = b"From: a@example.com\r\nA: 1\r\nSubject: Test\r\n\r\nBody.\r\n";
+    let actions = evaluate(&script, msg, "a@example.com", "b@example.com");
+    assert_eq!(actions, vec![SieveAction::Keep]);
+}
+
+// ---------------------------------------------------------------------------
+// RFC 5228 §5.4 / §4.3 — envelope test and redirect action
+// ---------------------------------------------------------------------------
+
+/// RFC 5228 §5.4 — envelope test matches the SMTP envelope "from" address.
+///
+/// Expected output hand-traced: envelope from equals "sender@example.com"
+/// → envelope :is "from" "sender@example.com" is true → FileInto "Inbox".
+#[test]
+fn test_envelope_from_match() {
+    let script = compile(
+        b"require [\"fileinto\"];\
+          if envelope :is \"from\" \"sender@example.com\" { fileinto \"Inbox\"; }",
+    )
+    .expect("compile failed");
+
+    let msg = make_message("sender@example.com", "me@example.com", "Hello", "Body.");
+    let actions = evaluate(&script, &msg, "sender@example.com", "me@example.com");
+    assert_eq!(actions, vec![SieveAction::FileInto("Inbox".to_string())]);
+}
+
+/// RFC 5228 §5.4 — envelope :is must not match when the envelope from
+/// address differs from the key.  Expected output: implicit keep.
+#[test]
+fn test_envelope_from_no_match() {
+    let script = compile(
+        b"require [\"fileinto\"];\
+          if envelope :is \"from\" \"sender@example.com\" { fileinto \"Inbox\"; }",
+    )
+    .expect("compile failed");
+
+    let msg = make_message("other@example.net", "me@example.com", "Hello", "Body.");
+    // Envelope from is "other@example.net", not "sender@example.com".
+    let actions = evaluate(&script, &msg, "other@example.net", "me@example.com");
+    assert_eq!(actions, vec![SieveAction::Keep]);
+}
+
+/// RFC 5228 §4.3 — redirect forwards the message to the given address.
+///
+/// Expected output hand-traced: X-Forward: yes matches → redirect action
+/// with address "forward@example.com".
+#[test]
+fn test_redirect_action() {
+    let script =
+        compile(b"if header :is \"X-Forward\" \"yes\" { redirect \"forward@example.com\"; }")
+            .expect("compile failed");
+
+    let msg = make_message_with_header("X-Forward", "yes");
+    let actions = evaluate(&script, &msg, "sender@example.com", "user@example.com");
+    assert_eq!(
+        actions,
+        vec![SieveAction::Redirect("forward@example.com".to_string())]
+    );
+}
+
+/// RFC 5228 §4.3 — redirect must not fire when the condition is false.
+/// Expected output: implicit keep.
+#[test]
+fn test_redirect_no_match() {
+    let script =
+        compile(b"if header :is \"X-Forward\" \"yes\" { redirect \"forward@example.com\"; }")
+            .expect("compile failed");
+
+    // No X-Forward header — condition is false, redirect does not fire.
+    let msg = make_message("a@example.com", "b@example.com", "Test", ".");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
     assert_eq!(actions, vec![SieveAction::Keep]);
 }

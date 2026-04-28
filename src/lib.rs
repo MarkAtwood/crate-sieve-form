@@ -67,9 +67,26 @@ const _: () = {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SieveAction {
+    /// Deliver the message to the user's inbox.
+    ///
+    /// This is the default implicit action when a script produces no other
+    /// explicit disposition (RFC 5228 §4.2).
     Keep,
+    /// File the message into the named folder/mailbox.
+    ///
+    /// The contained string is the destination folder or mailbox name.
+    /// Requires `require ["fileinto"]` (RFC 5228 §4.3).
     FileInto(String),
+    /// Silently drop the message with no delivery and no error.
+    ///
+    /// The MTA discards the message without notifying the sender
+    /// (RFC 5228 §4.1).
     Discard,
+    /// Reject the message with a human-readable bounce reason.
+    ///
+    /// The contained string is the reason text returned to the sender
+    /// per RFC 5429 §2.1.  The MTA should reject the message with this
+    /// text.  Requires `require ["reject"]`.
     Reject(String),
     /// Forward the message to an SMTP envelope recipient address.
     ///
