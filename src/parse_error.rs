@@ -37,7 +37,10 @@ impl std::error::Error for ParseError {}
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SieveError {
+    /// Human-readable description of the error, suitable for display to an end user.
     pub message: String,
+    /// Structured category of the error, suitable for programmatic matching.
+    /// Use this field — not the message string — to distinguish error kinds.
     pub kind: SieveErrorKind,
     pub(crate) source: Option<ParseError>,
 }
