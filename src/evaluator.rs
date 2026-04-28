@@ -19,6 +19,26 @@ use std::collections::HashMap;
 pub(crate) const KNOWN_EXTENSIONS: &[&str] =
     &["fileinto", "reject", "envelope", "variables", "regex"];
 
+/// Build the cache key for a case-sensitive anchored regex pattern.
+pub(crate) fn regex_base_key(pattern: &str) -> String {
+    format!("(?s)\\A(?:{pattern})\\z")
+}
+
+/// Build the cache key for a case-insensitive anchored regex pattern.
+pub(crate) fn regex_ci_key(base_key: &str) -> String {
+    format!("(?i){base_key}")
+}
+
+/// Build the cache key for a case-sensitive glob pattern.
+pub(crate) fn glob_base_key(pattern: &str) -> String {
+    format!("glob:{pattern}")
+}
+
+/// Build the cache key for a case-insensitive glob pattern.
+pub(crate) fn glob_ci_key(base_key: &str) -> String {
+    format!("(?i){base_key}")
+}
+
 // ---------------------------------------------------------------------------
 // Evaluation context
 // ---------------------------------------------------------------------------
@@ -401,9 +421,9 @@ fn str_matches_glob(
     // Fast path: glob patterns are pre-compiled into the cache at compile()
     // time under the key "glob:{pattern}" (or "(?i)glob:{pattern}" for
     // case-insensitive).  Avoid calling sieve_glob_to_regex at eval time.
-    let base_key = format!("glob:{pattern}");
+    let base_key = glob_base_key(pattern);
     if comparator == Comparator::AsciiCasemap {
-        let ci_key = format!("(?i){base_key}");
+        let ci_key = glob_ci_key(&base_key);
         if let Some(re) = regex_cache.get(&ci_key) {
             return re.is_match(value).unwrap_or(false);
         }
@@ -464,7 +484,7 @@ fn str_matches_regex(
     comparator: Comparator,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
 ) -> bool {
-    let anchored = format!("(?s)\\A(?:{pattern})\\z");
+    let anchored = regex_base_key(pattern);
     str_matches_regex_pat(value, &anchored, comparator, regex_cache)
 }
 
@@ -479,7 +499,7 @@ fn str_matches_regex_pat(
     // Callers should validate pattern complexity or restrict who can supply
     // :regex tests.
     if comparator == Comparator::AsciiCasemap {
-        let pat = format!("(?i){anchored}");
+        let pat = regex_ci_key(anchored);
         if let Some(re) = regex_cache.get(&pat) {
             return re.is_match(value).unwrap_or(false);
         }

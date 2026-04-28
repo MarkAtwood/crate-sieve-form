@@ -493,8 +493,8 @@ fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_r
 }
 
 fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
-    let base = format!("(?s)\\A(?:{pattern})\\z");
-    let ci = format!("(?i){base}");
+    let base = evaluator::regex_base_key(pattern);
+    let ci = evaluator::regex_ci_key(&base);
     // Errors were already caught by validate_script; ignore here.
     if let Ok(re) = fancy_regex::Regex::new(&base) {
         cache.insert(base, re);
@@ -506,12 +506,12 @@ fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>)
 
 fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
     let regex_str = evaluator::sieve_glob_to_regex(pattern);
-    let base_key = format!("glob:{pattern}");
+    let base_key = evaluator::glob_base_key(pattern);
     if let Ok(re) = fancy_regex::Regex::new(&regex_str) {
         cache.insert(base_key.clone(), re);
     }
     let ci_str = format!("(?i){regex_str}");
-    let ci_key = format!("(?i){base_key}");
+    let ci_key = evaluator::glob_ci_key(&base_key);
     if let Ok(re) = fancy_regex::Regex::new(&ci_str) {
         cache.insert(ci_key, re);
     }
