@@ -146,7 +146,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     // Collect declared extensions and validate them against the set the
     // evaluator implements.  The canonical list lives in the evaluator so
     // adding a new extension only requires updating one place.
-    let mut declared_extensions: HashSet<String> = HashSet::new();
+    let mut declared_extensions: HashSet<&str> = HashSet::new();
     for stmt in &parsed {
         if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
             if w == "require" {
@@ -160,7 +160,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                                     source: None,
                                 });
                             }
-                            declared_extensions.insert(s.clone());
+                            declared_extensions.insert(s.as_str());
                         }
                         form::Form::StringList(v) => {
                             for s in v {
@@ -171,7 +171,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                                         source: None,
                                     });
                                 }
-                                declared_extensions.insert(s.clone());
+                                declared_extensions.insert(s.as_str());
                             }
                         }
                         _ => {}
@@ -207,7 +207,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
 ///
 /// Extension commands that must be declared: `fileinto`, `reject`.
 /// Recurses into blocks and test lists.
-fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<String>) -> Result<(), SieveError> {
+fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<(), SieveError> {
     // Action commands that require a prior require declaration (RFC 5228 §6.1).
     // Note: redirect is a base RFC 5228 §4.4 action — no require declaration needed.
     // Note: variables and envelope are handled separately (tests or require-only).

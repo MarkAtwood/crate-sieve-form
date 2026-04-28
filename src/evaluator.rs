@@ -687,11 +687,10 @@ fn expand_vars<'a>(s: &'a str, ctx: &Ctx<'_>) -> Cow<'a, str> {
             }
             if closed {
                 // Variable names are case-insensitive (RFC 5229 §3).
-                let val = ctx
-                    .variables
-                    .get(&name.to_lowercase())
-                    .map(String::as_str)
-                    .unwrap_or("");
+                // RFC 5229 §2 restricts names to [A-Za-z][A-Za-z0-9_-]*,
+                // so make_ascii_lowercase() is correct and avoids a heap allocation.
+                name.make_ascii_lowercase();
+                let val = ctx.variables.get(&name).map(String::as_str).unwrap_or("");
                 out.push_str(val);
                 modified = true;
             } else {
