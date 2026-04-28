@@ -45,10 +45,11 @@ pub struct SieveError {
     /// The underlying parse error, if any.
     ///
     /// Accessible to external callers via [`std::error::Error::source`], which
-    /// returns it as `&dyn std::error::Error`.  Use
-    /// `err.source().and_then(|e| e.downcast_ref::<ParseError>())` if you need
-    /// the concrete type (requires re-exporting `ParseError` as a public type,
-    /// which this crate does via `pub use`).
+    /// returns it as `&dyn std::error::Error`.  To inspect parse position,
+    /// use `err.source().map(|e| e.to_string())`; the string includes line and
+    /// column when available.  Note: `&dyn Error` does not expose
+    /// `downcast_ref` in stable Rust; check `err.kind` and `err.message`
+    /// instead for structured error handling.
     pub(crate) source: Option<ParseError>,
 }
 

@@ -204,47 +204,46 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
 // if / elsif / else
 // ---------------------------------------------------------------------------
 
-/// Evaluate an if-chain.
+/// Evaluate an if/elsif/else chain iteratively.
 ///
 /// `rest` is the slice of forms *after* the leading `Word("if")`:
 /// `[test_form0, test_form1, ..., Block(then_stmts), optional elsif/else ...]`
-fn eval_if(rest: &[Form], ctx: &mut Ctx<'_>) -> StmtResult {
-    let block_pos = match rest.iter().position(|f| matches!(f, Form::Block(_))) {
-        Some(p) => p,
-        None => return StmtResult::Continue, // malformed
-    };
-
-    let test_forms = &rest[..block_pos];
-    let block = match &rest[block_pos] {
-        Form::Block(stmts) => stmts,
-        _ => return StmtResult::Continue,
-    };
-    let after_block = &rest[block_pos + 1..];
-
-    if eval_test(test_forms, ctx) {
-        return match eval_stmt_list(block, ctx) {
-            None | Some(StmtResult::Continue) => StmtResult::Continue,
-            Some(other) => other,
+///
+/// Uses a loop instead of mutual recursion to avoid stack overflow on
+/// adversarial scripts with many `elsif` branches.
+fn eval_if(mut rest: &[Form], ctx: &mut Ctx<'_>) -> StmtResult {
+    loop {
+        let block_pos = match rest.iter().position(|f| matches!(f, Form::Block(_))) {
+            Some(p) => p,
+            None => return StmtResult::Continue, // malformed
         };
-    }
 
-    eval_elsif_else(after_block, ctx)
-}
+        let test_forms = &rest[..block_pos];
+        let block = match &rest[block_pos] {
+            Form::Block(stmts) => stmts,
+            _ => return StmtResult::Continue,
+        };
+        let after_block = &rest[block_pos + 1..];
 
-fn eval_elsif_else(rest: &[Form], ctx: &mut Ctx<'_>) -> StmtResult {
-    match rest {
-        [] => StmtResult::Continue,
-
-        [Form::Word(w), tail @ ..] if w == "elsif" => eval_if(tail, ctx),
-
-        [Form::Word(w), Form::Block(stmts), ..] if w == "else" => {
-            match eval_stmt_list(stmts, ctx) {
+        if eval_test(test_forms, ctx) {
+            return match eval_stmt_list(block, ctx) {
                 None | Some(StmtResult::Continue) => StmtResult::Continue,
                 Some(other) => other,
-            }
+            };
         }
 
-        _ => StmtResult::Continue,
+        // Test failed — advance to the next elsif/else or stop.
+        match after_block {
+            [] => return StmtResult::Continue,
+            [Form::Word(w), tail @ ..] if w == "elsif" => rest = tail,
+            [Form::Word(w), Form::Block(stmts), ..] if w == "else" => {
+                return match eval_stmt_list(stmts, ctx) {
+                    None | Some(StmtResult::Continue) => StmtResult::Continue,
+                    Some(other) => other,
+                };
+            }
+            _ => return StmtResult::Continue,
+        }
     }
 }
 

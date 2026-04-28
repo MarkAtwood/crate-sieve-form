@@ -149,10 +149,22 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     // Collect declared extensions and validate them against the set the
     // evaluator implements.  The canonical list lives in the evaluator so
     // adding a new extension only requires updating one place.
+    // RFC 5228 §6.1: all require statements MUST appear before any other
+    // command.  We enforce this by tracking the first non-require statement
+    // and rejecting any require that appears after it.
     let mut declared_extensions: HashSet<&str> = HashSet::new();
+    let mut seen_non_require = false;
     for stmt in &parsed {
         if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
             if w == "require" {
+                if seen_non_require {
+                    return Err(SieveError {
+                        message: "require must appear before any other command (RFC 5228 §6.1)"
+                            .to_string(),
+                        kind: SieveErrorKind::Parse,
+                        source: None,
+                    });
+                }
                 for f in rest {
                     match f {
                         form::Form::Str(s) => {
@@ -180,7 +192,11 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                         _ => {}
                     }
                 }
+            } else {
+                seen_non_require = true;
             }
+        } else {
+            seen_non_require = true;
         }
     }
 
@@ -1038,6 +1054,24 @@ mod tests {
             matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "envelope"),
             "expected MissingRequire(envelope), got {:?}",
             err.kind
+        );
+    }
+
+    #[test]
+    fn compile_require_after_command_rejected() {
+        // RFC 5228 §6.1: require must appear before any other command.
+        let script = b"keep;\nrequire [\"fileinto\"];\nfileinto \"Inbox\";";
+        let err = compile(script).unwrap_err();
+        assert_eq!(
+            err.kind,
+            SieveErrorKind::Parse,
+            "expected Parse error for late require, got {:?}",
+            err.kind
+        );
+        assert!(
+            err.message.contains("require"),
+            "error message should mention require: {}",
+            err.message
         );
     }
 }

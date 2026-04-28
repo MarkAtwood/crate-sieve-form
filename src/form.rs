@@ -39,9 +39,9 @@ pub type Stmt = Vec<Form>;
 
 /// A script is a sequence of statements.
 ///
-/// Returned by []. Callers may inspect or iterate forms, but
+/// Returned by [`read_script`]. Callers may inspect or iterate forms, but
 /// should not depend on the outer structure being the final representation;
-/// see [] stability note.
+/// see [`Stmt`] stability note.
 pub type Script = Vec<Stmt>;
 
 /// Maximum allowed nesting depth to prevent stack overflow on adversarial input.
