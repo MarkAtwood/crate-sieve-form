@@ -71,6 +71,11 @@ pub enum SieveAction {
     FileInto(String),
     Discard,
     Reject(String),
+    /// Forward the message to an SMTP envelope recipient address.
+    ///
+    /// The contained string is the SMTP envelope recipient address.  Forwarding
+    /// to that address is mandatory per RFC 5228 §4.4.  The address has not been
+    /// validated beyond what the Sieve script provides.
     Redirect(String),
 }
 
@@ -185,7 +190,7 @@ fn check_extension_use(
         if EXTENSION_COMMANDS.contains(&w.as_str()) && !declared.contains(w.as_str()) {
             return Err(SieveError {
                 message: format!("extension command \"{w}\" used without require declaration"),
-                kind: SieveErrorKind::UnsupportedExtension(w.clone()),
+                kind: SieveErrorKind::MissingRequire(w.clone()),
                 source: None,
             });
         }

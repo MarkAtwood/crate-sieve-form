@@ -59,6 +59,9 @@ pub enum SieveErrorKind {
     UnsupportedExtension(String),
     /// The script uses an unsupported comparator (RFC 5228 §2.7.2).
     UnsupportedComparator(String),
+    /// A command requiring an extension was used without a `require` declaration
+    /// (RFC 5228 §6.1). The contained string names the extension.
+    MissingRequire(String),
     /// A regex pattern in the script failed to compile.
     InvalidRegex(String),
 }
