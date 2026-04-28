@@ -210,7 +210,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
 ///
 /// Extension commands that must be declared: `fileinto`, `reject`, `set`.
 /// Recurses into blocks and test lists.
-fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<(), SieveError> {
+fn check_extension_use(stmt: &[form::Form], declared: &HashSet<&str>) -> Result<(), SieveError> {
     // Pairs of (command_name, required_extension) for RFC 5228 §6.1.
     // Note: redirect is a base RFC 5228 §4.4 action — no require declaration needed.
     // Note: variables and envelope are handled separately (tests or require-only).
@@ -224,7 +224,7 @@ fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<()
     // Match-type tags that require a prior require declaration.
     const EXTENSION_TAGS: &[&str] = &["regex"];
 
-    if let [form::Form::Word(w), ..] = stmt.as_slice() {
+    if let [form::Form::Word(w), ..] = stmt {
         if let Some(&(_, ext)) = EXTENSION_COMMAND_REQUIRES
             .iter()
             .find(|&&(cmd, _)| cmd == w.as_str())
@@ -249,7 +249,7 @@ fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<()
         // "not" negates an inner test; the remainder is that test's flat forms.
         // Recurse to check extension requirements in the inner test.
         if w == "not" && stmt.len() > 1 {
-            check_extension_use(&stmt[1..].to_vec(), declared)?;
+            check_extension_use(&stmt[1..], declared)?;
         }
     }
 
@@ -259,7 +259,7 @@ fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<()
     //   - `elsif envelope ...` (test word appearing after the if-Block)
     //   - `if not envelope ...` (test word after "not")
     // Block and TestList contents are handled by the recursion loop below.
-    for form in stmt.as_slice() {
+    for form in stmt {
         if let form::Form::Word(name) = form {
             if EXTENSION_TESTS.contains(&name.as_str()) && !declared.contains(name.as_str()) {
                 return Err(SieveError {
@@ -272,7 +272,7 @@ fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<()
     }
 
     // Recurse into blocks and test lists; also check extension match-type tags.
-    for form in stmt.as_slice() {
+    for form in stmt {
         match form {
             form::Form::Tag(t) if EXTENSION_TAGS.contains(&t.as_str()) => {
                 if !declared.contains(t.as_str()) {
