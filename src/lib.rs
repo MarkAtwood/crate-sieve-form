@@ -16,7 +16,7 @@
 //! 2. [`form::read_script`] — tokens → `Script` (a uniform form tree)
 //! 3. evaluator — `Script` + message → `Vec<SieveAction>` (internal, not pub)
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 pub mod form;
@@ -146,8 +146,7 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     // Collect declared extensions and validate them against the set the
     // evaluator implements.  The canonical list lives in the evaluator so
     // adding a new extension only requires updating one place.
-    let mut declared_extensions: std::collections::HashSet<String> =
-        std::collections::HashSet::new();
+    let mut declared_extensions: HashSet<String> = HashSet::new();
     for stmt in &parsed {
         if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
             if w == "require" {
@@ -208,16 +207,15 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
 ///
 /// Extension commands that must be declared: `fileinto`, `reject`.
 /// Recurses into blocks and test lists.
-fn check_extension_use(
-    stmt: &form::Stmt,
-    declared: &std::collections::HashSet<String>,
-) -> Result<(), SieveError> {
+fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<String>) -> Result<(), SieveError> {
     // Action commands that require a prior require declaration (RFC 5228 §6.1).
     // Note: redirect is a base RFC 5228 §4.4 action — no require declaration needed.
-    // Note: variables, regex, envelope are handled separately (tests or require-only).
+    // Note: variables and envelope are handled separately (tests or require-only).
     const EXTENSION_COMMANDS: &[&str] = &["fileinto", "reject"];
     // Extension tests that require a prior require declaration.
     const EXTENSION_TESTS: &[&str] = &["envelope"];
+    // Match-type tags that require a prior require declaration.
+    const EXTENSION_TAGS: &[&str] = &["regex"];
 
     if let [form::Form::Word(w), ..] = stmt.as_slice() {
         if EXTENSION_COMMANDS.contains(&w.as_str()) && !declared.contains(w.as_str()) {
@@ -264,9 +262,20 @@ fn check_extension_use(
         }
     }
 
-    // Recurse into blocks and test lists.
+    // Recurse into blocks and test lists; also check extension match-type tags.
     for form in stmt.as_slice() {
         match form {
+            form::Form::Tag(t) if EXTENSION_TAGS.contains(&t.as_str()) => {
+                if !declared.contains(t.as_str()) {
+                    return Err(SieveError {
+                        message: format!(
+                            "extension match type \":{t}\" used without require declaration"
+                        ),
+                        kind: SieveErrorKind::MissingRequire(t.clone()),
+                        source: None,
+                    });
+                }
+            }
             form::Form::Block(stmts) => {
                 for inner in stmts {
                     check_extension_use(inner, declared)?;
@@ -330,68 +339,73 @@ fn validate_regex_in_clause(clause: &[form::Form]) -> Result<(), SieveError> {
     Ok(())
 }
 
-fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
-    // Scan the flat form list for Tag("comparator") followed by Str(name).
-    // Also detect Tag("regex") and validate all Str patterns in the stmt.
-    //
-    // An if/elsif/else chain is represented as a single flat Stmt where clauses
-    // are separated by Form::Block.  Regex state is scoped per clause so that
-    // an invalid pattern in one clause is not shadowed by strings from another.
-    let mut has_regex_tag = false;
+/// Walk the clause structure of a single statement, calling `visit` for each
+/// clause's form slice (the forms between if/elsif/else block boundaries).
+///
+/// `visit` is called before recursing into the block that follows the clause.
+/// After all blocks, `visit` is called once more for any trailing forms.
+/// Recursion into [`form::Form::Block`] stmts and [`form::Form::TestList`]
+/// tests is handled automatically.
+fn for_each_clause<F>(stmt: &form::Stmt, visit: &mut F) -> Result<(), SieveError>
+where
+    F: FnMut(&[form::Form]) -> Result<(), SieveError>,
+{
     let mut clause_start = 0;
     let mut i = 0;
     while i < stmt.len() {
         match &stmt[i] {
-            form::Form::Tag(t) if t == "comparator" => {
-                // The next form must be the comparator name string.
-                if let Some(form::Form::Str(name)) = stmt.get(i + 1) {
-                    const KNOWN_COMPARATORS: &[&str] = &["i;ascii-casemap", "i;octet"];
-                    if !KNOWN_COMPARATORS.contains(&name.as_str()) {
-                        return Err(SieveError {
-                            message: format!("unsupported comparator: {name}"),
-                            kind: SieveErrorKind::UnsupportedComparator(name.clone()),
-                            source: None,
-                        });
-                    }
-                    i += 2; // consume tag + name
-                    continue;
-                }
-                // No Str follows the tag; advance past the tag only.
-            }
-            form::Form::Tag(t) if t == "regex" => {
-                has_regex_tag = true;
-            }
             form::Form::Block(stmts) => {
-                // End of a clause: validate regex patterns collected since
-                // clause_start, recurse into the block, then reset for the
-                // next clause (elsif/else).
-                if has_regex_tag {
-                    validate_regex_in_clause(&stmt[clause_start..i])?;
-                }
+                visit(&stmt[clause_start..i])?;
                 for inner in stmts {
-                    validate_stmt(inner)?;
+                    for_each_clause(inner, visit)?;
                 }
-                has_regex_tag = false;
                 clause_start = i + 1;
             }
             form::Form::TestList(tests) => {
-                // Recurse into parenthesised test lists.
                 for test in tests {
-                    validate_stmt(test)?;
+                    for_each_clause(test, visit)?;
                 }
             }
             _ => {}
         }
         i += 1;
     }
-
-    // Validate regex for any trailing clause (after the last Block, or the
-    // whole stmt when there is no Block).
-    if has_regex_tag {
-        validate_regex_in_clause(&stmt[clause_start..])?;
-    }
-
+    visit(&stmt[clause_start..])?;
     Ok(())
+}
+
+fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
+    for_each_clause(stmt, &mut |clause| {
+        let mut has_regex_tag = false;
+        let mut i = 0;
+        while i < clause.len() {
+            match &clause[i] {
+                form::Form::Tag(t) if t == "comparator" => {
+                    if let Some(form::Form::Str(name)) = clause.get(i + 1) {
+                        const KNOWN_COMPARATORS: &[&str] = &["i;ascii-casemap", "i;octet"];
+                        if !KNOWN_COMPARATORS.contains(&name.as_str()) {
+                            return Err(SieveError {
+                                message: format!("unsupported comparator: {name}"),
+                                kind: SieveErrorKind::UnsupportedComparator(name.clone()),
+                                source: None,
+                            });
+                        }
+                        i += 2;
+                        continue;
+                    }
+                }
+                form::Form::Tag(t) if t == "regex" => {
+                    has_regex_tag = true;
+                }
+                _ => {}
+            }
+            i += 1;
+        }
+        if has_regex_tag {
+            validate_regex_in_clause(clause)?;
+        }
+        Ok(())
+    })
 }
 
 /// Whether patterns in a clause are raw regexes or Sieve glob patterns.
@@ -440,54 +454,30 @@ fn cache_patterns_in_clause(
 }
 
 fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_regex::Regex>) {
-    let mut has_regex_tag = false;
-    let mut has_matches_tag = false;
-    let mut clause_start = 0;
-    let mut i = 0;
-    while i < stmt.len() {
-        match &stmt[i] {
-            form::Form::Tag(t) if t == "regex" => {
-                has_regex_tag = true;
-            }
-            form::Form::Tag(t) if t == "matches" => {
-                has_matches_tag = true;
-            }
-            form::Form::Block(stmts) => {
-                if has_regex_tag {
-                    cache_patterns_in_clause(&stmt[clause_start..i], PatternKind::Regex, cache);
-                } else if has_matches_tag {
-                    cache_patterns_in_clause(&stmt[clause_start..i], PatternKind::Glob, cache);
-                }
-                for inner in stmts {
-                    collect_regex_patterns(inner, cache);
-                }
-                has_regex_tag = false;
-                has_matches_tag = false;
-                clause_start = i + 1;
-            }
-            form::Form::TestList(tests) => {
-                for test in tests {
-                    collect_regex_patterns(test, cache);
-                }
-            }
-            _ => {}
+    // Infallible: patterns were already validated by validate_script.
+    let _ = for_each_clause(stmt, &mut |clause| {
+        let has_regex = clause
+            .iter()
+            .any(|f| matches!(f, form::Form::Tag(t) if t == "regex"));
+        if has_regex {
+            cache_patterns_in_clause(clause, PatternKind::Regex, cache);
+        } else if clause
+            .iter()
+            .any(|f| matches!(f, form::Form::Tag(t) if t == "matches"))
+        {
+            cache_patterns_in_clause(clause, PatternKind::Glob, cache);
         }
-        i += 1;
-    }
-    if has_regex_tag {
-        cache_patterns_in_clause(&stmt[clause_start..], PatternKind::Regex, cache);
-    } else if has_matches_tag {
-        cache_patterns_in_clause(&stmt[clause_start..], PatternKind::Glob, cache);
-    }
+        Ok(())
+    });
 }
 
 fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
     let base = format!("(?s)\\A(?:{pattern})\\z");
+    let ci = format!("(?i){base}");
     // Errors were already caught by validate_script; ignore here.
     if let Ok(re) = fancy_regex::Regex::new(&base) {
-        cache.insert(base.clone(), re);
+        cache.insert(base, re);
     }
-    let ci = format!("(?i){base}");
     if let Ok(re) = fancy_regex::Regex::new(&ci) {
         cache.insert(ci, re);
     }
@@ -920,6 +910,18 @@ mod tests {
         assert!(
             matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "envelope"),
             "expected MissingRequire(envelope), got {:?}",
+            err.kind
+        );
+    }
+
+    #[test]
+    fn compile_regex_without_require_fails() {
+        let result = compile(b"if header :regex \"Subject\" \"test.*\" { keep; }");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "regex"),
+            "expected MissingRequire(regex), got {:?}",
             err.kind
         );
     }

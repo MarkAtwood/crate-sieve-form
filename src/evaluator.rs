@@ -26,25 +26,23 @@ pub(crate) const KNOWN_EXTENSIONS: &[&str] =
 /// Per-evaluation context threaded through all evaluator functions.
 ///
 /// Created fresh on each [`eval_script`] call and dropped at the end.
-/// All fields are read-only during evaluation except `variables`, which
-/// is mutated by the `set` command (RFC 5229 §4).
-pub(crate) struct Ctx<'a> {
+struct Ctx<'a> {
     /// Parsed header list in document order.  A `Vec` (not a `HashMap`)
     /// because RFC 5228 permits multiple headers with the same name and
     /// because the test evaluators need to iterate all matching values.
-    pub(crate) headers: Vec<(String, String)>,
-    pub(crate) message_size: usize,
-    pub(crate) envelope_from: &'a str,
-    pub(crate) envelope_to: &'a str,
+    headers: Vec<(String, String)>,
+    message_size: usize,
+    envelope_from: &'a str,
+    envelope_to: &'a str,
     /// Variable bindings (lowercase names) set by the `set` command.
     /// Only consulted when `variables_enabled` is true.
-    pub(crate) variables: HashMap<String, String>,
+    variables: HashMap<String, String>,
     /// Whether `require ["variables"]` was declared (RFC 5229).
     /// `${name}` substitution is only active when this is true.
-    pub(crate) variables_enabled: bool,
+    variables_enabled: bool,
     /// Pre-compiled regex cache from [`crate::compile`].  Read-only
     /// during evaluation; all patterns are compiled once at compile time.
-    pub(crate) regex_cache: &'a HashMap<String, fancy_regex::Regex>,
+    regex_cache: &'a HashMap<String, fancy_regex::Regex>,
 }
 
 // ---------------------------------------------------------------------------

@@ -141,11 +141,21 @@ fn find_header_end(raw: &[u8]) -> Option<usize> {
 pub(crate) fn split_addresses(s: &str) -> Vec<String> {
     let mut result = Vec::new();
     let mut current = String::new();
-    let mut depth: usize = 0; // nesting depth of `(...)` comments
+    let mut depth: usize = 0;
     let mut in_quotes = false;
+    let mut prev_backslash = false;
 
     for ch in s.chars() {
+        if prev_backslash {
+            prev_backslash = false;
+            current.push(ch);
+            continue;
+        }
         match ch {
+            '\\' if in_quotes => {
+                prev_backslash = true;
+                current.push(ch);
+            }
             '"' if depth == 0 => {
                 in_quotes = !in_quotes;
                 current.push(ch);
@@ -226,6 +236,20 @@ mod tests {
         assert_eq!(
             got,
             vec!["alice@example.com (Alice, A.)", "bob@example.com"]
+        );
+    }
+
+    #[test]
+    fn split_addresses_backslash_escaped_quote_in_display_name() {
+        // \"Doe, Jane\" has a comma inside an escaped-quote display name.
+        // The escaped \" must not close the quoted context.
+        let got = split_addresses("\"Doe, \\\"Jane\\\"\" <jane@example.com>, bob@example.com");
+        assert_eq!(
+            got,
+            vec![
+                "\"Doe, \\\"Jane\\\"\" <jane@example.com>",
+                "bob@example.com"
+            ]
         );
     }
 
