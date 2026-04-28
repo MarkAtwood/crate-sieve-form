@@ -80,6 +80,9 @@ pub fn read_script(tokens: &[Token]) -> Result<Script, ParseError> {
 /// after this statement.
 fn read_stmt(tokens: &[Token], start: usize, depth: usize) -> Result<(Stmt, usize), ParseError> {
     if depth >= MAX_NESTING_DEPTH {
+        // line/col are None throughout the form parser — it has no position
+        // tracking.  The From<ParseError> impl in parse_error.rs uses
+        // line.is_some() to distinguish form-layer errors from lexer errors.
         return Err(ParseError {
             message: "script nesting depth exceeds maximum (100)".to_string(),
             line: None,

@@ -137,6 +137,19 @@ impl std::fmt::Display for SieveAction {
 /// compilation, so a hostile script can make compilation itself CPU-expensive.
 /// Callers should validate pattern complexity or restrict who can supply
 /// `:regex` tests.
+/// Validate a single extension name against the known-extensions list.
+/// Returns Err if the extension is not supported.
+fn validate_extension(s: &str) -> Result<(), SieveError> {
+    if !evaluator::KNOWN_EXTENSIONS.contains(&s) {
+        return Err(SieveError {
+            message: format!("unsupported Sieve extension: {s}"),
+            kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
+            source: None,
+        });
+    }
+    Ok(())
+}
+
 pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     let source = std::str::from_utf8(script).map_err(|e| SieveError {
         message: format!("invalid UTF-8: {e}"),
@@ -168,24 +181,12 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
                 for f in rest {
                     match f {
                         form::Form::Str(s) => {
-                            if !evaluator::KNOWN_EXTENSIONS.contains(&s.as_str()) {
-                                return Err(SieveError {
-                                    message: format!("unsupported Sieve extension: {s}"),
-                                    kind: SieveErrorKind::UnsupportedExtension(s.clone()),
-                                    source: None,
-                                });
-                            }
+                            validate_extension(s.as_str())?;
                             declared_extensions.insert(s.as_str());
                         }
                         form::Form::StringList(v) => {
                             for s in v {
-                                if !evaluator::KNOWN_EXTENSIONS.contains(&s.as_str()) {
-                                    return Err(SieveError {
-                                        message: format!("unsupported Sieve extension: {s}"),
-                                        kind: SieveErrorKind::UnsupportedExtension(s.clone()),
-                                        source: None,
-                                    });
-                                }
+                                validate_extension(s.as_str())?;
                                 declared_extensions.insert(s.as_str());
                             }
                         }
@@ -331,6 +332,15 @@ fn validate_script(script: &form::Script) -> Result<(), SieveError> {
     Ok(())
 }
 
+/// Validate regex patterns in a single test clause.
+///
+/// # Precondition
+///
+/// `clause` must be a single clause slice (one if/elsif/else branch) with no
+/// embedded `Block` forms.  The caller (`validate_stmt` via `for_each_clause`)
+/// is responsible for splitting at clause boundaries before calling this.
+/// Passing a full `Stmt` spanning multiple clauses would mis-identify field-name
+/// strings as patterns.
 fn validate_regex_in_clause(clause: &[form::Form]) -> Result<(), SieveError> {
     // The pattern key-list is always the last Str/StringList in a test clause;
     // earlier string arguments are header/address field names that must not be
@@ -399,40 +409,47 @@ where
     Ok(())
 }
 
+/// Validate a single statement for semantic correctness.
+///
+/// Parallel to `collect_regex_patterns`, which walks the same tree but builds
+/// the compile-time regex cache rather than checking for errors.  The two
+/// functions are intentionally separate: `validate_stmt` runs before
+/// `collect_regex_patterns`, so patterns that fail validation are never cached.
 fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
     for_each_clause(stmt, &mut |clause| {
         let mut has_regex_tag = false;
-        let mut i = 0;
-        while i < clause.len() {
-            match &clause[i] {
-                form::Form::Tag(t) if t == "comparator" => match clause.get(i + 1) {
-                    Some(form::Form::Str(name)) => {
-                        const KNOWN_COMPARATORS: &[&str] = &["i;ascii-casemap", "i;octet"];
-                        if !KNOWN_COMPARATORS.contains(&name.as_str()) {
+        let mut iter = clause.iter();
+        while let Some(f) = iter.next() {
+            match f {
+                form::Form::Tag(t) if t == "comparator" => {
+                    // Consume the comparator name that must follow.
+                    match iter.next() {
+                        Some(form::Form::Str(name)) => {
+                            const KNOWN_COMPARATORS: &[&str] = &["i;ascii-casemap", "i;octet"];
+                            if !KNOWN_COMPARATORS.contains(&name.as_str()) {
+                                return Err(SieveError {
+                                    message: format!("unsupported comparator: {name}"),
+                                    kind: SieveErrorKind::UnsupportedComparator(name.clone()),
+                                    source: None,
+                                });
+                            }
+                        }
+                        _ => {
                             return Err(SieveError {
-                                message: format!("unsupported comparator: {name}"),
-                                kind: SieveErrorKind::UnsupportedComparator(name.clone()),
+                                message:
+                                    ":comparator tag must be followed by a comparator name string"
+                                        .to_owned(),
+                                kind: SieveErrorKind::Parse,
                                 source: None,
                             });
                         }
-                        i += 2;
-                        continue;
                     }
-                    _ => {
-                        return Err(SieveError {
-                            message: ":comparator tag must be followed by a comparator name string"
-                                .to_owned(),
-                            kind: SieveErrorKind::Parse,
-                            source: None,
-                        });
-                    }
-                },
+                }
                 form::Form::Tag(t) if t == "regex" => {
                     has_regex_tag = true;
                 }
                 _ => {}
             }
-            i += 1;
         }
         if has_regex_tag {
             validate_regex_in_clause(clause)?;
@@ -468,17 +485,17 @@ fn cache_patterns_in_clause(
         .iter()
         .rposition(|f| matches!(f, form::Form::Str(_) | form::Form::StringList(_)));
     if let Some(pos) = last_pos {
+        // Resolve the caching function once to avoid repeating the match
+        // inside each arm.
+        let cache_one: fn(&str, &mut HashMap<String, fancy_regex::Regex>) = match kind {
+            PatternKind::Glob => cache_glob_pattern,
+            PatternKind::Regex => cache_pattern,
+        };
         match &clause[pos] {
-            form::Form::Str(p) => match kind {
-                PatternKind::Glob => cache_glob_pattern(p, cache),
-                PatternKind::Regex => cache_pattern(p, cache),
-            },
+            form::Form::Str(p) => cache_one(p, cache),
             form::Form::StringList(ps) => {
                 for p in ps {
-                    match kind {
-                        PatternKind::Glob => cache_glob_pattern(p, cache),
-                        PatternKind::Regex => cache_pattern(p, cache),
-                    }
+                    cache_one(p, cache);
                 }
             }
             _ => {}
@@ -488,6 +505,9 @@ fn cache_patterns_in_clause(
 
 fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_regex::Regex>) {
     // Infallible: patterns were already validated by validate_script.
+    // Uses rposition (last Str/StringList) for the same reason as
+    // validate_regex_in_clause: the pattern argument is always the final
+    // string argument in a test clause; earlier strings are field names.
     for_each_clause(stmt, &mut |clause| {
         let has_regex = clause
             .iter()
@@ -505,6 +525,12 @@ fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_r
     .expect("collect_regex_patterns: closure is infallible");
 }
 
+/// Cache a compiled regex pattern under the keys used by `str_matches_regex_pat`.
+///
+/// Key format: `regex_base_key(pattern)` (case-sensitive) and
+/// `regex_ci_key(&base)` (case-insensitive).  The lookup in
+/// `str_matches_regex_pat` must use the same key builders to find these
+/// entries — do not change one without updating the other.
 fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
     let base = evaluator::regex_base_key(pattern);
     let ci = evaluator::regex_ci_key(&base);
@@ -517,6 +543,13 @@ fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>)
     }
 }
 
+/// Cache a compiled glob pattern under the keys used by `str_matches_glob`.
+///
+/// Key format: `glob_base_key(pattern)` (case-sensitive) and
+/// `glob_ci_key(&base_key)` (case-insensitive).  Unlike the regex cache whose
+/// key is the anchored pattern string, the glob key is prefixed (`"glob:"`
+/// via `glob_base_key`) to avoid collisions with regex keys in the same map.
+/// The lookup in `str_matches_glob` must use the same key builders.
 fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
     let regex_str = evaluator::sieve_glob_to_regex(pattern);
     let base_key = evaluator::glob_base_key(pattern);

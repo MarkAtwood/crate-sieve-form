@@ -7,7 +7,6 @@ use crate::message;
 use crate::message::AddressPart;
 use crate::SieveAction;
 use std::borrow::Cow;
-use std::cmp::Reverse;
 use std::collections::HashMap;
 
 /// Extensions that this evaluator implements.
@@ -51,8 +50,11 @@ struct Ctx<'a> {
     /// because RFC 5228 permits multiple headers with the same name and
     /// because the test evaluators need to iterate all matching values.
     headers: Vec<(String, String)>,
+    /// Size of the raw message in bytes.  Set once at eval time from `raw_message.len()`.
     message_size: usize,
+    /// SMTP MAIL FROM address (empty string if not provided).
     envelope_from: &'a str,
+    /// SMTP RCPT TO address (empty string if not provided).
     envelope_to: &'a str,
     /// Variable bindings (lowercase names) set by the `set` command.
     /// Only consulted when `variables_enabled` is true.
@@ -119,6 +121,10 @@ pub fn eval_script(
         Some(StmtResult::FileInto(folder)) => SieveAction::FileInto(folder),
         Some(StmtResult::Reject(reason)) => SieveAction::Reject(reason),
         Some(StmtResult::Redirect(addr)) => SieveAction::Redirect(addr),
+        // StmtResult::Stop (and Continue/Keep with no explicit disposition):
+        // RFC 5228 §4.5 specifies that when evaluation reaches stop or the
+        // end of the script with no explicit final disposition, the implicit
+        // action is keep (deliver to the default mailbox).
         _ => SieveAction::Keep,
     };
     vec![action]
@@ -487,6 +493,12 @@ fn str_matches_regex(
     str_matches_regex_pat(value, &anchored, comparator, regex_cache)
 }
 
+/// Match `value` against a pre-compiled regex pattern looked up by key.
+///
+/// `anchored` must be the exact key used by `cache_pattern` in lib.rs:
+/// `regex_base_key(pattern)` for case-sensitive, or `regex_ci_key(&base)`
+/// for case-insensitive.  Mismatching the key format causes a cache miss
+/// (match always returns false silently).
 fn str_matches_regex_pat(
     value: &str,
     anchored: &str,
@@ -743,23 +755,15 @@ fn expand_vars<'a>(s: &'a str, ctx: &Ctx<'_>) -> Cow<'a, str> {
 /// | 30         | `:length`       |
 /// | 20         | `:quotewildcard` |
 /// | 10         | `:firstline`    |
-fn apply_set_modifiers(value: String, modifiers: &[&str]) -> String {
-    // Sort modifiers by precedence (highest first = applied first).
-    fn precedence(m: &str) -> u8 {
-        match m {
-            "lower" | "upper" => 40,
-            "length" => 30,
-            "quotewildcard" => 20,
-            "firstline" => 10,
-            _ => 0,
+fn apply_set_modifiers(mut v: String, modifiers: &[&str]) -> String {
+    // Apply modifiers in descending-precedence order (RFC 5229 §7.1):
+    //   lower/upper (40) → length (30) → quotewildcard (20) → firstline (10).
+    // Iterating a fixed priority-ordered list avoids a heap allocation for
+    // sorting the tiny (≤4-element) modifier slice.
+    for &m in &["lower", "upper", "length", "quotewildcard", "firstline"] {
+        if !modifiers.contains(&m) {
+            continue;
         }
-    }
-
-    let mut sorted: Vec<&str> = modifiers.to_vec();
-    sorted.sort_unstable_by_key(|m| Reverse(precedence(m)));
-
-    let mut v = value;
-    for m in sorted {
         v = match m {
             "lower" => v.to_ascii_lowercase(),
             "upper" => v.to_ascii_uppercase(),
@@ -782,7 +786,6 @@ fn apply_set_modifiers(value: String, modifiers: &[&str]) -> String {
                     v
                 }
             }
-            // Unknown modifiers are ignored (fail-safe).
             _ => v,
         };
     }
