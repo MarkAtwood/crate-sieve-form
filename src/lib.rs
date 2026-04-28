@@ -132,8 +132,11 @@ impl std::fmt::Display for SieveAction {
 ///
 /// The `:regex` match type uses `fancy-regex`, which supports backtracking
 /// for extended patterns.  Untrusted `:regex` patterns can cause catastrophic
-/// backtracking (ReDoS).  Callers should validate pattern complexity or
-/// restrict who can supply `:regex` tests.
+/// backtracking (ReDoS) at both compile time and evaluation time.
+/// `fancy_regex::Regex::new()` is called on each `:regex` pattern during
+/// compilation, so a hostile script can make compilation itself CPU-expensive.
+/// Callers should validate pattern complexity or restrict who can supply
+/// `:regex` tests.
 pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     let source = std::str::from_utf8(script).map_err(|e| SieveError {
         message: format!("invalid UTF-8: {e}"),
@@ -205,25 +208,34 @@ pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
 /// Check that extension commands used in `stmt` have been declared in the
 /// script's `require` list (RFC 5228 §6.1).
 ///
-/// Extension commands that must be declared: `fileinto`, `reject`.
+/// Extension commands that must be declared: `fileinto`, `reject`, `set`.
 /// Recurses into blocks and test lists.
 fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<(), SieveError> {
-    // Action commands that require a prior require declaration (RFC 5228 §6.1).
+    // Pairs of (command_name, required_extension) for RFC 5228 §6.1.
     // Note: redirect is a base RFC 5228 §4.4 action — no require declaration needed.
     // Note: variables and envelope are handled separately (tests or require-only).
-    const EXTENSION_COMMANDS: &[&str] = &["fileinto", "reject"];
+    const EXTENSION_COMMAND_REQUIRES: &[(&str, &str)] = &[
+        ("fileinto", "fileinto"),
+        ("reject", "reject"),
+        ("set", "variables"),
+    ];
     // Extension tests that require a prior require declaration.
     const EXTENSION_TESTS: &[&str] = &["envelope"];
     // Match-type tags that require a prior require declaration.
     const EXTENSION_TAGS: &[&str] = &["regex"];
 
     if let [form::Form::Word(w), ..] = stmt.as_slice() {
-        if EXTENSION_COMMANDS.contains(&w.as_str()) && !declared.contains(w.as_str()) {
-            return Err(SieveError {
-                message: format!("extension command \"{w}\" used without require declaration"),
-                kind: SieveErrorKind::MissingRequire(w.clone()),
-                source: None,
-            });
+        if let Some(&(_, ext)) = EXTENSION_COMMAND_REQUIRES
+            .iter()
+            .find(|&&(cmd, _)| cmd == w.as_str())
+        {
+            if !declared.contains(ext) {
+                return Err(SieveError {
+                    message: format!("extension command \"{w}\" used without require declaration"),
+                    kind: SieveErrorKind::MissingRequire(ext.to_owned()),
+                    source: None,
+                });
+            }
         }
         // Direct extension test: e.g. `if envelope :is "from" "x" { ... }`
         // represented as stmt = [Word("if"), Word("envelope"), ..., Block(...)]
@@ -380,8 +392,8 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
         let mut i = 0;
         while i < clause.len() {
             match &clause[i] {
-                form::Form::Tag(t) if t == "comparator" => {
-                    if let Some(form::Form::Str(name)) = clause.get(i + 1) {
+                form::Form::Tag(t) if t == "comparator" => match clause.get(i + 1) {
+                    Some(form::Form::Str(name)) => {
                         const KNOWN_COMPARATORS: &[&str] = &["i;ascii-casemap", "i;octet"];
                         if !KNOWN_COMPARATORS.contains(&name.as_str()) {
                             return Err(SieveError {
@@ -393,7 +405,15 @@ fn validate_stmt(stmt: &form::Stmt) -> Result<(), SieveError> {
                         i += 2;
                         continue;
                     }
-                }
+                    _ => {
+                        return Err(SieveError {
+                            message: ":comparator tag must be followed by a comparator name string"
+                                .to_owned(),
+                            kind: SieveErrorKind::Parse,
+                            source: None,
+                        });
+                    }
+                },
                 form::Form::Tag(t) if t == "regex" => {
                     has_regex_tag = true;
                 }
@@ -513,6 +533,13 @@ fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Re
 ///
 /// There are no built-in size limits on message size; callers are responsible
 /// for bounding inputs before calling this function.
+///
+/// # Security
+///
+/// The `:regex` match type uses `fancy-regex`, which supports backtracking
+/// for extended patterns.  Untrusted `:regex` patterns can cause catastrophic
+/// backtracking (ReDoS) during evaluation.  Callers should validate pattern
+/// complexity or restrict who can supply `:regex` tests.
 pub fn evaluate(
     script: &CompiledScript,
     raw_message: &[u8],
@@ -886,6 +913,23 @@ mod tests {
     }
 
     #[test]
+    fn eval_variables_modifier_quotewildcard_backslash() {
+        // RFC 5229 §4.1.2: :quotewildcard must escape `\` in addition to `*`
+        // and `?`. Backslash must be escaped BEFORE the wildcard characters to
+        // avoid double-escaping. Input string (after Sieve lexer unescaping):
+        // `a\b` — a backslash between two letters, no wildcards. Expected
+        // output: `a\\b` (the backslash is prefixed with a second backslash).
+        // In the Sieve source the quoted string "a\\b" contains one backslash;
+        // the Rust byte string b"...\"a\\\\b\"..." encodes that as two.
+        let script = compile(
+            b"require [\"variables\", \"fileinto\"]; set :quotewildcard \"x\" \"a\\\\b\"; fileinto \"${x}\";",
+        )
+        .unwrap();
+        let actions = evaluate(&script, &make_msg("test"), "", "");
+        assert_eq!(actions, vec![SieveAction::FileInto("a\\\\b".into())]);
+    }
+
+    #[test]
     fn eval_variables_case_insensitive_name() {
         let script = compile(
             b"require [\"variables\", \"fileinto\"]; set \"MyVar\" \"hello\"; fileinto \"${myvar}\";",
@@ -901,6 +945,18 @@ mod tests {
         let script = compile(b"require [\"reject\"]; reject \"${reason}\";").unwrap();
         let actions = evaluate(&script, &make_msg("test"), "", "");
         assert_eq!(actions, vec![SieveAction::Reject("${reason}".into())]);
+    }
+
+    #[test]
+    fn compile_set_without_require_fails() {
+        let result = compile(b"set \"x\" \"value\";");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "variables"),
+            "expected MissingRequire(variables), got {:?}",
+            err.kind
+        );
     }
 
     #[test]
@@ -924,6 +980,43 @@ mod tests {
             matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "regex"),
             "expected MissingRequire(regex), got {:?}",
             err.kind
+        );
+    }
+
+    #[test]
+    fn parse_deep_nesting_returns_error() {
+        // Build a script with 200 nested `if true { ... }` blocks.
+        // Depth 100 is the limit; depth 200 must return a ParseError.
+        let open = b"if true { ".repeat(200);
+        let close = b"}".repeat(200);
+        let mut script_bytes = Vec::new();
+        script_bytes.extend_from_slice(&open);
+        script_bytes.extend_from_slice(b"keep;");
+        script_bytes.extend_from_slice(&close);
+        let result = compile(&script_bytes);
+        assert!(
+            result.is_err(),
+            "200 nested if blocks must exceed depth limit and return an error"
+        );
+        let err = result.unwrap_err();
+        assert!(
+            err.message.contains("nesting depth"),
+            "error message should mention nesting depth, got: {err}"
+        );
+    }
+
+    #[test]
+    fn parse_allof_empty_test_returns_error() {
+        // allof(,) contains an empty test before the comma — must be rejected.
+        let result = compile(b"if allof(,) { keep; }");
+        assert!(
+            result.is_err(),
+            "empty test in allof must return a parse error"
+        );
+        let err = result.unwrap_err();
+        assert!(
+            err.message.contains("empty test"),
+            "error message should mention empty test, got: {err}"
         );
     }
 }

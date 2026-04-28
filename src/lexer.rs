@@ -215,7 +215,18 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
                 let err_line = line;
                 let err_col = col;
                 advance(&mut chars, &mut line, &mut col); // consume ':'
-                                                          // Consume optional CR/LF or CRLF to end the `text:` header line.
+                                                          // RFC 5228 §2.3.1: optional whitespace then optional hash
+                                                          // comment are permitted on the `text:` header line before
+                                                          // the mandatory newline.  Consume `[ \t]*` then `#[^\n]*`.
+                while chars.peek().is_some_and(|&c| c == ' ' || c == '\t') {
+                    advance(&mut chars, &mut line, &mut col);
+                }
+                if chars.peek() == Some(&'#') {
+                    while chars.peek().is_some_and(|&c| c != '\n') {
+                        advance(&mut chars, &mut line, &mut col);
+                    }
+                }
+                // Consume optional CR/LF or CRLF to end the `text:` header line.
                 if chars.peek() == Some(&'\r') {
                     advance(&mut chars, &mut line, &mut col);
                 }
@@ -338,4 +349,21 @@ fn advance(
         *col += 1;
     }
     ch
+}
+
+// ---------------------------------------------------------------------------
+// Unit tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tokenize_text_with_hash_comment() {
+        // RFC 5228 §2.3.1 allows an optional hash comment on the text: line
+        let src = "text: # optional comment\nfoo\n.\n";
+        let tokens = tokenize(src).expect("should tokenize");
+        assert_eq!(tokens, vec![Token::StringLit("foo".into())]);
+    }
 }

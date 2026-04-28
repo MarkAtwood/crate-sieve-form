@@ -745,7 +745,10 @@ fn apply_set_modifiers(value: String, modifiers: &[&str]) -> String {
             "lower" => v.to_ascii_lowercase(),
             "upper" => v.to_ascii_uppercase(),
             "length" => v.chars().count().to_string(),
-            "quotewildcard" => v.replace('*', "\\*").replace('?', "\\?"),
+            "quotewildcard" => v
+                .replace('\\', "\\\\")
+                .replace('*', "\\*")
+                .replace('?', "\\?"),
             "firstline" => {
                 // Truncate at the first \n or \r\n.
                 if let Some(pos) = v.find('\n') {

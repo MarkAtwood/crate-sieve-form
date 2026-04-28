@@ -88,8 +88,22 @@ pub(crate) fn address_part(addr: &str, part: AddressPart) -> String {
 /// stripping any display name, angle brackets, and trailing comments.
 fn bare_address(addr: &str) -> Cow<'_, str> {
     let addr = addr.trim();
-    // If there is a `<...>` section, use what is inside it.
-    if let Some(start) = addr.rfind('<') {
+    // Find the last `<` that is NOT inside a `(...)` comment.
+    // Scan forward tracking paren depth; record position each time we see a
+    // `<` at depth 0.  This prevents a `<` embedded inside a comment such as
+    // `user@example.com (secretary < corp > dept)` from being treated as an
+    // angle-bracket delimiter.
+    let mut paren_depth: usize = 0;
+    let mut last_angle: Option<usize> = None;
+    for (i, ch) in addr.char_indices() {
+        match ch {
+            '(' => paren_depth += 1,
+            ')' if paren_depth > 0 => paren_depth -= 1,
+            '<' if paren_depth == 0 => last_angle = Some(i),
+            _ => {}
+        }
+    }
+    if let Some(start) = last_angle {
         if let Some(end) = addr[start..].find('>') {
             return Cow::Owned(addr[start + 1..start + end].trim().to_string());
         }
@@ -271,6 +285,16 @@ mod tests {
         // Angle-bracket form — display name and outer comment are stripped by
         // extracting from inside <>.
         let got = address_part("Display Name <user@example.com>", AddressPart::All);
+        assert_eq!(got, "user@example.com");
+    }
+
+    #[test]
+    fn bare_address_ignores_angle_in_comment() {
+        // The < inside the comment must not be used as an angle-bracket delimiter
+        let got = address_part(
+            "user@example.com (secretary < corp > dept)",
+            AddressPart::All,
+        );
         assert_eq!(got, "user@example.com");
     }
 }

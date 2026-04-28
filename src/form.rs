@@ -31,10 +31,21 @@ pub enum Form {
 }
 
 /// A statement is a sequence of forms terminated by a semicolon or a block.
+///
+/// **Stability**: this type alias is part of the public API. The representation
+/// is stable within the 0.x release series. A future major version may add
+/// position metadata, which would be a breaking change.
 pub type Stmt = Vec<Form>;
 
 /// A script is a sequence of statements.
+///
+/// Returned by []. Callers may inspect or iterate forms, but
+/// should not depend on the outer- structure being the final representation;
+/// see [] stability note.
 pub type Script = Vec<Stmt>;
+
+/// Maximum allowed nesting depth to prevent stack overflow on adversarial input.
+const MAX_NESTING_DEPTH: usize = 100;
 
 /// Parse a flat token slice into a [`Script`].
 ///
@@ -51,7 +62,7 @@ pub fn read_script(tokens: &[Token]) -> Result<Script, ParseError> {
             pos += 1;
             continue;
         }
-        let (stmt, new_pos) = read_stmt(tokens, pos)?;
+        let (stmt, new_pos) = read_stmt(tokens, pos, 0)?;
         pos = new_pos;
         if !stmt.is_empty() {
             script.push(stmt);
@@ -62,9 +73,20 @@ pub fn read_script(tokens: &[Token]) -> Result<Script, ParseError> {
 
 /// Read one statement starting at `pos`.
 ///
+/// `depth` tracks the current nesting level; returns [`ParseError`] if it
+/// exceeds [`MAX_NESTING_DEPTH`].
+///
 /// Returns `(stmt, new_pos)` where `new_pos` is the index of the first token
 /// after this statement.
-fn read_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError> {
+fn read_stmt(tokens: &[Token], start: usize, depth: usize) -> Result<(Stmt, usize), ParseError> {
+    if depth > MAX_NESTING_DEPTH {
+        return Err(ParseError {
+            message: "script nesting depth exceeds maximum (100)".to_string(),
+            line: None,
+            col: None,
+        });
+    }
+
     let mut stmt = Stmt::new();
     let mut pos = start;
 
@@ -116,14 +138,14 @@ fn read_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError
 
             Token::LParen => {
                 pos += 1; // consume '('
-                let (test_list, new_pos) = read_test_list(tokens, pos)?;
+                let (test_list, new_pos) = read_test_list(tokens, pos, depth)?;
                 pos = new_pos;
                 stmt.push(Form::TestList(test_list));
             }
 
             Token::LBrace => {
                 pos += 1; // consume '{'
-                let (block, new_pos) = read_block(tokens, pos)?;
+                let (block, new_pos) = read_block(tokens, pos, depth)?;
                 pos = new_pos;
                 stmt.push(Form::Block(block));
                 // A block ends the statement — unless followed by `elsif` or
@@ -222,7 +244,11 @@ fn read_string_list(tokens: &[Token], start: usize) -> Result<(Vec<String>, usiz
 ///
 /// Tests are separated by commas; no semicolons.
 /// Returns `(test_stmts, pos_after_rparen)`.
-fn read_test_list(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), ParseError> {
+fn read_test_list(
+    tokens: &[Token],
+    start: usize,
+    depth: usize,
+) -> Result<(Vec<Stmt>, usize), ParseError> {
     let mut tests: Vec<Stmt> = Vec::new();
     let mut pos = start;
 
@@ -241,8 +267,15 @@ fn read_test_list(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), 
         }
 
         // Read one test: forms up to the next ',' or ')'.
-        let (test_stmt, new_pos) = read_test_stmt(tokens, pos)?;
+        let (test_stmt, new_pos) = read_test_stmt(tokens, pos, depth + 1)?;
         pos = new_pos;
+        if test_stmt.is_empty() {
+            return Err(ParseError {
+                message: "empty test in test list".to_string(),
+                line: None,
+                col: None,
+            });
+        }
         tests.push(test_stmt);
 
         // After a test, expect ',' or ')'.
@@ -274,8 +307,23 @@ fn read_test_list(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), 
 
 /// Read one test expression (a stmt without semicolons) within a test list.
 ///
+/// `depth` tracks the current nesting level; returns [`ParseError`] if it
+/// exceeds [`MAX_NESTING_DEPTH`].
+///
 /// Stops at `,` or `)` without consuming them.
-fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), ParseError> {
+fn read_test_stmt(
+    tokens: &[Token],
+    start: usize,
+    depth: usize,
+) -> Result<(Stmt, usize), ParseError> {
+    if depth > MAX_NESTING_DEPTH {
+        return Err(ParseError {
+            message: "script nesting depth exceeds maximum (100)".to_string(),
+            line: None,
+            col: None,
+        });
+    }
+
     let mut stmt = Stmt::new();
     let mut pos = start;
 
@@ -321,13 +369,13 @@ fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), Parse
             }
             Token::LParen => {
                 pos += 1;
-                let (test_list, new_pos) = read_test_list(tokens, pos)?;
+                let (test_list, new_pos) = read_test_list(tokens, pos, depth)?;
                 pos = new_pos;
                 stmt.push(Form::TestList(test_list));
             }
             Token::LBrace => {
                 pos += 1;
-                let (block, new_pos) = read_block(tokens, pos)?;
+                let (block, new_pos) = read_block(tokens, pos, depth)?;
                 pos = new_pos;
                 stmt.push(Form::Block(block));
                 return Ok((stmt, pos));
@@ -356,7 +404,11 @@ fn read_test_stmt(tokens: &[Token], start: usize) -> Result<(Stmt, usize), Parse
 /// Read a block of statements starting *after* the `{`.
 ///
 /// Returns `(stmts, pos_after_rbrace)`.
-fn read_block(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), ParseError> {
+fn read_block(
+    tokens: &[Token],
+    start: usize,
+    depth: usize,
+) -> Result<(Vec<Stmt>, usize), ParseError> {
     let mut stmts: Vec<Stmt> = Vec::new();
     let mut pos = start;
 
@@ -380,7 +432,7 @@ fn read_block(tokens: &[Token], start: usize) -> Result<(Vec<Stmt>, usize), Pars
             continue;
         }
 
-        let (stmt, new_pos) = read_stmt(tokens, pos)?;
+        let (stmt, new_pos) = read_stmt(tokens, pos, depth + 1)?;
         pos = new_pos;
         if !stmt.is_empty() {
             stmts.push(stmt);
