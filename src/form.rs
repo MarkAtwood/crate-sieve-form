@@ -79,7 +79,7 @@ pub fn read_script(tokens: &[Token]) -> Result<Script, ParseError> {
 /// Returns `(stmt, new_pos)` where `new_pos` is the index of the first token
 /// after this statement.
 fn read_stmt(tokens: &[Token], start: usize, depth: usize) -> Result<(Stmt, usize), ParseError> {
-    if depth > MAX_NESTING_DEPTH {
+    if depth >= MAX_NESTING_DEPTH {
         return Err(ParseError {
             message: "script nesting depth exceeds maximum (100)".to_string(),
             line: None,
@@ -316,7 +316,7 @@ fn read_test_stmt(
     start: usize,
     depth: usize,
 ) -> Result<(Stmt, usize), ParseError> {
-    if depth > MAX_NESTING_DEPTH {
+    if depth >= MAX_NESTING_DEPTH {
         return Err(ParseError {
             message: "script nesting depth exceeds maximum (100)".to_string(),
             line: None,

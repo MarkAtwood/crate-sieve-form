@@ -237,10 +237,8 @@ fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<()
                 });
             }
         }
-        // Direct extension test: e.g. `if envelope :is "from" "x" { ... }`
-        // represented as stmt = [Word("if"), Word("envelope"), ..., Block(...)]
-        // The test name is in position 0 when this stmt is a test itself
-        // (called recursively from a TestList).
+        // When called recursively on a test stmt (from TestList recursion),
+        // position 0 IS the test name. Check it directly.
         if EXTENSION_TESTS.contains(&w.as_str()) && !declared.contains(w.as_str()) {
             return Err(SieveError {
                 message: format!("extension test \"{w}\" used without require declaration"),
@@ -248,28 +246,27 @@ fn check_extension_use(stmt: &form::Stmt, declared: &HashSet<&str>) -> Result<()
                 source: None,
             });
         }
+        // "not" negates an inner test; the remainder is that test's flat forms.
+        // Recurse to check extension requirements in the inner test.
+        if w == "not" && stmt.len() > 1 {
+            check_extension_use(&stmt[1..].to_vec(), declared)?;
+        }
     }
 
-    // For if/elsif stmts, scan the test portion (between position 1 and the
-    // first Block) for any extension test word used without a require.
-    if let [form::Form::Word(w), rest @ ..] = stmt.as_slice() {
-        if w == "if" || w == "elsif" {
-            let test_forms = rest
-                .iter()
-                .take_while(|f| !matches!(f, form::Form::Block(_)));
-            for f in test_forms {
-                if let form::Form::Word(name) = f {
-                    if EXTENSION_TESTS.contains(&name.as_str()) && !declared.contains(name.as_str())
-                    {
-                        return Err(SieveError {
-                            message: format!(
-                                "extension test \"{name}\" used without require declaration"
-                            ),
-                            kind: SieveErrorKind::MissingRequire(name.clone()),
-                            source: None,
-                        });
-                    }
-                }
+    // Scan all Words in the flat stmt that are not inside Blocks or TestLists
+    // for extension test names. This covers:
+    //   - bare `if envelope ...` (test word at position 1 after "if")
+    //   - `elsif envelope ...` (test word appearing after the if-Block)
+    //   - `if not envelope ...` (test word after "not")
+    // Block and TestList contents are handled by the recursion loop below.
+    for form in stmt.as_slice() {
+        if let form::Form::Word(name) = form {
+            if EXTENSION_TESTS.contains(&name.as_str()) && !declared.contains(name.as_str()) {
+                return Err(SieveError {
+                    message: format!("extension test \"{name}\" used without require declaration"),
+                    kind: SieveErrorKind::MissingRequire(name.clone()),
+                    source: None,
+                });
             }
         }
     }
@@ -1017,6 +1014,30 @@ mod tests {
         assert!(
             err.message.contains("empty test"),
             "error message should mention empty test, got: {err}"
+        );
+    }
+
+    #[test]
+    fn compile_envelope_in_elsif_without_require_fails() {
+        let result = compile(b"if true { keep; } elsif envelope :is \"from\" \"x\" { discard; }");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "envelope"),
+            "expected MissingRequire(envelope), got {:?}",
+            err.kind
+        );
+    }
+
+    #[test]
+    fn compile_not_envelope_without_require_fails() {
+        let result = compile(b"if not envelope :is \"from\" \"x\" { keep; }");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            matches!(err.kind, SieveErrorKind::MissingRequire(ref ext) if ext == "envelope"),
+            "expected MissingRequire(envelope), got {:?}",
+            err.kind
         );
     }
 }
