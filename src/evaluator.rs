@@ -153,17 +153,20 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
         // set [modifiers...] "name" "value"  (RFC 5229 §4)
         [Form::Word(w), rest @ ..] if w == "set" => {
             // Collect leading Tag modifiers, then expect Str(name) Str(value).
-            let mut i = 0;
-            let mut modifier_names: Vec<&str> = Vec::new();
-            while i < rest.len() {
-                if let Form::Tag(t) = &rest[i] {
-                    modifier_names.push(t.as_str());
-                    i += 1;
-                } else {
-                    break;
-                }
-            }
-            if let (Some(Form::Str(name)), Some(Form::Str(value))) = (rest.get(i), rest.get(i + 1))
+            let n_tags = rest
+                .iter()
+                .position(|f| !matches!(f, Form::Tag(_)))
+                .unwrap_or(rest.len());
+            let modifier_names: Vec<&str> = rest[..n_tags]
+                .iter()
+                .map(|f| {
+                    let Form::Tag(t) = f else { unreachable!() };
+                    t.as_str()
+                })
+                .collect();
+            let operands = &rest[n_tags..];
+            if let (Some(Form::Str(name)), Some(Form::Str(value))) =
+                (operands.first(), operands.get(1))
             {
                 let expanded = expand_vars(value, ctx).into_owned();
                 let modified = apply_set_modifiers(expanded, &modifier_names);

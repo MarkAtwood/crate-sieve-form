@@ -6,7 +6,7 @@
 /// does not track positions, so form-layer errors always have `line == None`.
 /// When `line == None`, no source location is available.
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ParseError {
     pub message: String,
     pub line: Option<usize>,
@@ -56,7 +56,7 @@ pub struct SieveError {
 ///
 /// Marked `#[non_exhaustive]` so that adding new variants as more Sieve
 /// extensions are implemented does not break callers' existing match arms.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum SieveErrorKind {
     /// The script bytes are not valid UTF-8.

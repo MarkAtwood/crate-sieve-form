@@ -123,14 +123,11 @@ fn strip_trailing_comment(s: &str) -> Cow<'_, str> {
 /// Searches for `\r\n\r\n` first, then `\n\n`.
 fn find_header_end(raw: &[u8]) -> Option<usize> {
     // Look for \r\n\r\n first.
-    let crlf = (0..raw.len().saturating_sub(3)).find(|&i| {
-        raw[i] == b'\r' && raw[i + 1] == b'\n' && raw[i + 2] == b'\r' && raw[i + 3] == b'\n'
-    });
-    if crlf.is_some() {
-        return crlf;
+    if let Some(pos) = raw.windows(4).position(|w| w == b"\r\n\r\n") {
+        return Some(pos);
     }
     // Fall back to \n\n.
-    (0..raw.len().saturating_sub(1)).find(|&i| raw[i] == b'\n' && raw[i + 1] == b'\n')
+    raw.windows(2).position(|w| w == b"\n\n")
 }
 
 /// Split a header value containing one or more RFC 5322 addresses into

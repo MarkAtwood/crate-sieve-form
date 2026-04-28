@@ -12,7 +12,7 @@ use crate::parse_error::ParseError;
 
 /// A single form: a uniform, recursive representation of one syntactic element.
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Form {
     /// An identifier keyword.
     Word(String),

@@ -65,7 +65,7 @@ const _: () = {
 
 /// Disposition returned after evaluating a Sieve script against a message.
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum SieveAction {
     /// Deliver the message to the user's inbox.
     ///
@@ -455,7 +455,7 @@ fn cache_patterns_in_clause(
 
 fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_regex::Regex>) {
     // Infallible: patterns were already validated by validate_script.
-    let _ = for_each_clause(stmt, &mut |clause| {
+    for_each_clause(stmt, &mut |clause| {
         let has_regex = clause
             .iter()
             .any(|f| matches!(f, form::Form::Tag(t) if t == "regex"));
@@ -468,7 +468,8 @@ fn collect_regex_patterns(stmt: &form::Stmt, cache: &mut HashMap<String, fancy_r
             cache_patterns_in_clause(clause, PatternKind::Glob, cache);
         }
         Ok(())
-    });
+    })
+    .expect("collect_regex_patterns: closure is infallible");
 }
 
 fn cache_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Regex>) {
