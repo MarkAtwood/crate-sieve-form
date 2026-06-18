@@ -43,7 +43,7 @@ fn test_keep_action() {
         "Hello",
         "Body text.",
     );
-    let actions = evaluate(&script, &msg, "alice@example.com", "bob@example.com");
+    let actions = evaluate(&script, &msg, "alice@example.com", "bob@example.com").actions;
     // RFC 5228 §4.1: keep deposits the message in the default mailbox.
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
@@ -60,7 +60,7 @@ fn test_fileinto() {
         "You won",
         "Click here.",
     );
-    let actions = evaluate(&script, &msg, "spammer@example.net", "victim@example.com");
+    let actions = evaluate(&script, &msg, "spammer@example.net", "victim@example.com").actions;
     // fileinto "INBOX.spam" must route to exactly that mailbox name.
     assert_eq!(
         actions,
@@ -78,7 +78,7 @@ fn test_discard() {
         "Unwanted",
         "Drop me.",
     );
-    let actions = evaluate(&script, &msg, "bounce@example.com", "user@example.com");
+    let actions = evaluate(&script, &msg, "bounce@example.com", "user@example.com").actions;
     // discard produces no delivery — the only action is Discard.
     assert_eq!(actions, vec![SieveAction::Discard]);
 }
@@ -94,7 +94,7 @@ fn test_reject() {
         "Rejected",
         "Body.",
     );
-    let actions = evaluate(&script, &msg, "unwanted@example.net", "user@example.com");
+    let actions = evaluate(&script, &msg, "unwanted@example.net", "user@example.com").actions;
     // The reason string must be preserved verbatim.
     assert_eq!(actions, vec![SieveAction::Reject("No thanks".to_string())]);
 }
@@ -106,7 +106,7 @@ fn test_implicit_keep_empty_script() {
     // Empty script — no statements at all.
     let script = compile(b"").expect("compile failed");
     let msg = make_message("a@example.com", "b@example.com", "Hi", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -134,7 +134,7 @@ fn test_if_header_contains_match() {
         "Dinner plans",
         "Coming over Saturday?",
     );
-    let actions = evaluate(&script, &msg, "mom@family.example", "me@example.com");
+    let actions = evaluate(&script, &msg, "mom@family.example", "me@example.com").actions;
     assert_eq!(
         actions,
         vec![SieveAction::FileInto("INBOX.family".to_string())]
@@ -159,7 +159,7 @@ fn test_if_header_contains_no_match() {
         "Hello",
         "Do you know me?",
     );
-    let actions = evaluate(&script, &msg, "stranger@other.example", "me@example.com");
+    let actions = evaluate(&script, &msg, "stranger@other.example", "me@example.com").actions;
     // No explicit disposition — implicit keep (RFC 5228 §2.10.2).
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
@@ -184,7 +184,7 @@ fn test_if_header_is_case_insensitive() {
         "hello world",
         "Body.",
     );
-    let actions = evaluate(&script, &msg, "alice@example.com", "bob@example.com");
+    let actions = evaluate(&script, &msg, "alice@example.com", "bob@example.com").actions;
     assert_eq!(
         actions,
         vec![SieveAction::FileInto("INBOX.greetings".to_string())]
@@ -203,7 +203,7 @@ fn test_exists_header_present() {
     .expect("compile failed");
 
     let msg = make_message_with_header("X-Spam-Flag", "YES");
-    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com");
+    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Spam".to_string())]);
 }
 
@@ -220,7 +220,7 @@ fn test_exists_header_absent() {
 
     // Plain message without X-Spam-Flag.
     let msg = make_message("clean@example.com", "user@example.com", "Normal", "Hi.");
-    let actions = evaluate(&script, &msg, "clean@example.com", "user@example.com");
+    let actions = evaluate(&script, &msg, "clean@example.com", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -243,7 +243,7 @@ fn test_size_over_true() {
         "Subject",
         "Body text here.",
     );
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Big".to_string())]);
 }
 
@@ -260,7 +260,7 @@ fn test_size_under_true() {
     .expect("compile failed");
 
     let msg = b"From: a@b.com\r\n\r\nx\r\n";
-    let actions = evaluate(&script, msg, "a@b.com", "b@b.com");
+    let actions = evaluate(&script, msg, "a@b.com", "b@b.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Small".to_string())]);
 }
 
@@ -286,7 +286,7 @@ fn test_elsif_first_branch_taken() {
     .expect("compile failed");
 
     let msg = make_message_with_header("X-Spam-Score", "HIGH");
-    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com");
+    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Junk".to_string())]);
 }
 
@@ -306,7 +306,7 @@ fn test_elsif_second_branch_taken() {
     .expect("compile failed");
 
     let msg = make_message_with_header("X-Mailing-List", "announcements@example.org");
-    let actions = evaluate(&script, &msg, "list@example.org", "user@example.com");
+    let actions = evaluate(&script, &msg, "list@example.org", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Lists".to_string())]);
 }
 
@@ -327,7 +327,7 @@ fn test_elsif_else_branch_taken() {
 
     // Neither header present — falls through to else { keep }.
     let msg = make_message("normal@example.com", "user@example.com", "Hi", "Body.");
-    let actions = evaluate(&script, &msg, "normal@example.com", "user@example.com");
+    let actions = evaluate(&script, &msg, "normal@example.com", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -354,7 +354,7 @@ fn test_allof_both_true() {
         "URGENT: fix this",
         "Fix it.",
     );
-    let actions = evaluate(&script, &msg, "boss@example.com", "employee@example.com");
+    let actions = evaluate(&script, &msg, "boss@example.com", "employee@example.com").actions;
     assert_eq!(
         actions,
         vec![SieveAction::FileInto("Important".to_string())]
@@ -380,7 +380,7 @@ fn test_allof_one_false() {
         "Just checking in",
         "How are you?",
     );
-    let actions = evaluate(&script, &msg, "boss@example.com", "employee@example.com");
+    let actions = evaluate(&script, &msg, "boss@example.com", "employee@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -403,7 +403,7 @@ fn test_anyof_one_true() {
         "You win a prize",
         "Congrats.",
     );
-    let actions = evaluate(&script, &msg, "lotto@example.net", "user@example.com");
+    let actions = evaluate(&script, &msg, "lotto@example.net", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Spam".to_string())]);
 }
 
@@ -452,7 +452,7 @@ fn test_variables_set_and_use() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Work item", "Details.");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(
         actions,
         vec![SieveAction::FileInto("INBOX.Work".to_string())]
@@ -471,7 +471,7 @@ fn test_variables_modifier_lower() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("upper".to_string())]);
 }
 
@@ -486,7 +486,7 @@ fn test_variables_modifier_upper() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("LOWER".to_string())]);
 }
 
@@ -502,7 +502,7 @@ fn test_variables_modifier_length() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     // "hello" has 5 characters.
     assert_eq!(actions, vec![SieveAction::FileInto("5".to_string())]);
 }
@@ -515,7 +515,7 @@ fn test_no_variables_require_no_substitution() {
     // "${reason}" must be delivered verbatim when variables are not required.
     let script = compile(b"require [\"reject\"]; reject \"${reason}\";").expect("compile failed");
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Reject("${reason}".to_string())]);
 }
 
@@ -531,7 +531,7 @@ fn test_variables_case_insensitive_name() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("hello".to_string())]);
 }
 
@@ -557,7 +557,7 @@ fn test_variables_expanded_in_header_test() {
         "urgent: meeting now",
         "Come now.",
     );
-    let actions = evaluate(&script, &msg, "boss@example.com", "me@example.com");
+    let actions = evaluate(&script, &msg, "boss@example.com", "me@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Priority".to_string())]);
 
     // Subject does not contain "urgent" — variable still expands, no match.
@@ -567,7 +567,7 @@ fn test_variables_expanded_in_header_test() {
         "lunch plans",
         "See you at noon.",
     );
-    let actions2 = evaluate(&script, &msg2, "friend@example.com", "me@example.com");
+    let actions2 = evaluate(&script, &msg2, "friend@example.com", "me@example.com").actions;
     assert_eq!(actions2, vec![SieveAction::Keep]);
 }
 
@@ -581,7 +581,7 @@ fn test_variables_undefined_expands_to_empty() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     // ${undefined_var} → "" so the reason is "error: "
     assert_eq!(actions, vec![SieveAction::Reject("error: ".to_string())]);
 }
@@ -603,7 +603,7 @@ fn test_stop_terminates_execution() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     // stop with no prior disposition → implicit keep (RFC 5228 §2.10.2).
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
@@ -629,7 +629,7 @@ fn test_address_multi_address_header_match() {
 
     // To header has two addresses; "bob@example.com" is the second.
     let msg = b"From: alice@example.com\r\nTo: carol@example.com, bob@example.com\r\nSubject: Hi\r\n\r\nBody.\r\n";
-    let actions = evaluate(&script, msg, "alice@example.com", "bob@example.com");
+    let actions = evaluate(&script, msg, "alice@example.com", "bob@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Found".to_string())]);
 }
 
@@ -645,7 +645,7 @@ fn test_address_multi_address_header_no_match() {
     .expect("compile failed");
 
     let msg = b"From: alice@example.com\r\nTo: carol@example.com, bob@example.com\r\nSubject: Hi\r\n\r\nBody.\r\n";
-    let actions = evaluate(&script, msg, "alice@example.com", "bob@example.com");
+    let actions = evaluate(&script, msg, "alice@example.com", "bob@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -670,7 +670,7 @@ fn test_exists_empty_list_is_false() {
     .expect("compile failed");
 
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     // Empty list → false → branch not taken → implicit keep.
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
@@ -699,7 +699,7 @@ fn test_not_single_condition_branch_skipped() {
         compile(b"if not header :is \"X-Spam\" \"yes\" { discard; }").expect("compile failed");
 
     let msg = make_message_with_header("X-Spam", "yes");
-    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com");
+    let actions = evaluate(&script, &msg, "spammer@example.net", "user@example.com").actions;
     // Branch skipped; implicit keep.
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
@@ -715,7 +715,7 @@ fn test_not_single_condition_branch_taken() {
 
     // No X-Spam header — header :is is false, not makes it true.
     let msg = make_message("clean@example.com", "user@example.com", "Normal", "Hi.");
-    let actions = evaluate(&script, &msg, "clean@example.com", "user@example.com");
+    let actions = evaluate(&script, &msg, "clean@example.com", "user@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Discard]);
 }
 
@@ -733,7 +733,7 @@ fn test_not_anyof_neither_present() {
 
     // Neither A nor B header — anyof is false, not anyof is true.
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Discard]);
 }
 
@@ -747,7 +747,7 @@ fn test_not_anyof_one_present_branch_skipped() {
 
     // Header A: 1 matches — anyof is true, not anyof is false.
     let msg = b"From: a@example.com\r\nA: 1\r\nSubject: Test\r\n\r\nBody.\r\n";
-    let actions = evaluate(&script, msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -768,7 +768,7 @@ fn test_envelope_from_match() {
     .expect("compile failed");
 
     let msg = make_message("sender@example.com", "me@example.com", "Hello", "Body.");
-    let actions = evaluate(&script, &msg, "sender@example.com", "me@example.com");
+    let actions = evaluate(&script, &msg, "sender@example.com", "me@example.com").actions;
     assert_eq!(actions, vec![SieveAction::FileInto("Inbox".to_string())]);
 }
 
@@ -784,7 +784,7 @@ fn test_envelope_from_no_match() {
 
     let msg = make_message("other@example.net", "me@example.com", "Hello", "Body.");
     // Envelope from is "other@example.net", not "sender@example.com".
-    let actions = evaluate(&script, &msg, "other@example.net", "me@example.com");
+    let actions = evaluate(&script, &msg, "other@example.net", "me@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }
 
@@ -799,7 +799,7 @@ fn test_redirect_action() {
             .expect("compile failed");
 
     let msg = make_message_with_header("X-Forward", "yes");
-    let actions = evaluate(&script, &msg, "sender@example.com", "user@example.com");
+    let actions = evaluate(&script, &msg, "sender@example.com", "user@example.com").actions;
     assert_eq!(
         actions,
         vec![SieveAction::Redirect("forward@example.com".to_string())]
@@ -816,6 +816,6 @@ fn test_redirect_no_match() {
 
     // No X-Forward header — condition is false, redirect does not fire.
     let msg = make_message("a@example.com", "b@example.com", "Test", ".");
-    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com");
+    let actions = evaluate(&script, &msg, "a@example.com", "b@example.com").actions;
     assert_eq!(actions, vec![SieveAction::Keep]);
 }

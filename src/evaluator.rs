@@ -65,6 +65,8 @@ struct Ctx<'a> {
     /// Pre-compiled regex cache from [`crate::compile`].  Read-only
     /// during evaluation; all patterns are compiled once at compile time.
     regex_cache: &'a HashMap<String, fancy_regex::Regex>,
+    /// Non-fatal issues accumulated during evaluation.
+    warnings: Vec<crate::EvalWarning>,
 }
 
 // ---------------------------------------------------------------------------
@@ -94,8 +96,9 @@ enum SizeDir {
 
 /// Evaluate a compiled Sieve [`Script`] against a raw RFC 5322 message.
 ///
-/// Returns the list of actions the script requests.  If the script produces
-/// no explicit disposition, `[Keep]` is appended per RFC 5228 §2.10.2.
+/// Returns the evaluation result including actions and any warnings.
+/// If the script produces no explicit disposition, `[Keep]` is returned
+/// per RFC 5228 §2.10.2.
 pub fn eval_script(
     script: &Script,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
@@ -103,7 +106,7 @@ pub fn eval_script(
     raw_message: &[u8],
     envelope_from: &str,
     envelope_to: &str,
-) -> Vec<SieveAction> {
+) -> crate::EvalResult {
     let headers = message::extract_headers(raw_message);
 
     let mut ctx = Ctx {
@@ -114,6 +117,7 @@ pub fn eval_script(
         variables: HashMap::new(),
         variables_enabled,
         regex_cache,
+        warnings: Vec::new(),
     };
 
     let action = match eval_stmt_list(script, &mut ctx) {
@@ -127,7 +131,10 @@ pub fn eval_script(
         // action is keep (deliver to the default mailbox).
         _ => SieveAction::Keep,
     };
-    vec![action]
+    crate::EvalResult {
+        actions: vec![action],
+        warnings: ctx.warnings,
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -417,6 +424,24 @@ fn str_contains(haystack: &str, needle: &str, comparator: Comparator) -> bool {
     })
 }
 
+/// Run a compiled regex match, recording a warning on execution failure.
+fn regex_is_match(
+    re: &fancy_regex::Regex,
+    value: &str,
+    warnings: &mut Vec<crate::EvalWarning>,
+) -> bool {
+    match re.is_match(value) {
+        Ok(m) => m,
+        Err(e) => {
+            warnings.push(crate::EvalWarning::RegexExecutionError {
+                pattern: re.as_str().to_string(),
+                message: e.to_string(),
+            });
+            false
+        }
+    }
+}
+
 /// Sieve glob matching (RFC 5228 §2.7.1).
 /// `*` = zero or more chars, `?` = exactly one char, `\*`/`\?` = literals.
 fn str_matches_glob(
@@ -424,6 +449,7 @@ fn str_matches_glob(
     pattern: &str,
     comparator: Comparator,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
+    warnings: &mut Vec<crate::EvalWarning>,
 ) -> bool {
     // Fast path: glob patterns are pre-compiled into the cache at compile()
     // time under the key "glob:{pattern}" (or "(?i)glob:{pattern}" for
@@ -432,15 +458,15 @@ fn str_matches_glob(
     if comparator == Comparator::AsciiCasemap {
         let ci_key = glob_ci_key(&base_key);
         if let Some(re) = regex_cache.get(&ci_key) {
-            return re.is_match(value).unwrap_or(false);
+            return regex_is_match(re, value, warnings);
         }
     } else if let Some(re) = regex_cache.get(&base_key) {
-        return re.is_match(value).unwrap_or(false);
+        return regex_is_match(re, value, warnings);
     }
     // Defensive fallback: compile on the fly (should not occur for validated
     // scripts whose patterns were pre-cached at compile time).
     let regex_pat = sieve_glob_to_regex(pattern);
-    str_matches_regex_pat(value, &regex_pat, comparator, regex_cache)
+    str_matches_regex_pat(value, &regex_pat, comparator, regex_cache, warnings)
 }
 
 /// Convert a Sieve glob pattern to an anchored regex string.
@@ -490,9 +516,10 @@ fn str_matches_regex(
     pattern: &str,
     comparator: Comparator,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
+    warnings: &mut Vec<crate::EvalWarning>,
 ) -> bool {
     let anchored = regex_base_key(pattern);
-    str_matches_regex_pat(value, &anchored, comparator, regex_cache)
+    str_matches_regex_pat(value, &anchored, comparator, regex_cache, warnings)
 }
 
 /// Match `value` against a pre-compiled regex pattern looked up by key.
@@ -506,6 +533,7 @@ fn str_matches_regex_pat(
     anchored: &str,
     comparator: Comparator,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
+    warnings: &mut Vec<crate::EvalWarning>,
 ) -> bool {
     // SECURITY: fancy-regex uses backtracking for extended patterns.
     // Untrusted :regex patterns can cause catastrophic backtracking (ReDoS).
@@ -514,20 +542,20 @@ fn str_matches_regex_pat(
     if comparator == Comparator::AsciiCasemap {
         let pat = regex_ci_key(anchored);
         if let Some(re) = regex_cache.get(&pat) {
-            return re.is_match(value).unwrap_or(false);
+            return regex_is_match(re, value, warnings);
         }
         // Fallback: compile on the fly (should not occur for validated scripts).
         match fancy_regex::Regex::new(&pat) {
-            Ok(re) => re.is_match(value).unwrap_or(false),
+            Ok(re) => regex_is_match(&re, value, warnings),
             Err(_) => false,
         }
     } else {
         if let Some(re) = regex_cache.get(anchored) {
-            return re.is_match(value).unwrap_or(false);
+            return regex_is_match(re, value, warnings);
         }
         // Fallback: compile on the fly (should not occur for validated scripts).
         match fancy_regex::Regex::new(anchored) {
-            Ok(re) => re.is_match(value).unwrap_or(false),
+            Ok(re) => regex_is_match(&re, value, warnings),
             Err(_) => false,
         }
     }
@@ -540,12 +568,13 @@ fn apply_match(
     mt: MatchType,
     comparator: Comparator,
     regex_cache: &HashMap<String, fancy_regex::Regex>,
+    warnings: &mut Vec<crate::EvalWarning>,
 ) -> bool {
     match mt {
         MatchType::Is => str_is(value, key, comparator),
         MatchType::Contains => str_contains(value, key, comparator),
-        MatchType::Matches => str_matches_glob(value, key, comparator, regex_cache),
-        MatchType::Regex => str_matches_regex(value, key, comparator, regex_cache),
+        MatchType::Matches => str_matches_glob(value, key, comparator, regex_cache, warnings),
+        MatchType::Regex => str_matches_regex(value, key, comparator, regex_cache, warnings),
     }
 }
 
@@ -553,7 +582,7 @@ fn apply_match(
 // Individual test implementations
 // ---------------------------------------------------------------------------
 
-fn eval_header_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
+fn eval_header_test(forms: &[Form], ctx: &mut Ctx<'_>) -> bool {
     let args = extract_test_args(forms);
     // RFC 5229 §3: variable substitution applies to all string args in tests.
     let field_names: Vec<Cow<'_, str>> = args.names.iter().map(|s| expand_vars(s, ctx)).collect();
@@ -563,7 +592,7 @@ fn eval_header_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
         for fname in &field_names {
             if hdr_name.eq_ignore_ascii_case(fname.as_ref()) {
                 for key in &keys {
-                    if apply_match(hdr_value, key.as_ref(), args.mt, args.cmp, ctx.regex_cache) {
+                    if apply_match(hdr_value, key.as_ref(), args.mt, args.cmp, ctx.regex_cache, &mut ctx.warnings) {
                         return true;
                     }
                 }
@@ -573,7 +602,7 @@ fn eval_header_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     false
 }
 
-fn eval_address_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
+fn eval_address_test(forms: &[Form], ctx: &mut Ctx<'_>) -> bool {
     let args = extract_test_args(forms);
     // RFC 5229 §3: variable substitution applies to all string args in tests.
     let field_names: Vec<Cow<'_, str>> = args.names.iter().map(|s| expand_vars(s, ctx)).collect();
@@ -587,7 +616,7 @@ fn eval_address_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
                 for raw_addr in message::split_addresses(hdr_value) {
                     let addr = message::address_part(&raw_addr, args.part);
                     for key in &keys {
-                        if apply_match(&addr, key.as_ref(), args.mt, args.cmp, ctx.regex_cache) {
+                        if apply_match(&addr, key.as_ref(), args.mt, args.cmp, ctx.regex_cache, &mut ctx.warnings) {
                             return true;
                         }
                     }
@@ -598,7 +627,7 @@ fn eval_address_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
     false
 }
 
-fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
+fn eval_envelope_test(forms: &[Form], ctx: &mut Ctx<'_>) -> bool {
     let args = extract_test_args(forms);
     // RFC 5229 §3: variable substitution applies to all string args in tests.
     let part_names: Vec<Cow<'_, str>> = args.names.iter().map(|s| expand_vars(s, ctx)).collect();
@@ -613,7 +642,7 @@ fn eval_envelope_test(forms: &[Form], ctx: &Ctx<'_>) -> bool {
         };
         let addr = message::address_part(raw_addr, args.part);
         for key in &keys {
-            if apply_match(&addr, key.as_ref(), args.mt, args.cmp, ctx.regex_cache) {
+            if apply_match(&addr, key.as_ref(), args.mt, args.cmp, ctx.regex_cache, &mut ctx.warnings) {
                 return true;
             }
         }

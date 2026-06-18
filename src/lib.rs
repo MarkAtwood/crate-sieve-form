@@ -125,6 +125,49 @@ impl std::fmt::Display for SieveAction {
     }
 }
 
+/// A non-fatal issue encountered during script evaluation.
+///
+/// Warnings do not alter the script's action outcome — the evaluator
+/// treats the failed operation as `false` and continues.  Callers can
+/// inspect warnings for logging, metrics, or diagnostics.
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum EvalWarning {
+    /// A compiled regex pattern failed during execution (e.g., stack
+    /// overflow from catastrophic backtracking).  The test was treated
+    /// as non-matching.
+    RegexExecutionError {
+        /// The regex pattern that failed.
+        pattern: String,
+        /// Human-readable description of the failure.
+        message: String,
+    },
+}
+
+impl std::fmt::Display for EvalWarning {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EvalWarning::RegexExecutionError { pattern, message } => {
+                write!(f, "regex execution error on {pattern:?}: {message}")
+            }
+        }
+    }
+}
+
+/// The result of evaluating a Sieve script against a message.
+///
+/// `actions` contains the disposition(s) the script requests.
+/// `warnings` contains non-fatal issues encountered during evaluation
+/// (e.g., regex execution errors).  An empty `warnings` vec means
+/// evaluation completed cleanly.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EvalResult {
+    /// The action(s) the script requests for this message.
+    pub actions: Vec<SieveAction>,
+    /// Non-fatal issues encountered during evaluation.
+    pub warnings: Vec<EvalWarning>,
+}
+
 /// Validate a single extension name against the known-extensions list.
 /// Returns `Err` if the extension is not supported.
 fn validate_extension(s: &str) -> Result<(), SieveError> {
@@ -574,8 +617,10 @@ fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Re
 /// Evaluate a compiled Sieve script against a raw RFC 5322 message.
 ///
 /// `envelope_from` and `envelope_to` are the SMTP envelope addresses.
-/// Returns the list of actions the script requests; defaults to `[Keep]`
-/// when the script produces no explicit disposition (RFC 5228 §2.10.2).
+/// Returns an [`EvalResult`] containing the actions the script requests
+/// and any non-fatal warnings (e.g., regex execution errors).  Defaults
+/// to `[Keep]` when the script produces no explicit disposition
+/// (RFC 5228 §2.10.2).
 ///
 /// # Implementation notes
 ///
@@ -604,7 +649,7 @@ pub fn evaluate(
     raw_message: &[u8],
     envelope_from: &str,
     envelope_to: &str,
-) -> Vec<SieveAction> {
+) -> EvalResult {
     evaluator::eval_script(
         &script.script,
         &script.regex_cache,
@@ -781,21 +826,21 @@ mod tests {
             &make_msg("test"),
             "sender@example.com",
             "recip@example.com",
-        );
+        ).actions;
         assert_eq!(actions, vec![SieveAction::Keep]);
     }
 
     #[test]
     fn eval_explicit_keep() {
         let script = compile(b"keep;").unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::Keep]);
     }
 
     #[test]
     fn eval_discard() {
         let script = compile(b"discard;").unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::Discard]);
     }
 
@@ -805,7 +850,7 @@ mod tests {
             b"require [\"fileinto\"]; if header :contains \"Subject\" \"URGENT\" { fileinto \"INBOX.Urgent\"; }",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("URGENT: fix this"), "", "");
+        let actions = evaluate(&script, &make_msg("URGENT: fix this"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("INBOX.Urgent".into())]);
     }
 
@@ -815,21 +860,21 @@ mod tests {
             b"require [\"fileinto\"]; if header :contains \"Subject\" \"URGENT\" { fileinto \"INBOX.Urgent\"; }",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("Normal message"), "", "");
+        let actions = evaluate(&script, &make_msg("Normal message"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::Keep]);
     }
 
     #[test]
     fn eval_reject() {
         let script = compile(b"require [\"reject\"]; reject \"Not wanted\";").unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::Reject("Not wanted".into())]);
     }
 
     #[test]
     fn eval_header_is_case_insensitive() {
         let script = compile(b"if header :is \"subject\" \"exact match\" { discard; }").unwrap();
-        let actions = evaluate(&script, &make_msg("exact match"), "", "");
+        let actions = evaluate(&script, &make_msg("exact match"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::Discard]);
     }
 
@@ -838,7 +883,7 @@ mod tests {
         let script =
             compile(b"require [\"fileinto\"]; if size :over 10 { fileinto \"Big\"; }").unwrap();
         let msg = make_msg("test"); // should be > 10 bytes
-        let actions = evaluate(&script, &msg, "", "");
+        let actions = evaluate(&script, &msg, "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("Big".into())]);
     }
 
@@ -848,7 +893,7 @@ mod tests {
             compile(b"require [\"fileinto\"]; if exists \"X-Spam-Flag\" { fileinto \"Spam\"; }")
                 .unwrap();
         let msg = b"X-Spam-Flag: YES\r\nSubject: test\r\n\r\nBody\r\n";
-        let actions = evaluate(&script, msg, "", "");
+        let actions = evaluate(&script, msg, "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("Spam".into())]);
     }
 
@@ -926,7 +971,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set \"folder\" \"INBOX.Work\"; fileinto \"${folder}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("INBOX.Work".into())]);
     }
 
@@ -936,7 +981,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set :lower \"folder\" \"INBOX.WORK\"; fileinto \"${folder}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("inbox.work".into())]);
     }
 
@@ -946,7 +991,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set :upper \"folder\" \"inbox.work\"; fileinto \"${folder}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("INBOX.WORK".into())]);
     }
 
@@ -956,7 +1001,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set :length \"len\" \"hello\"; fileinto \"${len}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("5".into())]);
     }
 
@@ -967,7 +1012,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set :firstline \"f\" \"line1\nline2\"; fileinto \"${f}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("line1".into())]);
     }
 
@@ -984,7 +1029,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set :quotewildcard \"x\" \"a\\\\b\"; fileinto \"${x}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("a\\\\b".into())]);
     }
 
@@ -994,7 +1039,7 @@ mod tests {
             b"require [\"variables\", \"fileinto\"]; set \"MyVar\" \"hello\"; fileinto \"${myvar}\";",
         )
         .unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::FileInto("hello".into())]);
     }
 
@@ -1002,7 +1047,7 @@ mod tests {
     fn eval_no_variables_require_no_substitution() {
         // Without require ["variables"], ${reason} is literal text (RFC 5229 §3).
         let script = compile(b"require [\"reject\"]; reject \"${reason}\";").unwrap();
-        let actions = evaluate(&script, &make_msg("test"), "", "");
+        let actions = evaluate(&script, &make_msg("test"), "", "").actions;
         assert_eq!(actions, vec![SieveAction::Reject("${reason}".into())]);
     }
 
