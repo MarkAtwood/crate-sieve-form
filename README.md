@@ -28,8 +28,9 @@ let script = compile(
 .unwrap();
 
 let msg = b"From: spammer@example.com\r\nX-Spam: yes\r\n\r\nBody\r\n";
-let actions = evaluate(&script, msg, "spammer@example.com", "user@example.com");
-assert_eq!(actions, vec![SieveAction::FileInto("Spam".to_string())]);
+let result = evaluate(&script, msg, "spammer@example.com", "user@example.com");
+assert_eq!(result.actions, vec![SieveAction::FileInto("Spam".to_string())]);
+assert!(result.warnings.is_empty());
 ```
 
 ## RFC coverage
@@ -53,19 +54,18 @@ assert_eq!(actions, vec![SieveAction::FileInto("Spam".to_string())]);
 The crate is structured as three distinct layers:
 
 ```
-raw bytes  →  lexer::tokenize  →  Vec<Token>
-Vec<Token> →  form::read_script →  Script (Vec<Vec<Form>>)
-Script     →  evaluator        →  Vec<SieveAction>
+raw bytes  →  lexer      →  tokens
+tokens     →  form reader →  Script (Vec<Vec<Form>>)
+Script     →  evaluator   →  EvalResult { actions, warnings }
 ```
 
-**Layer 1 — lexer** (`sieve_form::lexer`): converts raw UTF-8 source bytes into
-a flat `Vec<Token>`. Handles quoted strings, multiline strings (`text:…\n.\n`),
-tagged arguments (`:name`), numeric literals with size multipliers (`K`, `M`,
-`G`), line comments (`#`), and block comments (`/* */`).
+**Layer 1 — lexer** (internal): converts raw UTF-8 source bytes into a flat
+token stream. Handles quoted strings, multiline strings (`text:…\n.\n`), tagged
+arguments (`:name`), numeric literals with size multipliers (`K`, `M`, `G`),
+line comments (`#`), and block comments (`/* */`).
 
-**Layer 2 — form** (`sieve_form::form`): converts the token stream into a
-`Script`, which is a `Vec<Stmt>` where each `Stmt` is a `Vec<Form>`. The `Form`
-enum is:
+**Layer 2 — form reader** (internal): converts the token stream into a `Script`,
+which is a `Vec<Stmt>` where each `Stmt` is a `Vec<Form>`. The `Form` enum is:
 
 ```rust
 pub enum Form {
@@ -96,9 +96,12 @@ becomes one `Stmt`:
 ```
 
 **Layer 3 — evaluator** (internal): walks the form tree, maintains variable
-state (RFC 5229), and returns a `Vec<SieveAction>`. Defaults to
-`[SieveAction::Keep]` when the script produces no explicit disposition (RFC
-5228 §2.10.2).
+state (RFC 5229), and returns an `EvalResult` containing the actions and any
+non-fatal warnings. Defaults to `[SieveAction::Keep]` when the script produces
+no explicit disposition (RFC 5228 §2.10.2).
+
+Callers access the parsed form tree via `CompiledScript::script()` for
+inspection, linting, or custom evaluation.
 
 Because the form representation is uniform and stable, adding support for a new
 Sieve extension requires only new match arms in the evaluator — the lexer and
