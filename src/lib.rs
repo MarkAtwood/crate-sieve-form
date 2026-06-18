@@ -108,6 +108,19 @@ impl std::fmt::Display for SieveAction {
     }
 }
 
+/// Validate a single extension name against the known-extensions list.
+/// Returns `Err` if the extension is not supported.
+fn validate_extension(s: &str) -> Result<(), SieveError> {
+    if !evaluator::KNOWN_EXTENSIONS.contains(&s) {
+        return Err(SieveError {
+            message: format!("unsupported Sieve extension: {s}"),
+            kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
+            source: None,
+        });
+    }
+    Ok(())
+}
+
 /// Compile a Sieve script from raw source bytes.
 ///
 /// The bytes must be valid UTF-8.  Returns `Err` with a human-readable
@@ -137,19 +150,6 @@ impl std::fmt::Display for SieveAction {
 /// compilation, so a hostile script can make compilation itself CPU-expensive.
 /// Callers should validate pattern complexity or restrict who can supply
 /// `:regex` tests.
-/// Validate a single extension name against the known-extensions list.
-/// Returns Err if the extension is not supported.
-fn validate_extension(s: &str) -> Result<(), SieveError> {
-    if !evaluator::KNOWN_EXTENSIONS.contains(&s) {
-        return Err(SieveError {
-            message: format!("unsupported Sieve extension: {s}"),
-            kind: SieveErrorKind::UnsupportedExtension(s.to_string()),
-            source: None,
-        });
-    }
-    Ok(())
-}
-
 pub fn compile(script: &[u8]) -> Result<CompiledScript, SieveError> {
     let source = std::str::from_utf8(script).map_err(|e| SieveError {
         message: format!("invalid UTF-8: {e}"),
