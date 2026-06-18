@@ -577,6 +577,11 @@ fn cache_glob_pattern(pattern: &str, cache: &mut HashMap<String, fancy_regex::Re
 /// `SieveAction::Keep`.  RFC 5228 permits multiple simultaneous actions
 /// (e.g., keep + fileinto), but this is not yet implemented.
 ///
+/// `raw_message` is decoded as UTF-8 with lossy replacement: non-UTF-8
+/// bytes become U+FFFD.  This means header comparisons against non-ASCII
+/// bytes that are not valid UTF-8 will compare against the replacement
+/// character, not the original bytes.
+///
 /// There are no built-in size limits on message size; callers are responsible
 /// for bounding inputs before calling this function.
 ///

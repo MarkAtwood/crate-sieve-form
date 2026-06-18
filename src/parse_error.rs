@@ -2,9 +2,14 @@
 
 /// A parse error from the lexer or form parser.
 ///
-/// `line` and `col` are 1-based positions set by the lexer.  The form parser
-/// does not track positions, so form-layer errors always have `line == None`.
-/// When `line == None`, no source location is available.
+/// `line` and `col` are 1-based positions set by the lexer; lexer errors
+/// always have both fields set to `Some`.  The form parser does not track
+/// positions, so form-layer errors always have `line == None` and
+/// `col == None`.
+///
+/// This invariant is load-bearing: the `From<ParseError> for SieveError`
+/// impl uses `line.is_some()` to classify the error as
+/// [`SieveErrorKind::Lex`] vs [`SieveErrorKind::Parse`].
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ParseError {
