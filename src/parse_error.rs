@@ -35,7 +35,7 @@ impl std::error::Error for ParseError {}
 
 /// A typed error returned by [`crate::compile`].
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct SieveError {
     /// Human-readable description of the error, suitable for display to an end user.
     pub message: String,
@@ -52,6 +52,17 @@ pub struct SieveError {
     /// instead for structured error handling.
     pub(crate) source: Option<ParseError>,
 }
+
+/// Equality considers only the externally-visible fields (`message` and
+/// `kind`), not the `pub(crate) source` field.  This prevents external
+/// callers from encountering equality failures they cannot diagnose.
+impl PartialEq for SieveError {
+    fn eq(&self, other: &Self) -> bool {
+        self.message == other.message && self.kind == other.kind
+    }
+}
+
+impl Eq for SieveError {}
 
 /// The category of error produced by [`crate::compile`].
 ///
