@@ -134,14 +134,16 @@ fn strip_trailing_comment(s: &str) -> Cow<'_, str> {
 /// message.  Returns the offset of the *first byte* of the separator
 /// (i.e. the caller should use `&raw[..pos]` to get just the headers).
 ///
-/// Searches for `\r\n\r\n` first, then `\n\n`.
+/// Searches for both `\r\n\r\n` and `\n\n` and returns whichever occurs
+/// first, so that a later occurrence of the other pattern in the message
+/// body is never mistaken for the header/body separator.
 fn find_header_end(raw: &[u8]) -> Option<usize> {
-    // Look for \r\n\r\n first.
-    if let Some(pos) = raw.windows(4).position(|w| w == b"\r\n\r\n") {
-        return Some(pos);
+    let crlf = raw.windows(4).position(|w| w == b"\r\n\r\n");
+    let lf = raw.windows(2).position(|w| w == b"\n\n");
+    match (crlf, lf) {
+        (Some(a), Some(b)) => Some(a.min(b)),
+        (a, b) => a.or(b),
     }
-    // Fall back to \n\n.
-    raw.windows(2).position(|w| w == b"\n\n")
 }
 
 /// Split a header value containing one or more RFC 5322 addresses into
@@ -286,6 +288,38 @@ mod tests {
         // extracting from inside <>.
         let got = address_part("Display Name <user@example.com>", AddressPart::All);
         assert_eq!(got, "user@example.com");
+    }
+
+    #[test]
+    fn find_header_end_lf_body_contains_crlf() {
+        // Regression: message uses bare LF line endings, but the body
+        // happens to contain \r\n\r\n.  The separator must be the \n\n
+        // at offset 20, not the \r\n\r\n at offset 30 in the body.
+        let msg = b"Subject: test\nFoo: bar\n\nBody starts here.\r\n\r\nMore body.";
+        let pos = find_header_end(msg).unwrap();
+        // \n\n is at byte offset 22 ("Subject: test\nFoo: bar" = 22 bytes)
+        assert_eq!(pos, 22, "should pick the earlier \\n\\n, not the later \\r\\n\\r\\n");
+        assert_eq!(&msg[..pos], b"Subject: test\nFoo: bar");
+    }
+
+    #[test]
+    fn find_header_end_crlf_only() {
+        let msg = b"Subject: test\r\nFoo: bar\r\n\r\nBody here.";
+        let pos = find_header_end(msg).unwrap();
+        assert_eq!(&msg[..pos], b"Subject: test\r\nFoo: bar");
+    }
+
+    #[test]
+    fn find_header_end_lf_only() {
+        let msg = b"Subject: test\nFoo: bar\n\nBody here.";
+        let pos = find_header_end(msg).unwrap();
+        assert_eq!(&msg[..pos], b"Subject: test\nFoo: bar");
+    }
+
+    #[test]
+    fn find_header_end_no_separator() {
+        let msg = b"Subject: test\nFoo: bar";
+        assert_eq!(find_header_end(msg), None);
     }
 
     #[test]
