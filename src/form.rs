@@ -30,6 +30,29 @@ pub enum Form {
     Block(Vec<Stmt>),
 }
 
+impl std::fmt::Display for Form {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Form::Word(w) => write!(f, "{w}"),
+            Form::Tag(t) => write!(f, ":{t}"),
+            Form::Str(s) => write!(f, "{s:?}"),
+            Form::Num(n) => write!(f, "{n}"),
+            Form::StringList(items) => {
+                write!(f, "[")?;
+                for (i, s) in items.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{s:?}")?;
+                }
+                write!(f, "]")
+            }
+            Form::TestList(tests) => write!(f, "({} tests)", tests.len()),
+            Form::Block(stmts) => write!(f, "{{ {} stmts }}", stmts.len()),
+        }
+    }
+}
+
 /// A statement is a sequence of forms terminated by a semicolon or a block.
 ///
 /// **Stability**: this type alias is part of the public API. The representation

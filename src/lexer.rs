@@ -6,7 +6,7 @@ use crate::parse_error::ParseError;
 
 /// Tokens produced by the Sieve lexer.
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Token {
     /// An identifier: `[a-zA-Z_][a-zA-Z0-9_]*`
     Word(String),
@@ -24,6 +24,25 @@ pub enum Token {
     RBrace,
     Semicolon,
     Comma,
+}
+
+impl std::fmt::Display for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Token::Word(w) => write!(f, "{w}"),
+            Token::Tag(t) => write!(f, ":{t}"),
+            Token::StringLit(s) => write!(f, "{s:?}"),
+            Token::Number(n) => write!(f, "{n}"),
+            Token::LBracket => write!(f, "["),
+            Token::RBracket => write!(f, "]"),
+            Token::LParen => write!(f, "("),
+            Token::RParen => write!(f, ")"),
+            Token::LBrace => write!(f, "{{"),
+            Token::RBrace => write!(f, "}}"),
+            Token::Semicolon => write!(f, ";"),
+            Token::Comma => write!(f, ","),
+        }
+    }
 }
 
 /// Tokenize a Sieve script source string into a flat token list.
