@@ -62,8 +62,8 @@ pub type Stmt = Vec<Form>;
 
 /// A script is a sequence of statements.
 ///
-/// Returned by [`read_script`]. Callers may inspect or iterate forms, but
-/// should not depend on the outer structure being the final representation;
+/// Callers may inspect or iterate forms via [`CompiledScript::script`](crate::CompiledScript::script).
+/// Do not depend on the outer structure being the final representation;
 /// see [`Stmt`] stability note.
 pub type Script = Vec<Stmt>;
 

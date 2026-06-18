@@ -10,19 +10,26 @@
 //! The only external dependency is [`fancy-regex`](https://crates.io/crates/fancy-regex),
 //! used for the `:regex` match type and Sieve glob-to-regex conversion.
 //!
+//! ## Usage
+//!
+//! Call [`compile`] to parse a script, then [`evaluate`] to run it against
+//! a message.  To inspect the parsed form tree (e.g., for linting or custom
+//! evaluation), use [`CompiledScript::script`].
+//!
 //! ## Internal pipeline
 //!
-//! 1. [`lexer::tokenize`] — raw source → `Vec<Token>`
-//! 2. [`form::read_script`] — tokens → `Script` (a uniform form tree)
-//! 3. evaluator — `Script` + message → `Vec<SieveAction>` (internal, not pub)
+//! 1. Lexer — raw source → token stream
+//! 2. Form reader — tokens → [`Script`] (a uniform form tree)
+//! 3. Evaluator — `Script` + message → `Vec<SieveAction>`
 
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
-pub mod form;
-pub mod lexer;
+pub(crate) mod form;
+pub(crate) mod lexer;
 pub mod parse_error;
 
+pub use form::{Form, Script, Stmt};
 pub use parse_error::{ParseError, SieveError, SieveErrorKind};
 
 mod evaluator;
@@ -51,6 +58,16 @@ impl std::fmt::Debug for CompiledScript {
                 &format!("<{} compiled patterns>", self.regex_cache.len()),
             )
             .finish()
+    }
+}
+
+impl CompiledScript {
+    /// The parsed form tree, for inspection or custom evaluation.
+    ///
+    /// Each statement is a flat `Vec<Form>` — see [`Form`] for the variant
+    /// types.  The tree is read-only; modifications require re-compiling.
+    pub fn script(&self) -> &[Stmt] {
+        &self.script
     }
 }
 
