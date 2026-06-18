@@ -48,6 +48,18 @@ assert!(result.warnings.is_empty());
 | Date/Index    | RFC 5260               | Not yet   |
 | Editheader    | RFC 5293               | Not yet   |
 | Enotify       | RFC 5435               | Not yet   |
+| MIME parts    | RFC 5703               | Not yet   |
+
+### Speculative future extensions
+
+The form layer's dispatch model makes it straightforward to add custom
+extensions beyond the IETF-tracked set. One candidate:
+
+- **S/MIME** (`require "smime"`) — tests like `smime_signed`,
+  `smime_encrypted`, `smime_valid`. No RFC exists for this; it would be
+  a custom extension requiring access to a certificate store and crypto
+  stack. A natural fit for an MTA embedding this crate alongside a TLS
+  library (e.g., wolfSSL).
 
 ## Architecture
 
