@@ -254,15 +254,6 @@ fn check_extension_use(stmt: &[form::Form], declared: &HashSet<&str>) -> Result<
                 });
             }
         }
-        // When called recursively on a test stmt (from TestList recursion),
-        // position 0 IS the test name. Check it directly.
-        if EXTENSION_TESTS.contains(&w.as_str()) && !declared.contains(w.as_str()) {
-            return Err(SieveError {
-                message: format!("extension test \"{w}\" used without require declaration"),
-                kind: SieveErrorKind::MissingRequire(w.clone()),
-                source: None,
-            });
-        }
         // "not" negates an inner test; the remainder is that test's flat forms.
         // Recurse to check extension requirements in the inner test.
         if w == "not" && stmt.len() > 1 {
