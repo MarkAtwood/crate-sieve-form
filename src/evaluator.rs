@@ -76,11 +76,7 @@ struct Ctx<'a> {
 #[derive(Debug)]
 enum StmtResult {
     Continue,
-    Keep,
-    Discard,
-    FileInto(String),
-    Reject(String),
-    Redirect(String),
+    Action(SieveAction),
     Stop,
 }
 
@@ -121,11 +117,8 @@ pub fn eval_script(
     };
 
     let action = match eval_stmt_list(script, &mut ctx) {
-        Some(StmtResult::Discard) => SieveAction::Discard,
-        Some(StmtResult::FileInto(folder)) => SieveAction::FileInto(folder),
-        Some(StmtResult::Reject(reason)) => SieveAction::Reject(reason),
-        Some(StmtResult::Redirect(addr)) => SieveAction::Redirect(addr),
-        // StmtResult::Stop (and Continue/Keep with no explicit disposition):
+        Some(StmtResult::Action(a)) => a,
+        // StmtResult::Stop, Continue, and None (end of script):
         // RFC 5228 §4.5 specifies that when evaluation reaches stop or the
         // end of the script with no explicit final disposition, the implicit
         // action is keep (deliver to the default mailbox).
@@ -161,24 +154,24 @@ fn eval_stmt(stmt: &Stmt, ctx: &mut Ctx<'_>) -> StmtResult {
 
         // fileinto "folder"
         [Form::Word(w), Form::Str(folder)] if w == "fileinto" => {
-            StmtResult::FileInto(expand_vars(folder, ctx).into_owned())
+            StmtResult::Action(SieveAction::FileInto(expand_vars(folder, ctx).into_owned()))
         }
 
         // reject "reason"
         [Form::Word(w), Form::Str(reason)] if w == "reject" => {
-            StmtResult::Reject(expand_vars(reason, ctx).into_owned())
+            StmtResult::Action(SieveAction::Reject(expand_vars(reason, ctx).into_owned()))
         }
 
         // redirect "address"  (RFC 5228 §4.4 — base action, no extension required)
         [Form::Word(w), Form::Str(addr)] if w == "redirect" => {
-            StmtResult::Redirect(expand_vars(addr, ctx).into_owned())
+            StmtResult::Action(SieveAction::Redirect(expand_vars(addr, ctx).into_owned()))
         }
 
         // discard
-        [Form::Word(w)] if w == "discard" => StmtResult::Discard,
+        [Form::Word(w)] if w == "discard" => StmtResult::Action(SieveAction::Discard),
 
         // keep
-        [Form::Word(w)] if w == "keep" => StmtResult::Keep,
+        [Form::Word(w)] if w == "keep" => StmtResult::Action(SieveAction::Keep),
 
         // stop
         [Form::Word(w)] if w == "stop" => StmtResult::Stop,
@@ -337,7 +330,9 @@ fn extract_test_args<'a>(forms: &'a [Form]) -> TestArgs<'a> {
     let mut part = AddressPart::All;
     let mut names: Vec<&'a str> = Vec::new();
     let mut keys: Vec<&'a str> = Vec::new();
-    let mut string_count = 0usize;
+    // RFC 5228 §5.9: test arguments are positional — first string-like
+    // form is field-names, second is key-list.
+    let mut have_names = false;
     let mut i = 0;
     while i < forms.len() {
         match &forms[i] {
@@ -359,22 +354,19 @@ fn extract_test_args<'a>(forms: &'a [Form]) -> TestArgs<'a> {
                 "all" => part = AddressPart::All,
                 _ => {}
             },
-            Form::Str(s) if string_count < 2 => {
-                if string_count == 0 {
-                    names.push(s.as_str());
-                } else {
-                    keys.push(s.as_str());
-                }
-                string_count += 1;
+            Form::Str(s) if !have_names => {
+                names.push(s.as_str());
+                have_names = true;
             }
-            Form::StringList(v) if string_count < 2 => {
-                let target = if string_count == 0 {
-                    &mut names
-                } else {
-                    &mut keys
-                };
-                target.extend(v.iter().map(String::as_str));
-                string_count += 1;
+            Form::Str(s) if have_names => {
+                keys.push(s.as_str());
+            }
+            Form::StringList(v) if !have_names => {
+                names.extend(v.iter().map(String::as_str));
+                have_names = true;
+            }
+            Form::StringList(v) if have_names => {
+                keys.extend(v.iter().map(String::as_str));
             }
             _ => {}
         }
@@ -719,8 +711,11 @@ fn expand_vars<'a>(s: &'a str, ctx: &Ctx<'_>) -> Cow<'a, str> {
     if !ctx.variables_enabled {
         return Cow::Borrowed(s);
     }
-    // Fast path: if there are no trigger characters, return borrowed.
-    if !s.contains('$') && !s.contains('\\') {
+    // Fast path: return borrowed when there are no variable references.
+    // A backslash only matters if it precedes '$'; a '$' only matters if
+    // followed by '{'.  Checking for "${" and "\$" avoids entering the
+    // character loop for strings that merely contain '\' (e.g., regex patterns).
+    if !s.contains("${") && !s.contains("\\$") {
         return Cow::Borrowed(s);
     }
     let mut out = String::with_capacity(s.len());

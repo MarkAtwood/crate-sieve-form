@@ -55,9 +55,8 @@ impl std::fmt::Display for Form {
 
 /// A statement is a sequence of forms terminated by a semicolon or a block.
 ///
-/// **Stability**: this type alias is part of the public API. The representation
-/// is stable within the 0.x release series. A future major version may add
-/// position metadata, which would be a breaking change.
+/// Currently a type alias for `Vec<Form>`.  This may become a newtype in a
+/// future version if position metadata is added.
 pub type Stmt = Vec<Form>;
 
 /// A script is a sequence of statements.
