@@ -386,6 +386,7 @@ fn extract_test_args<'a>(forms: &'a [Form]) -> TestArgs<'a> {
 // String matching helpers
 // ---------------------------------------------------------------------------
 
+/// Test whether two strings are equal under the given comparator.
 fn str_is(a: &str, b: &str, comparator: Comparator) -> bool {
     if comparator == Comparator::AsciiCasemap {
         a.eq_ignore_ascii_case(b)
@@ -394,6 +395,7 @@ fn str_is(a: &str, b: &str, comparator: Comparator) -> bool {
     }
 }
 
+/// Test whether `haystack` contains `needle` under the given comparator.
 fn str_contains(haystack: &str, needle: &str, comparator: Comparator) -> bool {
     if comparator != Comparator::AsciiCasemap {
         return haystack.contains(needle);
@@ -531,6 +533,7 @@ fn str_matches_regex_pat(
     }
 }
 
+/// Dispatch a match-type comparison between `value` and `key`.
 fn apply_match(
     value: &str,
     key: &str,

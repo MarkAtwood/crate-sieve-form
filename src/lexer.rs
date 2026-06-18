@@ -354,8 +354,11 @@ pub fn tokenize(src: &str) -> Result<Vec<Token>, ParseError> {
     Ok(tokens)
 }
 
-// Consume one character from the iterator, updating line/col tracking.
-// called only when chars.peek().is_some() is guaranteed
+/// Consume one character from the iterator, updating line/col tracking.
+///
+/// # Panics
+///
+/// Panics if the iterator is empty (`chars.peek()` is `None`).
 fn advance(
     chars: &mut std::iter::Peekable<std::str::Chars<'_>>,
     line: &mut usize,
