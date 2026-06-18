@@ -5,6 +5,7 @@
 use crate::parse_error::ParseError;
 
 /// Tokens produced by the Sieve lexer.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token {
     /// An identifier: `[a-zA-Z_][a-zA-Z0-9_]*`
