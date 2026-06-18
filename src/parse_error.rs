@@ -131,6 +131,24 @@ impl std::error::Error for SieveError {
     }
 }
 
+impl SieveError {
+    /// 1-based line number of the error in the source script, if available.
+    ///
+    /// Returns `Some` for lexer errors and `None` for form-layer or
+    /// non-parse errors (UTF-8, unsupported extension, etc.).
+    pub fn line(&self) -> Option<usize> {
+        self.source.as_ref().and_then(|e| e.line)
+    }
+
+    /// 1-based column number of the error in the source script, if available.
+    ///
+    /// Returns `Some` for lexer errors and `None` for form-layer or
+    /// non-parse errors.
+    pub fn col(&self) -> Option<usize> {
+        self.source.as_ref().and_then(|e| e.col)
+    }
+}
+
 impl From<ParseError> for SieveError {
     fn from(e: ParseError) -> Self {
         // Invariant: the lexer always sets line/col; the form parser never does
