@@ -69,18 +69,20 @@ pub fn extract_headers(raw: &[u8]) -> Vec<(String, String)> {
 /// The address is first stripped of angle-bracket delimiters and any
 /// display-name prefix before extracting the part.  Returns `""` on a
 /// malformed address when `LocalPart` or `Domain` was requested.
-pub(crate) fn address_part(addr: &str, part: AddressPart) -> String {
+pub(crate) fn address_part<'a>(addr: &'a str, part: AddressPart) -> Cow<'a, str> {
     // Normalise: strip display name and angle brackets.
     let bare = bare_address(addr);
 
     match part {
-        AddressPart::LocalPart => bare
-            .rfind('@')
-            .map_or_else(String::new, |at| bare[..at].to_string()),
-        AddressPart::Domain => bare
-            .rfind('@')
-            .map_or_else(String::new, |at| bare[at + 1..].to_string()),
-        AddressPart::All => bare.into_owned(),
+        AddressPart::LocalPart => Cow::Owned(
+            bare.rfind('@')
+                .map_or_else(String::new, |at| bare[..at].to_string()),
+        ),
+        AddressPart::Domain => Cow::Owned(
+            bare.rfind('@')
+                .map_or_else(String::new, |at| bare[at + 1..].to_string()),
+        ),
+        AddressPart::All => bare,
     }
 }
 
