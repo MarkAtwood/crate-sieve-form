@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.12",
+  "title": "Script/Stmt are public type aliases with no stability contract",
+  "description": "SCENARIO: Script = Vec<Stmt> and Stmt = Vec<Form> are pub type aliases. Any caller can construct, destructure, or pattern-match on Vec<Vec<Form>> directly. If the representation ever needs to change (e.g. adding position tracking, wrapping in a struct, or adding metadata), that is a breaking semver change. There is no doc comment on either alias documenting whether they are considered stable API. MAINTENANCE CONSEQUENCE: Either the representation is frozen forever, or a future minor refactor requires a major version bump. Fix: add a doc comment explicitly stating whether these aliases are considered stable public API, and whether callers should treat them as opaque or structural.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:38Z",
+  "updated_at": "2026-04-28T20:37:01Z",
+  "closed_at": "2026-04-28T20:37:01Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:38"
+    }
+  ]
+}

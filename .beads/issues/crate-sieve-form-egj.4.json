@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-egj.4",
+  "title": "SieveAction missing #[non_exhaustive]",
+  "description": "parse_error.rs / lib.rs: SieveAction is a public enum without #[non_exhaustive]. Sieve has standard additional actions: redirect (RFC 5228 \u00a74.3), vacation (RFC 5230), notify (RFC 5435). Adding any of these to SieveAction later is a breaking change for every caller who matches on it. SieveErrorKind already correctly applies #[non_exhaustive] \u2014 SieveAction must too.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:24:40Z",
+  "updated_at": "2026-04-28T16:50:04Z",
+  "closed_at": "2026-04-28T16:50:04Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:24:39"
+    }
+  ]
+}

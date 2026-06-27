@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bnt.1",
+  "title": "Cargo.toml missing readme field \u2014 crates.io shows no README",
+  "description": "Without readme = 'README.md' in Cargo.toml, crates.io does not render the README on the crate's page. The README is the primary discovery mechanism for users evaluating the crate. README.md exists and is good \u2014 just needs to be declared in Cargo.toml.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:58:21Z",
+  "updated_at": "2026-04-25T02:59:11Z",
+  "closed_at": "2026-04-25T02:59:11Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bnt",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:58:21"
+    }
+  ]
+}

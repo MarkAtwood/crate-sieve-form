@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-2jm",
+  "title": "RUSTY review round 3: sieve-form post-round2-fixes",
+  "description": "RUSTY idiomatic Rust review of sieve-form after round 2 fixes (for_each_clause, regex require check, Ctx private, Cow in message.rs). Check if P0=P1=P2=0 and bikeshedding threshold reached.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:36:06Z",
+  "updated_at": "2026-04-28T19:44:45Z",
+  "closed_at": "2026-04-28T19:44:45Z",
+  "notes": "lib.rs+parse_error.rs \u2014 Idiom rating: ACCEPTABLE \u2014 the core structure is solid, error types are well-shaped, no unwraps or gratuitous clones; minor gaps are missing Hash derives, repeated SieveError struct literals, and one silent Result discard.\nlib.rs+parse_error.rs confidence: 88% chance of missed issue. Least confident: (1) whether the manual index loops in validate_stmt/for_each_clause are considered non-idiomatic by project standards vs justified by skip-by-2 logic; (2) whether check_extension_use double pattern-match on stmt.as_slice() warrants a refactor issue. SEC7: NO\nevaluator.rs+message.rs+form.rs+lexer.rs \u2014 Idiom rating: ACCEPTABLE \u2014 code is solid and correct throughout; five P2 idiom issues found (wasteful alloc, missing Hash, windows idiom, Cow return, index loop), no soundness bugs or .unwrap() misuse\nevaluator+message+form+lexer confidence: 90% chance of missed issue. Least confident: lib.rs check_extension_use double-walk (may have a latent logic gap), expand_vars edge cases under variables_enabled=false. SEC7: YES \u2014 ReDoS risk from untrusted :regex patterns is documented in both compile() and eval code."
+}

@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-cxs",
+  "title": "Review: sieve-form 0.1.0 full project iteration 2",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:42:27Z",
+  "updated_at": "2026-04-28T20:51:13Z",
+  "closed_at": "2026-04-28T20:51:13Z",
+  "notes": "Iteration 2 confidence: 75% chance of missed bug. Least confident: (1) whether any other non-envelope extension test names could be added in the future and would silently bypass check_extension_use via the same root cause (the architecture of the check is structurally fragile for tests used after 'not' or in elsif); (2) whether the bare_address strip_trailing_comment path handles quoted display-name forms without angle brackets correctly (known edge case, not new). All confirmed bugs filed as crate-sieve-form-cxs.1, .2, .3. SEC7: YES"
+}

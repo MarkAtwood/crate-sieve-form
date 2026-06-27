@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-egj.14",
+  "title": "KNOWN_EXTENSIONS centralized in evaluator, referenced from compile()",
+  "description": "lib.rs:94 references evaluator::KNOWN_EXTENSIONS for require validation. This is correct: the authoritative list of implemented extensions lives with the implementation (evaluator) and compile() references it. A reviewer might suggest duplicating the list in lib.rs for 'better separation'; this would introduce divergence risk. The current arrangement ensures you cannot add an extension to the evaluator without it being accepted at compile time, and cannot accept an extension without implementing it.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:50Z",
+  "updated_at": "2026-04-28T16:58:30Z",
+  "closed_at": "2026-04-28T16:58:30Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:50"
+    }
+  ]
+}

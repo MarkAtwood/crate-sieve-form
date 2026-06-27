@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.33",
+  "title": "address test fails on multi-address headers",
+  "description": "RFC 5228 \u00a75.1 requires that if a header contains multiple addresses separated by commas, the address test evaluates each address separately and returns true if any matches. The current eval_address_test calls address_part() on the entire raw header value, treating it as a single address. For 'To: alice@example.com, bob@example.com', a Sieve test 'address :is \"To\" \"alice@example.com\"' returns false because bare_address() returns the whole string 'alice@example.com, bob@example.com'. For angle-bracket form 'To: <alice@example.com>, <bob@example.com>', rfind('<') finds only the LAST '<', so only bob@example.com is extracted. In both cases, any address except the last (bare) or last (angle-bracket form) is unreachable. Trigger: any address test against a To/CC/BCC or other multi-address header. Bad behavior: non-last addresses silently fail to match.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:12:31Z",
+  "updated_at": "2026-04-28T18:19:18Z",
+  "closed_at": "2026-04-28T18:19:18Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:12:30"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.1",
+  "title": "Vec<&Form> collect() before every test eval",
+  "description": "eval_header_test, eval_address_test, eval_envelope_test, eval_exists_test each open with `let refs: Vec<&Form> = forms.iter().collect()`, then pass &[&Form] to extract_match_type/extract_comparator/extract_address_part. The helpers could take &[Form] directly, eliminating a heap allocation on every test invocation \u2014 expected impact: one fewer Vec per test call.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:00:42Z",
+  "updated_at": "2026-04-28T22:21:01Z",
+  "closed_at": "2026-04-28T22:21:01Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:00:41"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.1",
+  "title": "expand_vars Cow return unused at all sites",
+  "description": "expand_vars returns Cow<'a, str> to allow returning a borrowed slice when no substitution is needed, but every call site immediately calls .into_owned() (evaluator.rs lines 131, 136, 163, 532-533, 557-558, 583-584, 607). The Cow::Borrowed fast path is thus never exploited: when variables_enabled is false the function returns Cow::Borrowed(s) but callers still clone via .into_owned(). Idiomatic Rust would either (a) return String directly since all callers allocate unconditionally, or (b) rewrite call sites to use the Cow without .into_owned() where the value is only read. As written, the Cow type adds complexity with no payoff.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:16:56Z",
+  "updated_at": "2026-04-28T17:33:45Z",
+  "closed_at": "2026-04-28T17:33:45Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:16:56"
+    }
+  ]
+}

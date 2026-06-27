@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.5",
+  "title": "casemap bool param should be Comparator",
+  "description": "str_is, str_contains, str_matches_glob, str_matches_regex, str_matches_regex_pat, and apply_match (evaluator.rs) all accept a casemap: bool parameter derived from cmp == Comparator::AsciiCasemap. This discards the Comparator type context immediately after extracting it and passes a naked bool through multiple call layers. Idiomatic Rust would pass Comparator (or a newtype) directly, keeping the semantic meaning attached to the value and making call sites self-documenting. A bool cannot communicate whether future comparators exist, whereas the enum can be extended.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:17:16Z",
+  "updated_at": "2026-04-28T17:33:55Z",
+  "closed_at": "2026-04-28T17:33:55Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:17:15"
+    }
+  ]
+}

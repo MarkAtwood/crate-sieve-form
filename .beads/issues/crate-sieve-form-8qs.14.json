@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.14",
+  "title": "collect_two_string_lists intermediate Vec allocation",
+  "description": "collect_two_string_lists builds a Vec<Vec<&str>>, then clones the first and second elements to return (names, keys). This allocates a Vec of Vecs just to extract two items. Since the function is called at the tail of each extract chain in the eval hot path (after the 3-4 Vec allocations noted separately), it adds two more small Vec allocations per test. Fix: take the already-filtered slice and directly scan for the first and second Str/StringList forms, returning them as (&[&str], &[&str]) or as references without constructing intermediate collections. Expected impact: 2 fewer small allocations per test per message, additive with the extract-chain fix.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:58Z",
+  "updated_at": "2026-04-28T19:23:33Z",
+  "closed_at": "2026-04-28T19:23:33Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:58"
+    }
+  ]
+}

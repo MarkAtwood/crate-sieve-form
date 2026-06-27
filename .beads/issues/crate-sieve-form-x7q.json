@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-x7q",
+  "title": "Investigate envelope extension (RFC 5228 base)",
+  "description": "envelope is part of RFC 5228 base but gated behind require [envelope]. Read evaluator.rs to check if it is handled or rejected as unknown extension. If rejected, implement it \u2014 it is base spec not an extension. Report findings and implement fix if needed.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T00:56:33Z",
+  "updated_at": "2026-04-25T01:03:27Z",
+  "closed_at": "2026-04-25T01:03:27Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-03l",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 17:56:51"
+    }
+  ]
+}

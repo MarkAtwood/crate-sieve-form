@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-zrq.2",
+  "title": "Ctx struct is pub(crate) but only used in evaluator.rs",
+  "description": "evaluator.rs defines Ctx as pub(crate) with all fields also pub(crate). Nothing outside evaluator.rs constructs or reads a Ctx \u2014 all callers are within the same file. The overclaimed visibility means any future crate-internal module could construct a Ctx with arbitrary state (wrong regex_cache, mismatched variables_enabled, etc.) without going through eval_script. If it stays pub(crate) indefinitely, the next person adding a module will see a pub(crate) struct with no doc comment explaining why it is that way, and may use it. Fix: make Ctx and all its fields private (no pub annotation). Since Ctx is in evaluator.rs and used only there, this is a drop-in change.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:27:47Z",
+  "updated_at": "2026-04-28T19:33:50Z",
+  "closed_at": "2026-04-28T19:33:50Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-zrq",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:27:46"
+    }
+  ]
+}

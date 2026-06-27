@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.22",
+  "title": "All validation passes run at compile() not evaluate() \u2014 correct API contract",
+  "description": "compile() runs three sequential passes: require-extension validation, validate_script (comparator + regex), and build_regex_cache. evaluate() takes only &CompiledScript and &[u8] and returns Vec<SieveAction> \u2014 no Result. A reviewer might suggest moving some validation into evaluate() for 'flexibility'. That would be wrong: it would make evaluate() fallible, force callers to handle errors at evaluation time rather than load time, and violate the compile-once-evaluate-many contract. The design is correct. evaluate() must remain infallible.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:23:43Z",
+  "updated_at": "2026-04-28T22:19:06Z",
+  "closed_at": "2026-04-28T22:19:06Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:23:43"
+    }
+  ]
+}

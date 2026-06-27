@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-nf3",
+  "title": "reject and ereject extensions (RFC 5429)",
+  "description": "Implement reject (human-readable refusal, may bounce) and ereject (refuse during SMTP transaction, no bounce). Currently reject is an action but this tracks full RFC 5429 compliance including ereject. See RFC 5429.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:09Z",
+  "updated_at": "2026-04-25T01:14:09Z"
+}

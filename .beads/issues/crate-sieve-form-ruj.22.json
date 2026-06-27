@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.22",
+  "title": "eval_size_test uses three state booleans",
+  "description": "eval_size_test uses three separate mutable variables (over: bool, under: bool, limit: Option<u64>) filled by a for loop, then combines them at the end. The over/under pair is a disguised enum. Suggested rewrite: enum SizeDir { Over, Under } and extract (dir, limit) in one pass, then: match (dir, limit) { (Some(Over), Some(l)) => size > l, (Some(Under), Some(l)) => size < l, _ => false }.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:53Z",
+  "updated_at": "2026-04-28T22:25:17Z",
+  "closed_at": "2026-04-28T22:25:17Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:53"
+    }
+  ]
+}

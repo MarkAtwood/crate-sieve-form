@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.28",
+  "title": "ReDoS not documented at evaluate() entry point",
+  "description": "SCENARIO: A caller who reads only the evaluate() doc comment (lib.rs) does not see any security warning about :regex patterns. The SECURITY notice exists in evaluator.rs str_matches_regex_pat (internal) and in the compile() doc comment. evaluate() is the other public entry point and a user who searches only for evaluate() in the docs will miss the ReDoS warning. MAINTENANCE CONSEQUENCE: A downstream crate evaluates untrusted user-supplied Sieve scripts against messages in a mail service; they miss the warning, ship without a complexity limit, and get DoS'd. The fix is one sentence in the evaluate() doc comment pointing to compile()'s security section.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:21:08Z",
+  "updated_at": "2026-04-28T20:30:12Z",
+  "closed_at": "2026-04-28T20:30:12Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:21:07"
+    }
+  ]
+}

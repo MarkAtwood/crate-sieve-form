@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.4",
+  "title": "validate_stmt and collect_regex_patterns duplicate walk",
+  "description": "validate_stmt() and collect_regex_patterns() in lib.rs implement an almost identical manual loop: has_regex_tag bool, clause_start index, i index, with identical Block/TestList recursion structure (lib.rs:175-236 and 280-320). The only difference is the action taken when a clause ends at a Block. This means any future Sieve extension that adds a new match type or clause-scoping rule must update both functions. The two should be unified into a single form-tree walker that accepts a callback or visitor for the per-clause action.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:25Z",
+  "updated_at": "2026-04-28T22:20:05Z",
+  "closed_at": "2026-04-28T22:20:05Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:24"
+    }
+  ]
+}

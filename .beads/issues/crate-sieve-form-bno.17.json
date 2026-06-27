@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.17",
+  "title": "Document glob cache key convention at write site",
+  "description": "The 'glob:{pattern}' cache key format is explained in a comment inside str_matches_glob (evaluator.rs:389-390) where the key is read. The write site \u2014 cache_glob_pattern (lib.rs:331-332) \u2014 has no comment explaining the format or the asymmetry with the regex cache, whose keys are the compiled regex string rather than a prefixed original. A reader maintaining the cache encounters the asymmetry without explanation. The write site (cache_glob_pattern) should document the key scheme and why it differs from cache_pattern.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:23:14Z",
+  "updated_at": "2026-04-28T22:29:35Z",
+  "closed_at": "2026-04-28T22:29:35Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:23:14"
+    }
+  ]
+}

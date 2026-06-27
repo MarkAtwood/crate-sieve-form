@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-ruj.10",
+  "title": "str_matches_regex_pat allocates cache key String on every call",
+  "description": "str_matches_regex_pat builds the cache key with format!(\"(?i){anchored}\") or anchored.to_string() on every invocation before doing the HashMap lookup. The allocation is wasted when the entry is present. Constructing the key only when needed (or restructuring the lookup to avoid it) would eliminate one String allocation per regex/glob match call \u2014 expected impact: one String allocation eliminated per :regex or :matches test application.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:07Z",
+  "updated_at": "2026-04-28T17:12:36Z",
+  "closed_at": "2026-04-28T17:12:36Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:06"
+    }
+  ]
+}

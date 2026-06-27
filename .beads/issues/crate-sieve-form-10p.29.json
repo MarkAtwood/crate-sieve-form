@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.29",
+  "title": "Ctx struct fields are pub instead of pub(crate)",
+  "description": "In evaluator.rs, 'pub struct Ctx' with all-pub fields sits in a private module (mod evaluator). Today this is unreachable from outside. But if a contributor ever adds 'pub mod evaluator' or 'pub use evaluator::Ctx' by mistake in a PR, the entire eval context (parsed headers, variable map, regex cache reference) would become part of the public API with no deprecation path. Fields should be pub(crate) to enforce the intended visibility at the language level, not just by module privacy.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:08:33Z",
+  "updated_at": "2026-04-28T18:19:55Z",
+  "closed_at": "2026-04-28T18:19:55Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:08:33"
+    }
+  ]
+}

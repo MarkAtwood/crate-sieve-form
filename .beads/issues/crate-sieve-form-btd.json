@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-btd",
+  "title": "Review: refactor: type cleanup and extract_* legibility",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:54:13Z",
+  "updated_at": "2026-04-25T02:56:48Z",
+  "closed_at": "2026-04-25T02:56:48Z",
+  "notes": "Maintainer risk: LOW \u2014 no correctness issues found. One API design gap: #[non_exhaustive] on SieveErrorKind should be added before v0.1 is published.\nConfidence: 10% chance of missed bug. Code is clean after two fix passes. extract_comparator edge case (non-Str following :comparator) has different but equally correct behavior vs. original \u2014 both produce the same end result since Tags in remaining are ignored by collect_two_string_lists. No real bugs found."
+}

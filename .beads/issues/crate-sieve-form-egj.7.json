@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-egj.7",
+  "title": "address_part uses stringly-typed part param instead of enum",
+  "description": "message.rs:60 and evaluator.rs:326-341: address_part() takes part: &str with legal values \"localpart\", \"domain\", \"all\". extract_address_part returns &'static str for the same. A 3-variant enum (AddressPart { LocalPart, Domain, All }) makes invalid states unrepresentable, documents the contract at the call site, and removes the match on string literals in both address_part and extract_address_part.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:01Z",
+  "updated_at": "2026-04-28T16:50:44Z",
+  "closed_at": "2026-04-28T16:50:44Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:00"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-egj.8",
+  "title": "Regex recompiled on every match call",
+  "description": "evaluator.rs:407-419: str_matches_regex_pat compiles a new fancy_regex::Regex on every call. The comment at line 409 acknowledges this. For a script evaluating 1000 messages, each with a :regex header test, this compiles the same pattern 1000 times. Patterns are known at compile() time \u2014 they should be compiled once and stored in CompiledScript. This is the dominant cost for any script using :regex or :matches.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:08Z",
+  "updated_at": "2026-04-28T16:57:31Z",
+  "closed_at": "2026-04-28T16:57:31Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:08"
+    }
+  ]
+}

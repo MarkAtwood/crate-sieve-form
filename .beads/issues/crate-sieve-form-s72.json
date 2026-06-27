@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-s72",
+  "title": "RUSTY review: post-MY-OSS fixes",
+  "description": "RUSTY idiomatic Rust review after the MY-OSS fixes (require checks, depth limit, text: comment, bare_address, quotewildcard, cache key refactor).",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:39:06Z",
+  "updated_at": "2026-04-28T20:42:18Z",
+  "closed_at": "2026-04-28T20:42:18Z",
+  "notes": "Round confidence: 90% chance of no missed issue. SEC7: NO. One P2 filed: crate-sieve-form-s72.1 (Script doc stub links). All five review areas checked: EXTENSION_COMMAND_REQUIRES table clean, depth threading consistent, pub(crate) key builders correctly placed, bare_address last-angle heuristic correct for all realistic inputs, quotewildcard replace order correct (backslash-first).\nBIKESHED CONFIRMED: P0=0, P1=0, P2=1 (doc). RUSTY loop converged."
+}

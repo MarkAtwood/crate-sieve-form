@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.1",
+  "title": "Deduplicate clause-scan logic in lib.rs",
+  "description": "validate_stmt (lib.rs:279-341) and collect_regex_patterns (lib.rs:385-425) are near-identical imperative while-loops: both scan a flat form slice, track `clause_start`/`i` indexes, set boolean flags on Tag forms, and then dispatch on Block boundaries. The only difference is the payload (validate vs. cache). This is duplicated state-machine logic in ~80 lines of near-identical code. Suggested rewrite: extract a helper `iter_clauses(stmt) -> impl Iterator<Item = &[Form]>` that yields each clause slice (the span between consecutive Block forms). Both functions can then iterate over clauses and dispatch their own payload without reimplementing the scan. Alternatively, a single `scan_clauses(stmt, has_regex, has_matches, on_clause: FnMut(&[Form], PatternKind))` abstraction could unify both callers.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:14Z",
+  "updated_at": "2026-04-28T19:24:22Z",
+  "closed_at": "2026-04-28T19:24:22Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:14"
+    }
+  ]
+}

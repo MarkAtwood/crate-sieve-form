@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.2",
+  "title": "SieveAction missing Display impl",
+  "description": "SieveAction is the primary return type of the public evaluate() API and contains user-meaningful strings (folder names, reject reasons, redirect addresses). It derives Debug but has no Display impl. Callers who want to log or present an action to end users must use {:?} (debug format), which includes the enum variant name in Rust syntax rather than a human-readable sentence. Idiomatic Rust: impl fmt::Display for SieveAction so variants like FileInto(\"Spam\") render as something like \"fileinto \\\"Spam\\\"\" \u2014 the same pattern used by std::io::Error, which provides both Debug and Display. This matters because the type is #[non_exhaustive] and intended for long-term public API stability; adding Display now avoids a future breaking change.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:19Z",
+  "updated_at": "2026-04-28T19:20:04Z",
+  "closed_at": "2026-04-28T19:20:04Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:18"
+    }
+  ]
+}

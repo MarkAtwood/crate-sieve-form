@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.7",
+  "title": ".to_string() on &String should be .clone()",
+  "description": "In lib.rs, the compile() function constructs SieveErrorKind::UnsupportedExtension(s.to_string()) where s is a &String (destructured from Form::Str(s)). Calling .to_string() on a &String goes through the Display machinery to produce a new String \u2014 semantically identical to .clone() but roundabout. Clippy lint clippy::implicit_clone flags this pattern. The idiomatic form is s.clone(). Same pattern appears twice: once in the Form::Str arm (line ~148) and once in the Form::StringList loop (line ~158) of the require extension validation loop.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:33Z",
+  "updated_at": "2026-04-28T19:20:24Z",
+  "closed_at": "2026-04-28T19:20:24Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:33"
+    }
+  ]
+}

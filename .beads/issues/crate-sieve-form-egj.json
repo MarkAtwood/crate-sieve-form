@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-egj",
+  "title": "Review: sieve-form 0.1.0",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:24:14Z",
+  "updated_at": "2026-04-28T17:46:37Z",
+  "closed_at": "2026-04-28T17:46:37Z",
+  "notes": "Idiom rating: ACCEPTABLE \u2014 the core design is solid and the architecture is idiomatic. The form layer and evaluator are well-structured. Main gaps: missing PartialEq derives on Form and SieveErrorKind hurt testability, SieveAction needs #[non_exhaustive] before 0.1.0 ships, ParseError needs impl Error. No unsafe, no gratuitous clones, no logic errors in the RFC-required behavior.\nConfidence: 85% chance of missed issue. Least confident flags: the u64\u2192usize truncation on 32-bit (may be intentional given 64-bit-only target assumption). Uncertainty driven by: (1) no explicit 32-bit CI target visible, (2) didn't run clippy live \u2014 may have additional lint hits in the Vec<char> / str_contains paths. Would update assessment if: Cargo.toml added explicit target constraints, or clippy --all-features output was reviewed."
+}

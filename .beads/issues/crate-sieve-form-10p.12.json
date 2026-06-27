@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.12",
+  "title": "token_char returns '?' for non-delimiter tokens",
+  "description": "form.rs: token_char() returns '?' for non-delimiter tokens (Word, Tag, StringLit, Number). It is used in error messages like \"unexpected closing delimiter '?'\". In practice this arm is unreachable because token_char is only called on tokens already known to be delimiters, but the function signature and wildcard arm do not make this constraint visible. A contributor might extend it or call it in a new context and get misleading errors. Add a comment on the _ arm, or restrict the input type to only delimiter tokens.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:09Z",
+  "updated_at": "2026-04-28T22:26:37Z",
+  "closed_at": "2026-04-28T22:26:37Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:09"
+    }
+  ]
+}

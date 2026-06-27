@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-fdx",
+  "title": "RUSTY review: post-iteration-2 fixes",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:51:20Z",
+  "updated_at": "2026-04-28T20:58:43Z",
+  "closed_at": "2026-04-28T20:58:43Z",
+  "notes": "RUSTY iter3 confidence: 95%. SEC7: YES"
+}

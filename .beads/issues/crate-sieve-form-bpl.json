@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-bpl",
+  "title": "enotify extension (RFC 5435)",
+  "description": "Implement the notify action and valid_notify_method/notify_method_capability tests. Sends notifications via URIs (mailto:, xmpp:, sip:). Includes notify-method-capability test. See RFC 5435.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:11Z",
+  "updated_at": "2026-04-25T01:14:11Z"
+}

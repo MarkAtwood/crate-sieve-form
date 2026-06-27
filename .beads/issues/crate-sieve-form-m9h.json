@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-m9h",
+  "title": "special-use extension (RFC 8579)",
+  "description": "Implement specialuse_exists test and :specialuse argument for fileinto to deliver to mailboxes by RFC 6154 special-use attribute (e.g. \\Trash, \\Sent). See RFC 8579.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:34Z",
+  "updated_at": "2026-04-25T01:14:34Z"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2jm.9",
+  "title": "Form and SieveAction missing Hash derive",
+  "description": "form.rs Form (and lib.rs SieveAction) both derive PartialEq + Eq but not Hash. Rust convention: any type that implements Eq should also implement Hash so it can be used as a HashMap/HashSet key without a wrapper. All constituent types (String, Vec<String>, u64) implement Hash, so Hash is derivable. The absence is a gap callers will hit as soon as they want to deduplicate actions or use a Form as a map key.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:38:17Z",
+  "updated_at": "2026-04-28T19:43:52Z",
+  "closed_at": "2026-04-28T19:43:52Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:38:17"
+    }
+  ]
+}

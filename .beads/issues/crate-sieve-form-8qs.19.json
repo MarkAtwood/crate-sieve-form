@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.19",
+  "title": "address helpers always allocate on no-op path",
+  "description": "strip_trailing_comment in message.rs ends with s.to_string() which allocates even when nothing was stripped. bare_address calls strip_trailing_comment unconditionally and returns String. Both are called on every address/envelope test evaluation. Returning Cow<str> -- borrowing when no stripping needed, owning when it is -- eliminates the allocation on the common path.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:52:42Z",
+  "updated_at": "2026-04-28T19:20:49Z",
+  "closed_at": "2026-04-28T19:20:49Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:52:41"
+    }
+  ]
+}

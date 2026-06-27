@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-egj.13",
+  "title": "Three-layer architecture correctly separates concerns",
+  "description": "The lexer \u2192 form \u2192 evaluator split is the right call. The form layer is a uniform Vec<Form> representation that makes adding Sieve extensions purely an evaluator concern \u2014 no parser changes. A reviewer might suggest collapsing the form layer into a typed AST with per-command structs; resist this. The uniform form representation is the central design insight of the crate and is documented in CLAUDE.md and the crate docstring. It is correctly positioned.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:44Z",
+  "updated_at": "2026-04-28T16:58:27Z",
+  "closed_at": "2026-04-28T16:58:27Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:43"
+    }
+  ]
+}

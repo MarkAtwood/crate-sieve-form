@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.20",
+  "title": "token_char '?' makes error messages uninformative",
+  "description": "form.rs token_char returns '?' for Word/Tag/Number/StringLit. Used in 'non-string token ? inside string list' \u2014 the ? tells users nothing. Return a descriptive name so error messages are actionable.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:53:18Z",
+  "updated_at": "2026-04-28T19:20:54Z",
+  "closed_at": "2026-04-28T19:20:54Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:53:18"
+    }
+  ]
+}

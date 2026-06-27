@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.2",
+  "title": "extract_* chain allocates 3 Vecs per test call",
+  "description": "extract_match_type, extract_comparator, extract_address_part each return Vec<&Form>. They are chained: each produces a new Vec consumed by the next. Three heap allocations per test invocation on a slice that is typically 3-5 elements. Could use index-based scanning over the original slice instead \u2014 expected impact: eliminate 2-3 Vec allocations per test call.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:00:46Z",
+  "updated_at": "2026-04-28T22:21:02Z",
+  "closed_at": "2026-04-28T22:21:02Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:00:46"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bkx.10",
+  "title": "apply_set_modifiers uses sort_by_key; prefer sort_unstable_by_key",
+  "description": "apply_set_modifiers (evaluator.rs line 719) calls sorted.sort_by_key(...). Since modifier precedence values are Copy integers and stability of equal elements is irrelevant (RFC 5229 \u00a74 defines at most one modifier per precedence level), sort_unstable_by_key is more idiomatic and avoids a potential allocation. Clippy's map_unwrap_or / stable_sort_primitive lint may flag this.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:35Z",
+  "updated_at": "2026-04-28T17:44:09Z",
+  "closed_at": "2026-04-28T17:44:09Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:35"
+    }
+  ]
+}

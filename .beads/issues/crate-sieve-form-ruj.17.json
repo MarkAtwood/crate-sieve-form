@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.17",
+  "title": "Regex cache pre-compiles both casemap variants at compile time",
+  "description": "cache_pattern() in lib.rs inserts both the base anchored pattern and the (?i)-prefixed variant into the HashMap at compile time. str_matches_regex_pat() constructs the exact same key (with or without (?i) prefix depending on casemap) and looks it up. This means every regex match at eval time is a cache hit. A reviewer might suggest caching only one pattern and applying (?i) at match time, but that would require recompilation per match. The current design is correct: both variants are pre-compiled, the key is the full pattern string, and the lookup in str_matches_regex_pat matches exactly what was inserted.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:34Z",
+  "updated_at": "2026-04-28T22:19:12Z",
+  "closed_at": "2026-04-28T22:19:12Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:34"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.24",
+  "title": "unknown Sieve commands silently ignored, no warn mode",
+  "description": "eval_stmt catch-all silently ignores any unrecognised command per RFC 5228 \u00a72.9. A typo like 'fiileinto \"folder\";' compiles successfully and silently does nothing at eval time, producing implicit Keep. Users will file 'my script does nothing' bugs. There is no strict mode, no warning callback, and no documentation that callers should expect silent ignoring of misspelled commands. Consider a strict/lenient compile flag, or at minimum document this behavior prominently.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:08:13Z",
+  "updated_at": "2026-04-28T18:23:48Z",
+  "closed_at": "2026-04-28T18:23:48Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:08:12"
+    }
+  ]
+}

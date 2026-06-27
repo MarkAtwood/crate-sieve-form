@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bkx.5",
+  "title": "cache_pattern silently drops compile errors \u2014 correct for post-validation path",
+  "description": "In cache_pattern and cache_glob_pattern, regex compilation errors are silently ignored (if let Ok(re) = ...). A reviewer might flag these as hiding errors. They are correct: build_regex_cache runs only after validate_script has already rejected the script if any pattern was invalid. The Ok-only arm is the structurally reachable path; the Err arm is dead code under the invariant that compile() always calls validate_script first. Adding an expect() or unwrap() here would be equally correct but would abort on the (currently impossible) case of validate and cache using different anchoring logic.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:11Z",
+  "updated_at": "2026-04-28T22:19:11Z",
+  "closed_at": "2026-04-28T22:19:11Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:11"
+    }
+  ]
+}

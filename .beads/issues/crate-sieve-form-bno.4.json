@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.4",
+  "title": "use .to_owned() on string literals",
+  "description": "lexer.rs and form.rs use .to_string() on string literal constants in error constructors (e.g. \"unterminated block comment\".to_string()). Clippy (clippy::str_to_string) prefers .to_owned() for &str\u2192String conversion on literals, reserving .to_string() for Display formatting conversions.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:17:09Z",
+  "updated_at": "2026-04-28T17:34:34Z",
+  "closed_at": "2026-04-28T17:34:34Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:17:08"
+    }
+  ]
+}

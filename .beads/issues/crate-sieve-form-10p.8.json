@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.8",
+  "title": "expand_vars builds output string unconditionally",
+  "description": "expand_vars() (evaluator.rs:685-732) allocates out = String::with_capacity(s.len()) and accumulates characters into it, but only returns Cow::Owned(out) when modified==true. When the string contains '$' or '\\' but no valid substitution occurs, the function builds the full copy into out and then discards it, returning Cow::Borrowed(s). The modified flag is set only on actual substitution, making the invariant non-obvious: a reader must trace both branches to confirm that out and s are always identical when modified==false. Suggested rewrite: buffer should only be allocated on first confirmed substitution, using an Option<String> that is None until a difference is found, avoiding both the wasted copy and the flag-tracking complexity.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:46Z",
+  "updated_at": "2026-04-28T22:20:18Z",
+  "closed_at": "2026-04-28T22:20:18Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:46"
+    }
+  ]
+}

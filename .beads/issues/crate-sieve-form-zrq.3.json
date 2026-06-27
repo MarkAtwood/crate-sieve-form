@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-zrq.3",
+  "title": "validate_stmt and collect_regex_patterns duplicate clause-walk logic",
+  "description": "lib.rs contains two functions \u2014 validate_stmt (line 333) and collect_regex_patterns (line 442) \u2014 that independently implement identical clause-boundary tracking: has_regex_tag, has_matches_tag, clause_start, the Block branch resetting state, and the TestList recursion. They even use the same helper (cache_patterns_in_clause / validate_regex_in_clause) to act on each clause. The duplication is a maintenance hazard: if a third match-type tag is added (e.g., a hypothetical :pcre extension), it must be handled in both walks. Missing one produces a script that either crashes silently at eval time (validate finds nothing wrong) or wastes cache memory (collect runs but validate rejects). Fix: extract the shared clause-walk into a single generic visitor that takes a per-clause callback, or combine the two passes into one. Either way, the logic lives in one place.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:27:56Z",
+  "updated_at": "2026-04-28T19:34:03Z",
+  "closed_at": "2026-04-28T19:34:03Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-zrq",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:27:55"
+    }
+  ]
+}

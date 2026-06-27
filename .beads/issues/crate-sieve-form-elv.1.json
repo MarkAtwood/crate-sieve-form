@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-elv.1",
+  "title": "Variables not expanded in test string args",
+  "description": "RFC 5229 \u00a73: 'Variable substitution is performed on all string arguments... in test commands.' eval_header_test, eval_address_test, eval_envelope_test, and eval_exists_test pass raw Form::Str/StringList values to apply_match/collect_*_string_lists without calling expand_vars. A script like: set \"k\" \"spam\"; if header :contains \"Subject\" \"${k}\" { fileinto \"Spam\"; } \u2014 will look for literal '${k}' in Subject instead of 'spam'. Any script that uses variables in test arguments is broken. Only action arguments (fileinto, reject) currently call expand_vars.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:44:22Z",
+  "updated_at": "2026-04-25T02:49:49Z",
+  "closed_at": "2026-04-25T02:49:49Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-elv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:44:22"
+    }
+  ]
+}

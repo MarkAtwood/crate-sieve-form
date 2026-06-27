@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-5so",
+  "title": "Review Round 5: MY-OSS full project review",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:40:48Z",
+  "updated_at": "2026-04-28T18:43:25Z",
+  "closed_at": "2026-04-28T18:43:25Z",
+  "notes": "Maintainer risk: LOW \u2014 no new correctness, security, or API lock-in issues found\nIdiom rating: CLEAN \u2014 no new idiomatic Rust issues found in round 5\nConfidence: 5% chance of missed issue. Least confident flags: none. Uncertainty driven by: fancy-regex backtracking behavior in edge cases. Would update assessment if: new RFC extensions are added without updating EXTENSION_COMMANDS."
+}

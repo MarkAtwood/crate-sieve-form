@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-xez",
+  "title": "date and index extensions (RFC 5260)",
+  "description": "Implement date test (compare date/time values from message headers or :originalzone) and index extension (:index N :last to select Nth header occurrence). See RFC 5260.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:06Z",
+  "updated_at": "2026-04-25T01:14:06Z"
+}

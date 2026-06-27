@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.18",
+  "title": "repeated test preamble in evaluator",
+  "description": "eval_header_test, eval_address_test, and eval_envelope_test all open with the same four lines: refs collection, extract_match_type, extract_comparator, casemap derivation. Suggested rewrite: extract struct TestArgs { mt, casemap, remaining } and fn extract_test_args(forms) -> TestArgs. Address-part tests additionally call extract_address_part on args.remaining.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:41Z",
+  "updated_at": "2026-04-28T22:20:24Z",
+  "closed_at": "2026-04-28T22:20:24Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:41"
+    }
+  ]
+}

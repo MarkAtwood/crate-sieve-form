@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.7",
+  "title": "evaluate() returns Vec but always single element; API misleads callers",
+  "description": "evaluate() returns Vec<SieveAction> but the implementation always returns exactly one element (eval_script returns vec\\![action]). The doc comment says 'current implementation returns at most one action' and acknowledges RFC 5228 permits multiple actions. MAINTENANCE CONSEQUENCE: any caller who writes code that iterates the Vec and handles multiple actions will be surprised when multi-action semantics are added \u2014 or will write code that only looks at [0] and breaks when semantics change. The API surface is committed before the semantics are decided. Options: return a single SieveAction and change to Vec later (breaking), or define and implement multi-action semantics now.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:19Z",
+  "updated_at": "2026-04-28T20:22:59Z",
+  "closed_at": "2026-04-28T20:22:59Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:18"
+    }
+  ]
+}

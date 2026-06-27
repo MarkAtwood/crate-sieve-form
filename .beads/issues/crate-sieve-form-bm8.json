@@ -1,0 +1,12 @@
+{
+  "id": "crate-sieve-form-bm8",
+  "title": "Fix elsif/else evaluation: parsed as separate statements not continuation",
+  "description": "The form parser terminates an if-statement at the closing '}' brace (read_stmt returns when it sees LBrace/Block). This means 'elsif' and 'else' keywords become separate top-level statements, not part of the if-statement form.\n\neval_elsif_else() in evaluator.rs is effectively dead code: 'after_block' slice in eval_if() is always empty because the block terminates the statement. The elsif/else continuations are never evaluated.\n\nSymptom: in a script 'if COND1 { A; } elsif COND2 { B; } else { C; }', when COND1 is false, the result is always Keep (implicit) rather than evaluating COND2 or the else branch.\n\nNote: test_elsif_else_branch_taken passes only accidentally \u2014 the else block contains 'keep;' which produces the same result as the implicit keep that fires when no branch executes.\n\nFailing test: test_elsif_second_branch_taken in tests/rfc_vectors.rs expects FileInto('Lists') when the elsif condition matches, but gets Keep.\n\nFix needed in evaluator.rs: the script-level eval_stmt_list must detect consecutive elsif/else statements following an if-result and chain them correctly. The evaluator needs to carry forward the 'branch taken' state through the statement list, so that when 'if' returns Continue (branch not taken), subsequent elsif/else statements in the same script-level sequence are processed rather than skipped.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "bug",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:01:35Z",
+  "updated_at": "2026-04-25T01:05:41Z",
+  "closed_at": "2026-04-25T01:05:41Z"
+}

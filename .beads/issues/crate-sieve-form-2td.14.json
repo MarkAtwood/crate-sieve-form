@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.14",
+  "title": "SieveErrorKind::Lex vs Parse distinguished by line.is_some() \u2014 fragile invariant",
+  "description": "SCENARIO: parse_error.rs From<ParseError> for SieveError uses 'if e.line.is_some()' to decide whether the error came from the lexer (SieveErrorKind::Lex) or the form parser (SieveErrorKind::Parse). This invariant is stated only in a comment: 'the lexer always sets line/col; the form parser never does'. If any future code path in the form parser sets line/col (e.g. when adding position tracking to the form layer), the Lex/Parse classification silently misclassifies. MAINTENANCE CONSEQUENCE: callers matching SieveErrorKind::Lex vs ::Parse get wrong results without any compile-time or test-time signal. Fix: add a discriminant field to ParseError (e.g. an enum or bool 'from_lexer') or split ParseError into two types so the distinction is structural rather than a naming convention encoded in an Option.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:47Z",
+  "updated_at": "2026-04-28T20:27:48Z",
+  "closed_at": "2026-04-28T20:27:48Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:46"
+    }
+  ]
+}

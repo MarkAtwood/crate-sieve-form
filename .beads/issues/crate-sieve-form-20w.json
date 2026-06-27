@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-20w",
+  "title": "Review: fix: variable expansion in tests, doc cleanup",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:50:12Z",
+  "updated_at": "2026-04-25T02:53:50Z",
+  "closed_at": "2026-04-25T02:53:50Z",
+  "notes": "Maintainer risk: LOW \u2014 all P0/P1 issues from prior review are resolved. One new P2 type mismatch in SieveErrorKind, one P4 cosmetic. No correctness bugs found.\nConfidence: 20% chance of missed bug. The variable expansion fix was the main correctness gap. Remaining uncertainty: address parsing edge cases (quoted display names, comments in RFC 5322 addresses), size test u64\u2192usize truncation on 32-bit (theoretical). Would raise confidence: dovecot pigeonhole test suite."
+}

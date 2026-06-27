@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.13",
+  "title": "glob cache miss falls back to sieve_glob_to_regex at eval time",
+  "description": "str_matches_glob has a defensive fallback that calls sieve_glob_to_regex + str_matches_regex_pat at eval time when the pattern is not in the cache. This fallback is documented as 'should not occur for validated scripts'. However there is a real trigger path: if variables substitution is enabled and the pattern argument to :matches is a variable reference (e.g. header :matches \"Subject\" \"${pat}\"), the expanded pattern at eval time will not be in the cache (the cache was built from the literal \"${pat}\" string). Since glob patterns can contain variable references in a variables-enabled script, the fallback is not just defensive \u2014 it is the normal code path for variable-pattern glob matching, and it recompiles the regex on every message. No test covers this case and no doc note mentions it.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:45Z",
+  "updated_at": "2026-04-28T20:37:50Z",
+  "closed_at": "2026-04-28T20:37:50Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:45"
+    }
+  ]
+}

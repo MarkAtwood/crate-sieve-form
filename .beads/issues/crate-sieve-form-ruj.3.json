@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.3",
+  "title": "deduplicate form-tree walker in lib.rs",
+  "description": "validate_stmt and collect_regex_patterns are structurally identical tree walkers: both scan for :regex tag, recurse into Block/TestList, then locate the last Str/StringList. Only the leaf action differs (compile-check vs cache-insert). The duplication means any change to the tree-walk (e.g. supporting new container forms) must be made in two places. Suggested rewrite: extract a single walk_regex_patterns(stmt, &mut impl FnMut(&str)) closure-taking helper that both functions delegate to. validate_stmt calls it with a closure that returns Err; collect_regex_patterns calls it with a closure that inserts into the cache.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:00:48Z",
+  "updated_at": "2026-04-28T22:21:02Z",
+  "closed_at": "2026-04-28T22:21:02Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:00:48"
+    }
+  ]
+}

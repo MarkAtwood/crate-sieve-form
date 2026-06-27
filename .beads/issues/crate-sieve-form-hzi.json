@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-hzi",
+  "title": "vnd.dovecot.execute (Dovecot)",
+  "description": "Implement Dovecot execute extension: execute action runs a pre-approved external program with optional input/output. Part of sieve_extprograms plugin. Requires administrator-configured allowlist.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:47Z",
+  "updated_at": "2026-04-25T01:14:47Z"
+}

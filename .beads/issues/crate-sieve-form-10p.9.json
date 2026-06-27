@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.9",
+  "title": "ParseError->SieveError kind heuristic unexplained",
+  "description": "parse_error.rs From<ParseError> for SieveError: the impl determines Lex vs Parse kind by checking e.line.is_some(). This is a subtle heuristic (lexer sets line positions, form parser never does) that is documented in the ParseError struct doc comment but NOT in the From impl itself. A contributor reading only the impl block will not understand why line presence maps to Lex. Add a one-line comment in the From impl explaining the invariant.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:50Z",
+  "updated_at": "2026-04-28T22:27:58Z",
+  "closed_at": "2026-04-28T22:27:58Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:50"
+    }
+  ]
+}

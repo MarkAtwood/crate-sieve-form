@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.9",
+  "title": "Lex vs Parse kind heuristic breaks if form parser gains position tracking",
+  "description": "In parse_error.rs From<ParseError> for SieveError: the kind (Lex vs Parse) is determined by whether line.is_some(). The doc comment calls this an invariant: 'lexer always sets line/col; the form parser never does'. If the form parser is ever enhanced to track source positions (a natural improvement), all form-layer errors would suddenly be classified as Lex errors. There is no explicit discriminant in ParseError to distinguish source. MAINTENANCE CONSEQUENCE: the heuristic creates a silent misclassification trap for a routine future improvement.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:27Z",
+  "updated_at": "2026-04-28T20:25:04Z",
+  "closed_at": "2026-04-28T20:25:04Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:27"
+    }
+  ]
+}

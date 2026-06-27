@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.11",
+  "title": "no upper bound on regex pattern length enables ReDoS at compile time",
+  "description": "SCENARIO: caller passes a hostile Sieve script with require [\"regex\"] and a very long or pathological :regex pattern. compile() calls validate_script \u2192 validate_regex_in_clause \u2192 fancy_regex::Regex::new(anchored). fancy_regex compilation of a complex pattern is itself CPU-intensive (and for very long patterns with nested quantifiers, can be slow even before matching). The compile() doc note says 'callers are responsible for bounding inputs' and references ReDoS. However, the ReDoS warning only mentions eval time; compile-time cost is not mentioned. A caller who bounds message size but not script size can be DoS'd at compile time. MAINTENANCE CONSEQUENCE: library is being used as a mail filter; hostile scripts are a realistic attack vector. The compile-time ReDoS surface is undocumented.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:36Z",
+  "updated_at": "2026-04-28T20:30:05Z",
+  "closed_at": "2026-04-28T20:30:05Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:36"
+    }
+  ]
+}

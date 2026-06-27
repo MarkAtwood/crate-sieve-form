@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2ix.6",
+  "title": "regex cache lookup allocates key string per match",
+  "description": "evaluator.rs str_matches_regex() and str_matches_regex_pat(): every call allocates one or two temporary Strings to form the cache lookup key (e.g. format!(\"(?s)\\\\A(?:{pattern})\\\\z\") then format!(\"(?i){anchored}\")). The cache was designed to amortize regex compilation, but the key construction still allocates on every evaluated match. The fix is to change the cache key scheme: store patterns under their raw form (e.g. (pattern, comparator) as a struct key or a pre-canonical string), or pass the pre-formed cache key in from the caller who already has it (str_matches_glob already passes base_key). Alternatively use a Cow<str> or &str key with a HashMap<String, ...> using entry API tricks. This affects hot eval path for scripts using :regex or :matches.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:47:01Z",
+  "updated_at": "2026-04-28T19:48:35Z",
+  "closed_at": "2026-04-28T19:48:35Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2ix",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:47:00"
+    }
+  ]
+}

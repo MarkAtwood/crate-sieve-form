@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2jm.10",
+  "title": "address_part returns String; could return Cow<str> for All case",
+  "description": "message.rs address_part already internally computes bare_address as Cow<'_, str>. For AddressPart::All it calls bare.into_owned() unconditionally, forcing a heap allocation even when bare is already Cow::Borrowed (i.e. no angle brackets or trailing comments). Changing the return type to Cow<'_, str> would eliminate this allocation in the common bare-address path. The LocalPart and Domain arms must still return owned strings because they are subslices of the internally-created Cow.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:38:23Z",
+  "updated_at": "2026-04-28T19:41:51Z",
+  "closed_at": "2026-04-28T19:41:51Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:38:23"
+    }
+  ]
+}

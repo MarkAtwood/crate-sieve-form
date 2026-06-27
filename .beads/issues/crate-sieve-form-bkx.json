@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-bkx",
+  "title": "Review round 3: sieve-form post-fix-wave-2",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:35:14Z",
+  "updated_at": "2026-04-28T17:46:40Z",
+  "closed_at": "2026-04-28T17:46:40Z",
+  "notes": "SEC7: Running out of real complaints at P0/P1/P2: YES. Confidence: 10% chance of missed P0/P1/P2 issue. Least confident flags: (1) variables_enabled re-scanned on every evaluate() call rather than stored in CompiledScript \u2014 this is a mild per-call inefficiency (O(n) script scan) that prior rounds did not file as a defect; at the scale of Sieve scripts it is negligible but a strict reviewer might call it P3. (2) The From<ParseError> heuristic (line.is_some() -> Lex, else -> Parse) is a semantic encoding that could be wrong if the form layer ever gains position tracking \u2014 it's a maintainability landmine at P3 level. Neither rises to P0/P1/P2. The code is at a quality level where a serious Rust reviewer would approve it with minor comments (P3/P4 level), not substantive engineering objections.\nSEC0: CLEAN \u2014 no panics on caller-controlled input, no unsafe, no truncating casts, no off-by-one errors, comparator enum spelling and comparator-threaded paths are consistent, validate_stmt i+=2 scoping is correct, all ParseError sites use Option<usize> (no line:0 sentinel)"
+}

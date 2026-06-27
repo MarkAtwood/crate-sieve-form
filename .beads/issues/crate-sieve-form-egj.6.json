@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-egj.6",
+  "title": "SieveErrorKind and SieveError missing PartialEq",
+  "description": "parse_error.rs: SieveErrorKind and SieveError derive Debug and Clone but not PartialEq. Test assertions on compile() errors must inspect the .message string (lib.rs:461-465, tests/rfc_vectors.rs:425-429) because they cannot compare error kinds directly. assert_eq!(err.kind, SieveErrorKind::UnsupportedExtension(\"vacation\".to_string())) is clearer than string-contains checks. Add PartialEq and Eq to both.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:24:53Z",
+  "updated_at": "2026-04-28T16:50:00Z",
+  "closed_at": "2026-04-28T16:50:00Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:24:53"
+    }
+  ]
+}

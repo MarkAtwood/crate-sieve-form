@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.6",
+  "title": "split_addresses: allocates Vec<String> on every address test eval",
+  "description": "eval_address_test calls message::split_addresses(hdr_value) for each matching header, which allocates a Vec<String> of owned Strings (one per address). For single-address headers (the common case), this is one unnecessary String allocation. At evaluation time there is no regex cache or pre-parsing for addresses. A lazy iterator that yields &str slices (or Cow<str>) would avoid the allocation in the common case. Impact: measurable in tight loops filtering large volumes of messages.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:05:23Z",
+  "updated_at": "2026-04-28T22:20:27Z",
+  "closed_at": "2026-04-28T22:20:27Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:05:22"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-zrq.1",
+  "title": "regex match type usable without require [\"regex\"]",
+  "description": "RFC 5228 \u00a72.6 requires that extensions must be declared via require before use. The :regex match type is part of the \"regex\" extension, but check_extension_use in lib.rs only checks action commands (fileinto, reject) and the test word (envelope) in EXTENSION_TESTS. It never checks for Form::Tag(\"regex\") in the test arguments. As a result, a script like: if header :regex \"Subject\" \"test.*\" { keep; } compiles and evaluates successfully without require [\"regex\"]. This silently violates RFC 5228 \u00a72.6 and is confirmed by inspection of check_extension_use (lib.rs:220). The comment on line 217 says 'regex handled separately' but no separate handling exists. Fix: scan test argument tags for 'regex' in check_extension_use and require it to be declared, or handle it in a separate check pass over the form tree.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:27:39Z",
+  "updated_at": "2026-04-28T19:33:58Z",
+  "closed_at": "2026-04-28T19:33:58Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-zrq",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:27:38"
+    }
+  ]
+}

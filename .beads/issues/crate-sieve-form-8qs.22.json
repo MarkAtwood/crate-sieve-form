@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.22",
+  "title": "SieveError.source field is pub(crate) with no public accessor documented",
+  "description": "parse_error.rs SieveError.source is pub(crate). External callers wanting line/col from a lex error can only use std::error::Error::source() returning dyn Error, not the concrete ParseError. The struct docs are silent on this. Document the limitation or add a pub accessor, so users know how to get location info for Lex errors.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:53:53Z",
+  "updated_at": "2026-04-28T19:20:59Z",
+  "closed_at": "2026-04-28T19:20:59Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:54:01"
+    }
+  ]
+}

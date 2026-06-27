@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.34",
+  "title": "bare_address does not strip RFC 5322 comments",
+  "description": "RFC 5322 allows addresses in the form 'local@domain (Display Name)' where the parenthetical comment follows the addr-spec. bare_address() in message.rs only looks for angle brackets; when no '<' is present, it returns the whole string unchanged. For 'user@example.com (User Name)', address_part returns 'user@example.com (User Name)' for :all and 'example.com (User Name)' for :domain. A Sieve address :is test against 'user@example.com' then returns false (should be true), and address :domain :is against 'example.com' also fails. Trigger: From/To/CC header with comment after bare addr-spec and no angle brackets. Bad behavior: silent match failure.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:12:38Z",
+  "updated_at": "2026-04-28T18:19:30Z",
+  "closed_at": "2026-04-28T18:19:30Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:12:37"
+    }
+  ]
+}

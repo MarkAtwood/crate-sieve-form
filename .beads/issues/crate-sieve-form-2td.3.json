@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.3",
+  "title": "cache_pattern stores ci key as (?i)(?s)\\A\u2026, lookup correct but fragile",
+  "description": "cache_pattern in lib.rs builds ci_key = format!(\"(?i){base}\") where base = \"(?s)\\\\A(?:{p})\\\\z\", yielding \"(?i)(?s)\\\\A(?:{p})\\\\z\". str_matches_regex_pat builds anchored = \"(?s)\\\\A(?:{p})\\\\z\" then looks up format!(\"(?i){anchored}\") = \"(?i)(?s)\\\\A(?:{p})\\\\z\" \u2014 matches. The scheme is correct but there is no encapsulated key-construction function; cache builder and lookup are written independently as format strings in different files. If either side changes the format, the other silently misses the cache and falls back to runtime compile. MAINTENANCE CONSEQUENCE: a future contributor who changes the anchoring scheme in one place without updating the other will introduce a silent performance regression (all patterns recompile at eval time) with no test failure.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:03Z",
+  "updated_at": "2026-04-28T20:38:22Z",
+  "closed_at": "2026-04-28T20:38:22Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:02"
+    }
+  ]
+}

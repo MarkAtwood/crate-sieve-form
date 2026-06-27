@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.13",
+  "title": "SieveAction variants lack doc comments",
+  "description": "lib.rs: SieveAction enum has no per-variant doc comments explaining what the caller should do with each action. Keep, FileInto, Discard, Reject map to SMTP/IMAP behaviors that are non-obvious to someone integrating this crate for the first time at 2am. Add /// doc comments to each variant naming the RFC section and describing the expected caller behavior (e.g. 'deliver to default mailbox', 'deliver to named folder', 'silently drop', 'reject at SMTP level with the given reason').",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:16Z",
+  "updated_at": "2026-04-28T22:27:07Z",
+  "closed_at": "2026-04-28T22:27:07Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:16"
+    }
+  ]
+}

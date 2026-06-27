@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-8qs",
+  "title": "RUSTY Review Round 2: full project",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:48:42Z",
+  "updated_at": "2026-04-28T19:24:48Z",
+  "closed_at": "2026-04-28T19:24:48Z",
+  "notes": "Idiom rating: ACCEPTABLE \u2014 The code is correct, well-structured, and has good test coverage. The core architecture (three-layer lexer/form/evaluator) is sound and idiomatic. Main weaknesses are: the duplicated clause-scan state machine in lib.rs, the repeated Vec<&Form> chaining pattern in the test evaluators, and a few readability gaps around invariants. No unsafe code, no logic errors found.\nConfidence: 15% chance of missed issue. Least confident flags: the rposition semantics in validate_regex_in_clause (could be a deeper correctness issue, not just readability), and the str_contains Octet early-return ordering (correct but slightly surprising). Uncertainty driven by: not running the test suite myself to confirm all edge cases pass, and not having RFC 5228 text open to verify every semantic claim in comments. Would update assessment if: the test suite fails on any of the flagged areas, or if a RFC 5228 expert identifies the rposition usage as incorrect for multi-argument test forms with more than two string-list args."
+}

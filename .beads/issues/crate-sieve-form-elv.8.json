@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-elv.8",
+  "title": "ParseErrors from form.rs have line:0 col:0 \u2014 useless location",
+  "description": "Every ParseError constructed in form.rs has line: 0, col: 0. The ParseError struct has those fields but form.rs does not track position. Users see 'parse error at 0:0: unclosed {' \u2014 the 0:0 is actively misleading. Either propagate token positions through the form layer (tokens could carry location from the lexer) or drop line/col from ParseError and just use the message. A user debugging a script parse error cannot use location 0:0.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:45:35Z",
+  "updated_at": "2026-04-25T02:53:53Z",
+  "closed_at": "2026-04-25T02:53:53Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-elv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:45:35"
+    }
+  ]
+}

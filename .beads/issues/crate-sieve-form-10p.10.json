@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.10",
+  "title": "Validate and cache tree-walks are duplicated without comment",
+  "description": "lib.rs: validate_stmt and collect_regex_patterns implement nearly identical recursive tree-walks (both scan forms for Tag(regex)/Tag(matches), handle Block clause boundaries, recurse into TestList). No comment explains why they are separate functions or what coupling exists between them. A contributor who refactors one is likely to break the other silently. Add a comment above each function naming the parallel and explaining why unification was not done (or unify them).",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:56Z",
+  "updated_at": "2026-04-28T22:29:25Z",
+  "closed_at": "2026-04-28T22:29:25Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:56"
+    }
+  ]
+}

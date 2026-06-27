@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-7rc",
+  "title": "crate-sieve-form-2r1",
+  "description": "The 'not' test is implemented at evaluator.rs:230 but has zero test coverage in either src/lib.rs or tests/rfc_vectors.rs. RFC 5228 \u00a75.3 defines 'not' as a test that inverts the result of another test. A regression in eval_test dispatch for 'not' would go undetected. Add an integration test: not with a simple test that would otherwise match, verify Keep is returned instead.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:32:08Z",
+  "updated_at": "2026-04-28T18:35:14Z",
+  "closed_at": "2026-04-28T18:35:14Z"
+}

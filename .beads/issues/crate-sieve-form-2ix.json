@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-2ix",
+  "title": "RUSTY review round 4: sieve-form post-round3-fixes",
+  "description": "RUSTY idiomatic Rust review after round 3 fixes (Hash derives, windows idiom, take_while modifier scan, infallible expect). Checking if P0=P1=P2=0 and bikeshedding threshold reached.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:44:51Z",
+  "updated_at": "2026-04-28T19:50:10Z",
+  "closed_at": "2026-04-28T19:50:10Z",
+  "notes": "lib+parse_error+form \u2014 Idiom rating: ACCEPTABLE \u2014 Three files are well-structured with correct ownership, proper error types, good iterator use, and no unsound patterns. Two P2 allocation/ergonomics issues remain (HashSet<&str>, From<Utf8Error>), plus minor redundant type annotations in form.rs. Nothing at P0 or P1.\nlib+parse_error+form confidence: 90% chance of missed issue. Least confident: (1) for_each_clause clause_start edge cases \u2014 reviewed and appears correct; (2) two-pass require-scan vs check_extension_use collapsibility. SEC7: YES \u2014 running out of real complaints, findings are P2 and P3 only\nevaluator+message+lexer \u2014 Idiom rating: ACCEPTABLE \u2014 three P2 allocation issues remain (expand_vars wasted alloc, regex cache key alloc per match, to_lowercase vs make_ascii_lowercase); no P0/P1 issues; API design is sound\nevaluator+message+lexer confidence: 85% chance of missed issue. Least confident: str_matches_glob also builds base_key on every call (same pattern as str_matches_regex, possibly already captured under issue 6); quotewildcard double-replace (borderline P3, not filed). SEC7: YES (running out of real P0/P1 complaints, only P2 allocation micro-opts remain)"
+}

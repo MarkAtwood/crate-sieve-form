@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.14",
+  "title": "regex cache key coupling undocumented",
+  "description": "cache_pattern() in lib.rs inserts compiled regexes keyed by the full anchored string (e.g. '(?s)\\A(?:pat)\\z' or '(?i)(?s)\\A(?:pat)\\z'). str_matches_regex_pat() looks up entries using the same construction. This coupling \u2014 that the lookup key must be reconstructed to the exact same format as the insertion key \u2014 is not documented anywhere. A maintainer changing the anchoring scheme in one function would silently break the other. A comment on cache_pattern() or str_matches_regex_pat() should explain the key format contract.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:15Z",
+  "updated_at": "2026-04-28T22:29:36Z",
+  "closed_at": "2026-04-28T22:29:36Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:14"
+    }
+  ]
+}

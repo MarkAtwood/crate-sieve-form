@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.6",
+  "title": "apply_set_modifiers sorts for 0-1 modifiers",
+  "description": "apply_set_modifiers() (evaluator.rs:750-790) collects modifiers into a Vec, clones that Vec into sorted, then sort_unstable_by_key. In practice, real Sieve scripts use 0 or 1 modifier per set; the sort is never needed. The Vec clone and sort should be replaced: if modifiers.len() <= 1, skip sorting entirely. If more than one, sort in-place (modifiers is already a Vec<&str> owned by the call site, or can be). The inner closure fn precedence() is clean; just avoid the unconditional clone+sort.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:38Z",
+  "updated_at": "2026-04-28T22:25:00Z",
+  "closed_at": "2026-04-28T22:25:00Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:38"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-dwv.4",
+  "title": "compile() does two separate script tree-walks",
+  "description": "compile() performs two independent O(n) tree-walks over the parsed script: check_extension_use() (lib.rs ~155-157) and validate_stmt() via validate_script() (lib.rs ~161). Both recurse into Block and TestList nodes. They could be merged into a single combined pass, halving allocations and cache misses during compilation. Impact is proportional to script size; for typical mail filter scripts (tens of statements) this is negligible, but for large generated scripts or compile-time benchmarks it is a constant-factor regression.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:27:06Z",
+  "updated_at": "2026-04-28T22:19:57Z",
+  "closed_at": "2026-04-28T22:19:57Z",
+  "notes": "Two O(n) tree-walks is constant factor only; scripts are small. A future refactor to merge validate_stmt and check_extension_use is valid but not urgent.",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-dwv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:27:05"
+    }
+  ]
+}

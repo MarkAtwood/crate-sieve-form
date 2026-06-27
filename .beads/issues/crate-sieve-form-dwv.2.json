@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-dwv.2",
+  "title": "check_extension_use returns wrong error kind",
+  "description": "check_extension_use() (lib.rs ~186) returns SieveErrorKind::UnsupportedExtension(w) when an extension command like fileinto is used without a prior require declaration. UnsupportedExtension means 'this evaluator does not implement extension X', but 'used without require' means 'the script is structurally invalid' \u2014 a distinct condition. A caller matching on UnsupportedExtension to detect unsupported extensions will also catch scripts that simply forgot their require line, leading to wrong error messages ('extension not supported' vs 'script missing require'). A contributor adding future extension command checks will copy this pattern. A new SieveErrorKind::MissingRequire(String) variant (or using SieveErrorKind::Parse) would be semantically correct.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:27:00Z",
+  "updated_at": "2026-04-28T18:28:40Z",
+  "closed_at": "2026-04-28T18:28:40Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-dwv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:26:59"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.23",
+  "title": "non_exhaustive on SieveErrorKind is intentional",
+  "description": "parse_error.rs: #[non_exhaustive] on SieveErrorKind is explicitly documented with a rationale comment. A contributor might suggest removing it to avoid callers needing a _ arm. Do not remove it: the set of error kinds will grow as extensions are added, and breaking all downstream callers on every extension addition is worse than requiring a _ arm from day one. The current approach is correct API hygiene for a library at 0.1.0.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:08:06Z",
+  "updated_at": "2026-04-28T22:19:20Z",
+  "closed_at": "2026-04-28T22:19:20Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:08:06"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bkx.7",
+  "title": "err! macro captures line/col by value at error site",
+  "description": "The err! macro in the lexer captures line and col by value at the point of the macro invocation, not as a reference to the live counters. A reviewer might suggest passing &line and &col to avoid duplication. Value-capture is correct: line/col are usize (Copy), and the position should be frozen at the point the error is detected, not at the point the error is returned (which could be after further advance() calls in error recovery code). The current approach ensures the reported position is always where the erroneous character was seen.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:18Z",
+  "updated_at": "2026-04-28T22:19:11Z",
+  "closed_at": "2026-04-28T22:19:11Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:18"
+    }
+  ]
+}

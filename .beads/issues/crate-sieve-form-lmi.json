@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-lmi",
+  "title": "RUSTY review round 5: sieve-form bikeshed check",
+  "description": "Final RUSTY check after round 4 fixes (HashSet borrow, make_ascii_lowercase). Expecting P0=P1=P2=0 and SEC7=YES on both halves.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:50:16Z",
+  "updated_at": "2026-04-28T19:55:06Z",
+  "closed_at": "2026-04-28T19:55:06Z",
+  "notes": "Bikeshed threshold reached: P0=0, P1=0, P2=0, P3=1 (firstline truncate). SEC7=YES. No new actionable findings beyond firstline truncate.\nRound 5 confidence: 90% chance of zero missed P0/P1/P2. Least confident: eval_envelope_test to_ascii_lowercase alloc (decided: below threshold, bounded and clippy-clean). SEC7: YES"
+}

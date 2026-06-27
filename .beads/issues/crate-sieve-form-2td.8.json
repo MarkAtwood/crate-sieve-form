@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.8",
+  "title": "lexer: text: header-line comment rejected (RFC 5228 \u00a72.3)",
+  "description": "TRIGGER: RFC 5228 \u00a72.3.1 permits an optional hash-comment on the 'text:' header line before the terminating newline, e.g. 'text: # a comment\\nhello\\n.\\n'. The lexer currently requires the character immediately after 'text:' to be CR, LF, or CRLF. If any other character follows, it returns Err('expected newline after text:'). BAD BEHAVIOR: valid RFC 5228 scripts with text: comments fail to tokenize. Fix: after consuming 'text:', skip optional whitespace and an optional # comment before requiring the newline.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:23Z",
+  "updated_at": "2026-04-28T20:30:16Z",
+  "closed_at": "2026-04-28T20:30:16Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:22"
+    }
+  ]
+}

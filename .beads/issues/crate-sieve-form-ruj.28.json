@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.28",
+  "title": "advance() expect() is a justified programming-contract assertion",
+  "description": "In lexer.rs, advance() calls chars.next().expect(). Every call site first verifies chars.peek().is_some() before calling advance(). The expect() is therefore an assertion that a logic invariant holds, not a user-input error. It panics only if the lexer has a bug (calling advance on an empty iterator), not on malformed Sieve scripts. A reviewer might suggest returning Option<char> or using unwrap_or, but those would obscure a real logic bug. The expect() with a descriptive message is the correct Rust pattern here.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:19Z",
+  "updated_at": "2026-04-28T22:19:13Z",
+  "closed_at": "2026-04-28T22:19:13Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:19"
+    }
+  ]
+}

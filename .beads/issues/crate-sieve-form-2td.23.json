@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.23",
+  "title": "Correct: elsif/else chain encoding in flat Stmt",
+  "description": "WHY THIS IS CORRECT: After reading a block, read_stmt checks tokens.get(pos) for 'elsif' or 'else' and continues collecting into the same Stmt rather than returning. This correctly encodes if/elsif/else chains as a single flat Stmt whose Form sequence is [Word('if'), test..., Block(...), Word('elsif'), test..., Block(...), Word('else'), Block(...)]. Edge cases: if{} with no continuation returns immediately (pos not consumed beyond the RBrace); if{} elsif{} with no else stops after the second block because the next token is not 'elsif'/'else'. Both cases produce well-formed output.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:19:59Z",
+  "updated_at": "2026-04-28T20:36:26Z",
+  "closed_at": "2026-04-28T20:36:26Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:19:59"
+    }
+  ]
+}

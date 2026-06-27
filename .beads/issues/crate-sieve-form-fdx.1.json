@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-fdx.1",
+  "title": "check_extension_use: param should be &[Form] not &Stmt",
+  "description": "check_extension_use takes &form::Stmt (&Vec<Form>) but only calls .as_slice() internally. The not-recursion on line 252 must do stmt[1..].to_vec() \u2014 cloning each Form (heap String) \u2014 purely to satisfy the &Vec<Form> parameter. Changing the signature to &[Form] and passing stmt.as_slice() at all call sites eliminates that allocation entirely.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:52:09Z",
+  "updated_at": "2026-04-28T20:58:43Z",
+  "closed_at": "2026-04-28T20:58:43Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-fdx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:52:09"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bkx.11",
+  "title": "Token derives PartialEq but not Eq",
+  "description": "lexer.rs Token enum derives PartialEq but not Eq. All Token variants contain only String and u64, both of which are Eq, so Eq can and should be derived. Omitting Eq means Token cannot be used as a HashMap key or HashSet element, and callers cannot write trait bounds on Eq where they mean structural equality. Convention is to always derive Eq alongside PartialEq when all fields are Eq.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:54Z",
+  "updated_at": "2026-04-28T17:39:39Z",
+  "closed_at": "2026-04-28T17:39:39Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:53"
+    }
+  ]
+}

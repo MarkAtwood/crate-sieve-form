@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2ix.8",
+  "title": "StmtResult::Keep vs Stop both map to SieveAction::Keep is correct",
+  "description": "eval_script maps both StmtResult::Keep and StmtResult::Stop (via the _ arm) to SieveAction::Keep. This is correct per RFC 5228 \u00a72.10.2: 'stop' halts execution but still delivers to inbox unless another action was taken, and 'keep' explicitly requests inbox delivery. Both produce the same external disposition. The distinction exists at the StmtResult level to control early exit from eval_stmt_list, not to produce different SieveActions.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:47:14Z",
+  "updated_at": "2026-04-28T19:48:41Z",
+  "closed_at": "2026-04-28T19:48:41Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2ix",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:47:14"
+    }
+  ]
+}

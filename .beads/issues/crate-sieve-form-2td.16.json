@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.16",
+  "title": "for_each_clause correctly isolates regex state per if/elsif clause",
+  "description": "WHY THIS IS CORRECT AND SHOULD BE DEFENDED: validate_stmt uses for_each_clause to split a combined if/elsif stmt into separate clause slices before calling validate_regex_in_clause. This means the :regex tag and pattern in one clause cannot bleed into an adjacent elsif clause that happens to have its Str/StringList appearing later in the flat form list. The test compile_regex_invalid_in_if_clause_with_elsif covers this exact regression. The design is correct: Block boundaries are natural clause separators, and rposition within a clause slice (not the full stmt) correctly identifies the last pattern argument.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:56Z",
+  "updated_at": "2026-04-28T20:35:44Z",
+  "closed_at": "2026-04-28T20:35:44Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:56"
+    }
+  ]
+}

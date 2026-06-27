@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-c4x",
+  "title": "vnd.cyrus.imip (Cyrus IMAP)",
+  "description": "LEGACY alias for processcalendar (RFC 9671). Cyrus maps vnd.cyrus.imip to the newer processcalendar extension. Full syntax: processimip [:invitesonly | :deletecanceled] [:outcome <variable>] [:errstr <variable>] [:calendarid <calendar-id>]. Processes RFC 6047 iMIP calendar invitations (requests, responses, cancellations) during LMTP delivery. Implement as compatibility alias pointing to processcalendar.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:15:00Z",
+  "updated_at": "2026-04-25T01:37:56Z"
+}

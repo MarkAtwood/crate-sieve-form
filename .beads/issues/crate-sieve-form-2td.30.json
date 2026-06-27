@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.30",
+  "title": "Correct: stop and implicit keep semantics per RFC 5228 \u00a74.5, \u00a72.10.2",
+  "description": "WHY THIS IS CORRECT: eval_stmt returns StmtResult::Stop; eval_stmt_list short-circuits and returns Some(Stop); eval_script matches this in the wildcard arm and returns SieveAction::Keep (implicit keep). RFC 5228 \u00a74.5 says stop terminates processing; \u00a72.10.2 says implicit keep applies when no explicit disposition was produced. The code correctly handles all orderings: (1) stop alone \u2192 Keep; (2) fileinto before stop \u2192 FileInto (stops at FileInto, never reaches stop); (3) stop before fileinto \u2192 Keep (never reaches fileinto). The StmtResult::Keep variant from an explicit 'keep' command also propagates correctly via the wildcard arm.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:21:22Z",
+  "updated_at": "2026-04-28T20:36:37Z",
+  "closed_at": "2026-04-28T20:36:37Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:21:22"
+    }
+  ]
+}

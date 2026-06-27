@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.17",
+  "title": "ParseError->SieveError From relies on undocumented line-presence invariant",
+  "description": "parse_error.rs line 86: From<ParseError> for SieveError infers SieveErrorKind::Lex vs ::Parse from e.line.is_some(). The invariant 'lexer always sets line; form parser never does' is only documented on the struct, not in the From impl. A contributor adding a form-layer error with line info would silently produce a Lex kind. Add a comment in the From impl citing the invariant, or split into two error types at the type level.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:52:26Z",
+  "updated_at": "2026-04-28T19:20:39Z",
+  "closed_at": "2026-04-28T19:20:39Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:52:26"
+    }
+  ]
+}

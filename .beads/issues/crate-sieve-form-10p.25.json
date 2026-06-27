@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.25",
+  "title": "Clause-scoped regex validation prevents elsif shadowing",
+  "description": "lib.rs validate_stmt: the clause_start tracking resets per Block boundary so that regex pattern validation is scoped to each if/elsif clause independently. This prevents a valid Str in an elsif clause from masking an invalid Str in the preceding if clause (the regression test compile_regex_invalid_in_if_clause_with_elsif covers this). A contributor might simplify to scanning the full flat stmt for the last Str. That would be wrong: it would let invalid patterns in early clauses pass if a valid pattern appeared later. The per-clause scoping is load-bearing and the regression test must stay.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:08:19Z",
+  "updated_at": "2026-04-28T22:19:26Z",
+  "closed_at": "2026-04-28T22:19:26Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:08:18"
+    }
+  ]
+}

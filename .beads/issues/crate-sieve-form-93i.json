@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-93i",
+  "title": "crate-sieve-form-2r1",
+  "description": "Keep, FileInto, Discard, and Reject(String) have no doc comments. Redirect is the only variant with one. Reject in particular needs: what the String contains (human-readable rejection reason), that it requires require [\"reject\"] (RFC 5429 \u00a72.1), and what the MTA is expected to do with it. Callers matching on SieveAction need this information.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:31:40Z",
+  "updated_at": "2026-04-28T18:34:21Z",
+  "closed_at": "2026-04-28T18:34:21Z"
+}

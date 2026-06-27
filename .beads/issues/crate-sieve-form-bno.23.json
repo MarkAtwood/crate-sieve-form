@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.23",
+  "title": "Clause-scoped regex validation in validate_stmt is the correct fix for the if/elsif pattern",
+  "description": "validate_stmt and collect_regex_patterns both track clause_start and reset has_regex_tag when a Form::Block is encountered. This correctly scopes :regex tag detection to each if/elsif clause independently, preventing a valid string in a later elsif from masking an invalid pattern in an earlier if clause. A reviewer might suggest collapsing this to a simple flat scan over all forms in the stmt. That would re-introduce the bug: in 'if header :regex \"Subject\" \"[invalid\" {} elsif header :is \"To\" \"key\" {}', the flat scan would find :regex, then find the last Str which is \"key\" (valid), and incorrectly accept the script. The clause-scoped approach is the correct and necessary design.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:23:52Z",
+  "updated_at": "2026-04-28T22:19:06Z",
+  "closed_at": "2026-04-28T22:19:06Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:23:51"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-oal",
+  "title": "duplicate extension (RFC 7352)",
+  "description": "Implement duplicate test to detect duplicate message deliveries using message ID, tracked across a configurable time window. Supports :header, :uniqueid, :seconds, :last, :handle parameters. See RFC 7352.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:32Z",
+  "updated_at": "2026-04-25T01:14:32Z"
+}

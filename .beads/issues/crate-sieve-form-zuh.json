@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-zuh",
+  "title": "fcc extension (RFC 8580)",
+  "description": "Implement :fcc argument for vacation and notify actions to file a copy of the generated message into a specified mailbox. See RFC 8580.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:35Z",
+  "updated_at": "2026-04-25T01:14:35Z"
+}

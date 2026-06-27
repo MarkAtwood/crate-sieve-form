@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-7wj",
+  "title": "crate-sieve-form-2r1",
+  "description": "Two implemented features have no integration tests: (1) eval_envelope_test reads SMTP envelope from/to; the envelope extension is in KNOWN_EXTENSIONS and the evaluator path exists, but tests/rfc_vectors.rs has no test for it. (2) redirect is fully implemented (SieveAction::Redirect, evaluator.rs:128-130) but tests/rfc_vectors.rs has a stale comment saying redirect is not implemented (line 71). A redirect integration test is absent. Both are easily testable with compile() + evaluate() and a hand-traceable expected output.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:32:13Z",
+  "updated_at": "2026-04-28T18:35:57Z",
+  "closed_at": "2026-04-28T18:35:57Z"
+}

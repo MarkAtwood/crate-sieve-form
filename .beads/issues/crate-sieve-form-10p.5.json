@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.5",
+  "title": "chained Vec<&Form> extraction is awkward abstraction",
+  "description": "extract_match_type, extract_comparator, and extract_address_part all take &[&Form] and return (T, Vec<&Form>) so they can be chained. This pattern forces the caller to write three lines of let-binding and results in three allocations for what is conceptually a single scan of a short slice (evaluator.rs:546-549, 569-573, 595-598). Suggested rewrite: a single extract_test_opts() function that takes &[Form] and returns a struct { match_type, comparator, address_part, remaining: &[Form] } via one linear scan, keeping remaining as a slice view (or start/end indices) rather than an owned Vec.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:32Z",
+  "updated_at": "2026-04-28T22:20:12Z",
+  "closed_at": "2026-04-28T22:20:12Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:31"
+    }
+  ]
+}

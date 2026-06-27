@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2jm.4",
+  "title": "SieveError struct literal repeated 9x without constructor",
+  "description": "lib.rs constructs SieveError { message: format!(...), kind: ..., source: None } as a literal in nine separate call sites. Each repetition must remember to set source: None, which is error-prone. Idiomatic Rust would add a SieveError::new(kind: SieveErrorKind, message: String) -> Self constructor so call sites write SieveError::new(kind, format!(...)) instead. The pub(crate) source field is then encapsulated. This also removes the risk of accidentally omitting source: None in future additions.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:37:36Z",
+  "updated_at": "2026-04-28T19:40:34Z",
+  "closed_at": "2026-04-28T19:40:34Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:37:35"
+    }
+  ]
+}

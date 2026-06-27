@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-688",
+  "title": "environment extension (RFC 5183)",
+  "description": "Implement the environment test to query interpreter/system environment (e.g., domain, host, phase, remote-host, remote-ip). See RFC 5183.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:13:52Z",
+  "updated_at": "2026-04-25T01:13:52Z"
+}

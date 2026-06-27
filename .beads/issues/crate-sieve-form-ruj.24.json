@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.24",
+  "title": "read_test_stmt duplicates read_stmt token handling",
+  "description": "read_test_stmt in form.rs is a near-verbatim copy of read_stmt: both convert the same six token variants (Word, Tag, StringLit, Number, LBracket, LParen, LBrace) into the corresponding Form. The only difference is that read_test_stmt stops at Comma/RParen instead of Semicolon. Suggested rewrite: extract fn read_form(tokens, pos) -> Result<Option<(Form, usize)>, ParseError> that converts one token to one Form (or returns None for stop tokens the caller defines). Both read_stmt and read_test_stmt loop over it, passing their respective stop-token predicate.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:02Z",
+  "updated_at": "2026-04-28T22:20:25Z",
+  "closed_at": "2026-04-28T22:20:25Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:02"
+    }
+  ]
+}

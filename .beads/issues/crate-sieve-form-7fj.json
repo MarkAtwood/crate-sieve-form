@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-7fj",
+  "title": "vnd.dovecot.pipe (Dovecot)",
+  "description": "Implement Dovecot pipe extension: pipe action passes the message to a pre-approved external program via stdin. Part of sieve_extprograms plugin. Requires administrator-configured allowlist.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:48Z",
+  "updated_at": "2026-04-25T01:14:48Z"
+}

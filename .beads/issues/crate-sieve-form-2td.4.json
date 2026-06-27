@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.4",
+  "title": "Unbounded recursion on deeply nested blocks",
+  "description": "TRIGGER: a Sieve script with O(N) nested if/block structures (each { opens a block). read_stmt calls read_block which calls read_stmt \u2014 mutual recursion with no depth guard. A crafted 10,000-deep script exhausts the default Rust stack and panics with a stack overflow instead of returning a clean ParseError. BAD BEHAVIOR: process panics rather than returning Err(ParseError). Fix: add a depth counter threaded through read_stmt/read_block and return ParseError when it exceeds a reasonable limit (e.g. 200).",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:09Z",
+  "updated_at": "2026-04-28T20:30:28Z",
+  "closed_at": "2026-04-28T20:30:28Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:09"
+    }
+  ]
+}

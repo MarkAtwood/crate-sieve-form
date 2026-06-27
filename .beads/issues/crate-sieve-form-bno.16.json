@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.16",
+  "title": "Document From<ParseError> line>0 sentinel in impl",
+  "description": "From<ParseError> for SieveError (parse_error.rs:65-77) branches on e.line > 0 to choose between SieveErrorKind::Lex and SieveErrorKind::Parse. This logic is only comprehensible if the reader already knows that the form parser always emits line:0 as a sentinel for 'no position'. That invariant is documented on ParseError's struct doc comment, not on the From impl. A reader modifying the From impl without reading the struct docs will not understand why 0 is the branch condition. The impl should carry a brief inline comment explaining the sentinel, or \u2014 better \u2014 the ParseError struct doc should be referenced explicitly.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:23:07Z",
+  "updated_at": "2026-04-28T22:28:03Z",
+  "closed_at": "2026-04-28T22:28:03Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:23:06"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-943",
+  "title": "spamtest and virustest extensions (RFC 5235)",
+  "description": "Implement spamtest and virustest tests to check spam/virus scores assigned by mail infrastructure. Requires :percent option. Depends on relational (RFC 5231). See RFC 5235.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:01Z",
+  "updated_at": "2026-04-25T01:14:01Z"
+}

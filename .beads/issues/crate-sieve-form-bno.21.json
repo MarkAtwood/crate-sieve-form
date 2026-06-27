@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.21",
+  "title": "Regex pre-compilation cache with casemap variant keys is correct design",
+  "description": "The regex cache in lib.rs pre-compiles two variants of every pattern at compile() time: the base anchored pattern and the (?i)-prefixed casemap variant, keyed by their respective strings. The glob cache uses 'glob:{pattern}' and '(?i)glob:{pattern}' keys to avoid collision with raw regex keys. A reviewer might suggest caching only at eval time or using a single regex with runtime flag switching. The pre-compilation approach is correct: regex compilation is expensive, the cache is read-only after build, it is shared via Arc across threads, and the two-variant scheme ensures both comparators are covered without recompiling at eval time. The key scheme is airtight.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:23:35Z",
+  "updated_at": "2026-04-28T22:19:05Z",
+  "closed_at": "2026-04-28T22:19:05Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:23:35"
+    }
+  ]
+}

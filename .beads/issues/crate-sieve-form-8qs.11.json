@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.11",
+  "title": "Per-test Vec allocations in eval hot path",
+  "description": "eval_header_test, eval_address_test, and eval_envelope_test each collect forms into Vec<&Form>, then extract_match_type allocates another Vec<&Form>, then extract_comparator allocates another, then extract_address_part allocates another. That is 4 Vec heap allocations per test invocation on slices of typically 4-8 elements. These are called on every evaluate() for every header/address/envelope test clause. Fix: scan the slice by index in a single pass, recording tag positions and string-list positions without constructing intermediate Vecs. Expected impact: eliminates 3-4 small allocations per test per message, measurable on message-processing workloads.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:47Z",
+  "updated_at": "2026-04-28T19:23:29Z",
+  "closed_at": "2026-04-28T19:23:29Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:47"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.24",
+  "title": "bare_address: < inside comment body extracts wrong addr",
+  "description": "TRIGGER: Header value 'user@example.com (comment < with > inside it)' passed to bare_address(). BAD BEHAVIOR: rfind('<') matches the '<' inside the RFC 5322 comment body; addr[start..].find('>') then matches the '>' inside the comment, returning the junk string between them (e.g., ' with ') instead of 'user@example.com'. The function should skip '<' characters inside '(...)' comments before deciding which '<' is the angle-bracket delimiter. Address test on such a header returns a wrong match result.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:20:34Z",
+  "updated_at": "2026-04-28T20:30:23Z",
+  "closed_at": "2026-04-28T20:30:23Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:20:33"
+    }
+  ]
+}

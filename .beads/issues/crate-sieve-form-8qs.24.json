@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.24",
+  "title": "Compile-time Send+Sync assertion for CompiledScript is correct and should be kept",
+  "description": "lib.rs lines 58-64 use a const block with an inner fn to assert CompiledScript: Send+Sync at compile time. A reviewer might suggest removing it as redundant ('the compiler already checks this when you use it'). That is wrong: the assertion makes the Send+Sync guarantee explicit and visible in the source, documents the design intent, and makes a future regression (e.g. adding a non-Send field) fail at the definition site rather than at a distant use site. This pattern is idiomatic Rust for public types that document their thread-safety guarantees.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:55:14Z",
+  "updated_at": "2026-04-28T19:24:34Z",
+  "closed_at": "2026-04-28T19:24:34Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:55:13"
+    }
+  ]
+}

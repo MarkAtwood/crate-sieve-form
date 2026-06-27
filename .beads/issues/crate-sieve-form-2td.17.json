@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.17",
+  "title": "Form layer loses all position information for error messages",
+  "description": "SCENARIO: All ParseErrors from the form layer have line: None and col: None (documented as intentional). When a script has a structural error caught at the form layer \u2014 e.g. unclosed bracket, unexpected comma \u2014 the error message contains no source location. For any script longer than a few lines, this makes errors hard to diagnose. The evaluator layer (which reports errors as SieveError with no position either) compounds this. MAINTENANCE CONSEQUENCE: every bug report from users will require manual bisection to find the offending line. Fix: at minimum, thread token indices through the form layer and map them back to the original line/col from the token stream. Tokens do not currently carry position; adding position to Token is a prerequisite.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:19:00Z",
+  "updated_at": "2026-04-28T20:37:59Z",
+  "closed_at": "2026-04-28T20:37:59Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:19:00"
+    }
+  ]
+}

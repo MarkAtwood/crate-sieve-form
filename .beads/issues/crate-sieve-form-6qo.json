@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-6qo",
+  "title": "vacation-seconds extension (RFC 6131)",
+  "description": "Implement :seconds parameter for vacation action, allowing sub-day repeat suppression intervals. Extends RFC 5230 vacation. See RFC 6131.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:24Z",
+  "updated_at": "2026-04-25T01:14:24Z"
+}

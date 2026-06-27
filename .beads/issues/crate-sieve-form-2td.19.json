@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.19",
+  "title": "Correct: checked_mul for K/M/G multipliers returns clean error",
+  "description": "WHY THIS IS CORRECT: The lexer parses the numeric base with str::parse::<u64>() (which returns Err on overflow), then multiplies by the size suffix using checked_mul. Both overflow paths return a clean ParseError with the source location. A value like 18446744073709551616K gets rejected at the base parse step; a value like 18000000000G gets rejected at the checked_mul step. No silent wrapping or panic is possible on any input.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:19:07Z",
+  "updated_at": "2026-04-28T20:35:56Z",
+  "closed_at": "2026-04-28T20:35:56Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:19:07"
+    }
+  ]
+}

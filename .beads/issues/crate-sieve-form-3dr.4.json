@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.4",
+  "title": "Script type doc has broken intra-doc links",
+  "description": "In form.rs, the Script type alias has a doc comment with empty intra-doc links: 'Returned by [].' and 'see [] stability note.' These are broken references that will render as literal '[]' in rustdoc. Fix: fill in the intended targets (likely read_script and Stmt respectively) or remove the brackets.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:05:09Z",
+  "updated_at": "2026-04-28T21:13:51Z",
+  "closed_at": "2026-04-28T21:13:51Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:05:08"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-dwv.3",
+  "title": "find_header_end searches CRLF before LF \u2014 prevents false split on LF",
+  "description": "find_header_end searches for \\r\\n\\r\\n first and only falls back to \\n\\n. This ordering is correct: if the message uses CRLF line endings, a \\n\\n search would produce a false match on the LF bytes inside the CRLF pairs. Searching CRLF-first ensures we split at the actual separator and not mid-sequence. The two-pass approach (search, then fallback) is simpler and correct given that real messages use one consistent line-ending style.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:27:01Z",
+  "updated_at": "2026-04-28T22:19:45Z",
+  "closed_at": "2026-04-28T22:19:45Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-dwv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:27:01"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-zrq",
+  "title": "RUSTY Review Round 3: full project",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:24:52Z",
+  "updated_at": "2026-04-28T19:34:13Z",
+  "closed_at": "2026-04-28T19:34:13Z",
+  "notes": "Idiom rating: ACCEPTABLE \u2014 code is well-structured and mostly idiomatic Rust; the main open concerns (duplicate walks, eval-time cache key allocations, read_test_stmt duplication) are pre-existing tracked issues, not new regressions.\nConfidence: 85% chance of missed issue. Least confident: (1) bare_address rfind/find interaction with pathological comment+angle-bracket inputs, (2) check_extension_use coverage of nested allof/anyof containing extension tests \u2014 exercised only by manual trace, no dedicated test. Uncertainty: no runtime execution; all analysis was static read-through."
+}

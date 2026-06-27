@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.22",
+  "title": "ParseError lacks #[non_exhaustive], is a semver trap",
+  "description": "ParseError is in pub mod parse_error with all-pub fields and NO #[non_exhaustive] annotation. Any future addition of a field (e.g. a byte offset, a source snippet) is a semver breaking change because callers can construct and pattern-match ParseError directly. SieveError has #[non_exhaustive] on both struct and enum; ParseError should too. Additionally, ParseError is not re-exported at the crate root \u2014 callers must write sieve_form::parse_error::ParseError rather than sieve_form::ParseError \u2014 which is inconsistent with SieveError/SieveErrorKind.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:08:01Z",
+  "updated_at": "2026-04-28T18:18:32Z",
+  "closed_at": "2026-04-28T18:18:32Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:08:00"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.3",
+  "title": "Avoid repeated refs-vec allocation in test evaluators",
+  "description": "eval_header_test, eval_address_test, and eval_envelope_test all start with `let refs: Vec<&Form> = forms.iter().collect();` and then pass that Vec through three chained extract_* functions, each of which returns a new Vec<&Form>. This is three allocations plus the initial collect per test invocation. The extract_* functions could take `&[Form]` directly (iterating with .iter()) and return a filtered SmallVec or just iterate twice. A cleaner alternative: replace the three extract_* functions with a single `extract_test_args(forms: &[Form]) -> TestArgs` struct that fills MatchType, Comparator, AddressPart, names, and keys in one pass, eliminating all intermediate Vecs. The current pattern also means the signature `fn extract_match_type<'a>(forms: &[&'a Form])` is unusual \u2014 it takes a slice of references to Form rather than a slice of Form, which is a type-level smell.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:23Z",
+  "updated_at": "2026-04-28T19:24:10Z",
+  "closed_at": "2026-04-28T19:24:10Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:22"
+    }
+  ]
+}

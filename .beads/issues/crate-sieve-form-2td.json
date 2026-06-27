@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-2td",
+  "title": "Review: sieve-form 0.1.0 full project post-RUSTY",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:16:11Z",
+  "updated_at": "2026-04-28T20:38:59Z",
+  "closed_at": "2026-04-28T20:38:59Z",
+  "notes": "lib+parse_error SEC0: 75% chance of missed bug. Least confident: (1) whether check_extension_use correctly covers all Extension test positions in allof/anyof when used as top-level statements (not under if); (2) whether the for_each_clause trailing-visit path for TestList-only stmts can produce a false no-error on a malformed clause; (3) edge behavior of expand_vars when variables substitution produces a string that itself contains dollar-sequences (no re-expansion per RFC 5229 \u2014 confirmed correct by reading evaluator, but no test). SEC7: NO \u2014 multi-action semantics and the set-without-require path are not covered by tests.\nform+lexer SEC0: 15% chance of missed bug. Least confident: (1) whether RFC 5228 requires whitespace to be permitted between 'text:' and the optional hash-comment (the spec text is ambiguous about what is permitted on the header line beyond the hash-comment); (2) whether the evaluator handles Form::TestList([]) (empty test list from anyof()) without panicking \u2014 not reviewable from form.rs alone; (3) whether the 'text' identifier can legitimately appear followed by ':' in a variable-extension script in a position where greedy matching to multiline-string would be wrong. SEC7: YES \u2014 all material correctness findings have been filed as bugs.\nevaluator+message SEC0: 20% chance of missed bug. Least confident: expand_vars backslash-dollar RFC 5229 \u00a73.1 behavior (filed 2td.27, RFC examples are genuinely ambiguous and could go either way), bare_address handling of additional RFC 5322 address forms (e.g., group syntax 'GroupName: addr1, addr2;' is not handled at all). SEC7: YES \u2014 all findings have been filed as bd issues."
+}

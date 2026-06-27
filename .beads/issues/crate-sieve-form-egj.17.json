@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-egj.17",
+  "title": "Regex validation scans backwards to avoid false-positive on header names",
+  "description": "lib.rs:170-195: validate_stmt validates only the last Str/StringList in a :regex statement as a regex pattern, not the first (header field name). A reviewer might suggest validating all strings; this is wrong. 'X[Special]' is a legal RFC 5322 header name but an invalid regex. The backwards-scan approach is the correct way to identify the key-list without knowing the schema of each Sieve command. The test compile_regex_does_not_validate_header_name_as_pattern verifies this property explicitly. Defend the backwards-scan approach.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:26:11Z",
+  "updated_at": "2026-04-28T16:58:38Z",
+  "closed_at": "2026-04-28T16:58:38Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:26:11"
+    }
+  ]
+}

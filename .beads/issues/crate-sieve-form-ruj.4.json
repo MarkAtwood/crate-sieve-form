@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-ruj.4",
+  "title": "Form enum missing #[non_exhaustive]",
+  "description": "Form is a public enum in the public form module but is not marked #[non_exhaustive]. Any downstream crate that exhaustively matches on Form will get a compile error when a new variant is added (e.g. for a new Sieve syntax element). Idiomatic Rust marks public enums #[non_exhaustive] when the variant set is expected to grow, to avoid SemVer breaks.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:00:51Z",
+  "updated_at": "2026-04-28T17:11:17Z",
+  "closed_at": "2026-04-28T17:11:17Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:00:50"
+    }
+  ]
+}

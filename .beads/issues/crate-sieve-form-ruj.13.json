@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.13",
+  "title": "address_part/bare_address always returns owned String",
+  "description": "message::address_part and bare_address return String even for the AddressPart::All case, which could return &str borrowed from the input. In eval_address_test and eval_envelope_test these are called inside the inner header-matching loop. Changing the return type to Cow<str> would avoid the allocation for the common :all case and the addr.to_string() fallback in bare_address \u2014 expected impact: one String allocation eliminated per matched header field in :address/:envelope tests.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:13Z",
+  "updated_at": "2026-04-28T22:20:24Z",
+  "closed_at": "2026-04-28T22:20:24Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:13"
+    }
+  ]
+}

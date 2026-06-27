@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.17",
+  "title": "CRLF col tracking off-by-one not documented",
+  "description": "lexer.rs advance(): on CRLF line endings the \\r increments col before \\n resets it to 1, meaning the col number for a token at the start of a line following CRLF is correct, but col reported for the \\r itself is one higher than the actual column. This is benign in practice (line numbers are correct, col is advisory) but will confuse a contributor who tries to improve position tracking. Add a comment in advance() noting that col is best-effort and is not corrected for \\r in CRLF sequences.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:38Z",
+  "updated_at": "2026-04-28T22:26:45Z",
+  "closed_at": "2026-04-28T22:26:45Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:38"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.27",
+  "title": "allof/anyof use .all()/.any() short-circuit iterators correctly",
+  "description": "eval_allof and eval_anyof (evaluator.rs:243-255) use Iterator::all() and Iterator::any() which short-circuit on the first false/true result. A reviewer might suggest replacing with explicit loops for 'clarity.' The iterator form is more idiomatic Rust and the short-circuit property is implicit in the standard library guarantee for all/any, so it is both correct and idiomatic. The single-line implementation is the right level of abstraction here.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:55:48Z",
+  "updated_at": "2026-04-28T19:24:45Z",
+  "closed_at": "2026-04-28T19:24:45Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:55:47"
+    }
+  ]
+}

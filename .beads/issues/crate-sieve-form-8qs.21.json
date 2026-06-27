@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.21",
+  "title": "eval_*_test allocates Vec<&Form> to pass as slice",
+  "description": "evaluator.rs lines 542/565/594: eval_header_test, eval_address_test, eval_envelope_test each begin let refs: Vec<&Form> = forms.iter().collect(). This heap-allocates a Vec of references on every test evaluation solely to satisfy the &[&Form] signature of the extract_* functions. Changing extractor signatures to &[Form] eliminates three per-call heap allocations.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:53:24Z",
+  "updated_at": "2026-04-28T18:56:42Z",
+  "closed_at": "2026-04-28T18:56:42Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:53:23"
+    }
+  ]
+}

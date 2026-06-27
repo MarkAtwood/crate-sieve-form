@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2ix.4",
+  "title": "SieveAction::Display uses {:?} for string payloads \u2014 intentional",
+  "description": "SieveAction::Display (lib.rs lines 104-107) formats FileInto/Reject/Redirect payloads with {:?} (debug), producing output like 'fileinto \"Spam\"'. Using {?} for Display is unusual and a reviewer might flag it. However this is intentional: the Display output mimics Sieve source syntax, and quoting the string operand makes the output unambiguous. This is a valid design choice, not a bug.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:46:42Z",
+  "updated_at": "2026-04-28T19:48:38Z",
+  "closed_at": "2026-04-28T19:48:38Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2ix",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:46:41"
+    }
+  ]
+}

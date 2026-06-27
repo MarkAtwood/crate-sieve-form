@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.5",
+  "title": "expand_vars: gratuitous alloc when backslash present but no substitution",
+  "description": "expand_vars has a fast-path check for strings containing no '$' or '\\\\'. When a string contains '\\\\' but no actual variable substitutions (e.g. no '\\\\$' sequences and no '${...}' patterns), the function falls into the slow path, allocates and fully builds 'out' via char-by-char iteration, then returns Cow::Borrowed(s) (discarding the allocation) because modified==false. This wastes O(n) heap time for any string literal containing a literal backslash. Fix: either set modified=true whenever output diverges from input, or restructure to write into out only after a real substitution is confirmed.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:05:16Z",
+  "updated_at": "2026-04-28T22:20:25Z",
+  "closed_at": "2026-04-28T22:20:25Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:05:16"
+    }
+  ]
+}

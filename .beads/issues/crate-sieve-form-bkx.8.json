@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bkx.8",
+  "title": "err! macro calls .to_string() on format! result",
+  "description": "The err! macro in lexer.rs (line 42) always calls .to_string() on its argument. When called as err!(format!(...)) \u2014 the only call site using a dynamic message (line 311) \u2014 this calls String::to_string() which is a redundant clone of an already-owned String. The macro should accept a String directly and assign it, not call .to_string(). String literals passed to the macro are fine to .to_owned(); the fix is to change .to_string() to .into() so both &str literals and String values are accepted without redundant allocation.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:22Z",
+  "updated_at": "2026-04-28T17:39:42Z",
+  "closed_at": "2026-04-28T17:39:42Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:22"
+    }
+  ]
+}

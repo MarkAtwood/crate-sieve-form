@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.8",
+  "title": "apply_set_modifiers: sorted Vec alloc for small fixed-size modifier set",
+  "description": "apply_set_modifiers allocates a Vec<&str> via modifiers.to_vec() and calls sort_unstable_by_key. The modifier set has at most 4 elements (lower/upper/length/quotewildcard/firstline). Sorting a heap-allocated Vec for a max-4-element collection is wasteful; an insertion into a small fixed-size array or a manual precedence-ordered application would avoid the alloc. This is a micro-optimization but it's on the set-command hot path.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:05:36Z",
+  "updated_at": "2026-04-28T22:25:08Z",
+  "closed_at": "2026-04-28T22:25:08Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:05:36"
+    }
+  ]
+}

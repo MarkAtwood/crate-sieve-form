@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-dwv",
+  "title": "Review: sieve-form MY-OSS round 2",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:25:40Z",
+  "updated_at": "2026-04-28T22:19:59Z",
+  "closed_at": "2026-04-28T22:19:59Z",
+  "notes": "Maintainer risk: MEDIUM \u2014 wrong error kind for missing-require violations will mislead callers and be copied by contributors; Redirect has no caller guidance; efficiency issues are minor constant-factor only.\nConfidence: 12% chance of missed bug. Least confident flags: (1) redirect and envelope extensions have no evaluator-level integration tests \u2014 the paths are implemented but untested; a typo or off-by-one in a future refactor would go undetected. (2) bare_address uses rfind('<') without respecting quoted strings in the pre-split input \u2014 a display name containing a literal '<' inside double quotes would cause bare_address to extract the wrong range; however split_addresses correctly guards the comma split, so only a perverse address like '\"A <fake\" <real@x.com>' in a single unsplit header field would hit this. Both are real gaps but neither is a correctness regression from the prior round. Bikeshedding: YES \u2014 running out of real complaints. Remaining items are test coverage gaps (not bugs) and a theoretical edge case in RFC 5322 quoted-string parsing that real mail does not exercise.\nSEC0: CLEAN"
+}

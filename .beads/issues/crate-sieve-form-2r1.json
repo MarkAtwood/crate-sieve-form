@@ -1,0 +1,12 @@
+{
+  "id": "crate-sieve-form-2r1",
+  "title": "Review: sieve-form MY-OSS round 3",
+  "status": "in_progress",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:29:04Z",
+  "updated_at": "2026-04-28T18:32:26Z",
+  "notes": "Bikeshedding: NO. Confidence: 10% missed bug. New P0/P1/P2 found: 3. Summary: No correctness bugs found but three P2 gaps remain: missing doc comments on SieveAction variants (esp Reject), zero test coverage for the not operator, and no integration tests for the envelope test or redirect action (with a stale 'not implemented' comment)."
+}

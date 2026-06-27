@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.6",
+  "title": "Deduplicate validate_stmt / collect_regex_patterns walker",
+  "description": "validate_stmt (lib.rs:174) and collect_regex_patterns (lib.rs:275) implement the same imperative index-loop + clause-boundary state machine (clause_start, has_*_tag, Block-triggers-flush) identically. The only difference is the action taken on each clause (validate vs cache). This is ~60 lines duplicated. A shared clause-walker abstraction (e.g. a closure or trait-callback that receives each clause slice + match-type) would remove the duplication and make it impossible for the two passes to diverge in how they identify clause boundaries.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:17:23Z",
+  "updated_at": "2026-04-28T22:20:42Z",
+  "closed_at": "2026-04-28T22:20:42Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:17:23"
+    }
+  ]
+}

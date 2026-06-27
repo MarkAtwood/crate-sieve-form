@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2ix.1",
+  "title": "HashSet<String> in compile() should borrow as HashSet<&str>",
+  "description": "In compile() (lib.rs ~line 149), declared_extensions is HashSet<String> populated by cloning &String values out of the already-owned parsed forms. Because parsed outlives declared_extensions in the same function body, this could be HashSet<&str> borrowing directly from the Form::Str(s) payloads \u2014 eliminating one String allocation and clone per declared extension. The contains() calls already use as_str() correctly, so the change is local to the declaration and insert sites.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:46:22Z",
+  "updated_at": "2026-04-28T19:49:44Z",
+  "closed_at": "2026-04-28T19:49:44Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2ix",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:46:22"
+    }
+  ]
+}

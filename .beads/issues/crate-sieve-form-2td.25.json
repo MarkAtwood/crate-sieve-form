@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.25",
+  "title": "quotewildcard: backslash not escaped per RFC 5229 \u00a74.1.2",
+  "description": "TRIGGER: set :quotewildcard applied to a value containing a backslash character, e.g. value = 'path\\to\\file'. BAD BEHAVIOR: RFC 5229 \u00a74.1.2 states 'Every character with special meaning (*,  ?, and \\) is prefixed with \\ in the expansion.' Current code only replaces '*' and '?' but does NOT escape backslash. A backslash in the value is left unescaped, meaning that if the result is used in a :matches test, the backslash will be interpreted as a glob escape character rather than a literal backslash. This is a MUST-level requirement in the RFC (the word 'every' is unambiguous).",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:20:41Z",
+  "updated_at": "2026-04-28T20:29:11Z",
+  "closed_at": "2026-04-28T20:29:11Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:20:41"
+    }
+  ]
+}

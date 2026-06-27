@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.30",
+  "title": "Peekable<Chars> single-char lookahead for block comments is correct",
+  "description": "The block comment handler in lexer.rs (lines 68-96) consumes '/' via advance(), then peeks for '*' \u2014 one character of lookahead. The '*/' terminator detection (line 83) reads a char via advance(), then peeks for '/' \u2014 again one character of lookahead. Peekable<Chars> provides exactly one character of lookahead, and the code uses it correctly at each decision point without ever needing to look two characters ahead simultaneously. A reviewer might suggest a sliding-window or multi-peek approach, but the existing step-by-step approach is correct, idiomatic, and does not require any additional lookahead beyond what Peekable provides.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:33Z",
+  "updated_at": "2026-04-28T22:19:13Z",
+  "closed_at": "2026-04-28T22:19:13Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:32"
+    }
+  ]
+}

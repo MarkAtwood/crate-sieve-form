@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-qhq",
+  "title": "vnd.cyrus.jmapquery (Cyrus/Fastmail)",
+  "description": "Implement Cyrus/Fastmail jmapquery extension: jmapquery test filters messages using a JMAP filter object (RFC 8621 \u00a72) for powerful server-side filtering. Used by Fastmail.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:15:01Z",
+  "updated_at": "2026-04-25T01:15:01Z"
+}

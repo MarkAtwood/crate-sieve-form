@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.28",
+  "title": "KNOWN_EXTENSIONS lives in evaluator as single source of truth",
+  "description": "lib.rs/evaluator.rs: KNOWN_EXTENSIONS is defined in evaluator.rs (the layer that implements extensions) and referenced by compile() in lib.rs. The comment explicitly notes 'adding a new extension to the evaluator requires adding its name here'. A contributor might move it to lib.rs for visibility. That would break the invariant: the evaluator would then be able to implement an extension without automatically exposing it to compile(). The current location enforces the correct discipline that an extension is not 'known' until the evaluator implements it.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:08:32Z",
+  "updated_at": "2026-04-28T22:19:39Z",
+  "closed_at": "2026-04-28T22:19:39Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:08:31"
+    }
+  ]
+}

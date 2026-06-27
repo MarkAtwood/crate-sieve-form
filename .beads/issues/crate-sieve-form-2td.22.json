@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.22",
+  "title": "Correct: unclosed delimiters produce clean errors, not panics",
+  "description": "WHY THIS IS CORRECT: read_string_list, read_test_list, and read_block all check pos >= tokens.len() at the top of their loop and return descriptive ParseErrors before any index operation. Unclosed '[', '(', and '{' at any nesting level produce clean errors. The lexer similarly handles unterminated quoted strings and unterminated block comments with explicit EOF checks before advancing. No panic path exists for malformed-but-finite input in the delimiter handling.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:19:26Z",
+  "updated_at": "2026-04-28T20:36:21Z",
+  "closed_at": "2026-04-28T20:36:21Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:19:25"
+    }
+  ]
+}

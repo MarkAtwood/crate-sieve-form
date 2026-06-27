@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.26",
+  "title": "sieve_glob_to_regex allocates per-char strings",
+  "description": "sieve_glob_to_regex calls fancy_regex::escape(&other.to_string()) for each non-special character, allocating a String per char. fancy_regex::escape accepts &str; a char can be pushed to a stack buffer or formatted inline. Suggested rewrite: use a small [u8; 4] buffer via char::encode_utf8 or push the char to a scratch String allocated once, and pass it to escape: let mut buf = String::new(); buf.push(other); out.push_str(&fancy_regex::escape(&buf)); buf.clear();. This replaces N small heap allocations with one reused buffer.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:09Z",
+  "updated_at": "2026-04-28T22:25:18Z",
+  "closed_at": "2026-04-28T22:25:18Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:09"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2ix.5",
+  "title": "expand_vars: wasted alloc when no substitution",
+  "description": "evaluator.rs expand_vars(): when the input contains '$' or '\\' the function allocates out=String::with_capacity and fills it char-by-char, then returns Cow::Borrowed(s) if modified==false (i.e. nothing actually changed). The fully-filled out is then dropped \u2014 wasted heap allocation. Fix: delay construction of out until the first substitution is actually about to occur, pushing everything before the trigger point into out at that point. Alternatively, just always return Cow::Owned(out) when out has been built, removing the modified flag entirely, accepting the difference in pointer identity but not correctness.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:46:52Z",
+  "updated_at": "2026-04-28T19:48:32Z",
+  "closed_at": "2026-04-28T19:48:32Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2ix",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:46:51"
+    }
+  ]
+}

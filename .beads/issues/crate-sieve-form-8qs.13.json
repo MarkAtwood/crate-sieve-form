@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.13",
+  "title": "eval_*_test allocates Vec<&Form> to call extract_* helpers",
+  "description": "eval_header_test, eval_address_test, and eval_envelope_test each allocate an intermediate Vec<&Form> (via forms.iter().collect()) solely to satisfy extract_match_type, extract_comparator, and extract_address_part which take &[&Form]. These helpers could instead take &[Form] directly (iterating over references internally), eliminating one Vec allocation per test evaluation. As-is this creates three short-lived heap allocations on every single test evaluation, which compounds in scripts with many header tests.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:53Z",
+  "updated_at": "2026-04-28T18:53:08Z",
+  "closed_at": "2026-04-28T18:53:08Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:52"
+    }
+  ]
+}

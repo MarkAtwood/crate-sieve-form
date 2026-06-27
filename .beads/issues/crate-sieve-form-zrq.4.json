@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-zrq.4",
+  "title": "cache_pattern: unnecessary clone of base string",
+  "description": "In lib.rs cache_pattern (line 484): let base = format!(...); ... cache.insert(base.clone(), re); let ci = format!(\"(?i){base}\"); The clone is unnecessary because ci can be built before the insert, allowing base to move into cache.insert. Fix: reorder to build ci first, then insert base by move. This avoids one heap allocation per cached pattern.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:28:01Z",
+  "updated_at": "2026-04-28T19:34:06Z",
+  "closed_at": "2026-04-28T19:34:06Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-zrq",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:28:01"
+    }
+  ]
+}

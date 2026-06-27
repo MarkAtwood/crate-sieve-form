@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.15",
+  "title": "Ctx struct has no doc comment",
+  "description": "evaluator.rs Ctx struct (line 26) is pub(crate) and threaded through all eval_* functions, but has no doc comment. headers is a Vec (not HashMap) for ordering reasons; regex_cache is pre-populated at compile time; variables_enabled gates RFC 5229 behavior. These invariants are invisible to a new reader. Add a struct-level doc comment and field comments on the non-obvious fields.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:52:09Z",
+  "updated_at": "2026-04-28T19:20:34Z",
+  "closed_at": "2026-04-28T19:20:34Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:52:09"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.13",
+  "title": "ParseError line/col sentinel 0 should be Option",
+  "description": "ParseError (parse_error.rs) uses line: usize and col: usize where the value 0 is a sentinel meaning 'no position available' (form-layer errors). This is a stringly-typed pattern on numeric fields: callers must read documentation to learn that 0 is special. Idiomatic Rust would use Option<usize> for both fields, with None meaning 'no position'. This makes the absence of position information unambiguous in the type system and removes the special-case comment. The Display impl would check is_some() instead of > 0.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:20:51Z",
+  "updated_at": "2026-04-28T17:34:25Z",
+  "closed_at": "2026-04-28T17:34:25Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:20:53"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-bnt",
+  "title": "Review: fix: non_exhaustive on SieveErrorKind",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:56:59Z",
+  "updated_at": "2026-04-25T02:59:14Z",
+  "closed_at": "2026-04-25T02:59:14Z",
+  "notes": "Maintainer risk: LOW \u2014 no correctness issues found. Only Cargo.toml metadata gap and a doc comment clarification.\nConfidence: 5% chance of missed bug. Clippy and doc builds are clean. All previously found issues are resolved. I am running out of real complaints and approaching bikeshedding."
+}

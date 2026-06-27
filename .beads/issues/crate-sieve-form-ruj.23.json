@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.23",
+  "title": "Ctx struct fields undocumented",
+  "description": "The Ctx struct in evaluator.rs has no /// doc comment on the struct itself or on most fields. headers does not say names are lowercased (they are, per extract_headers). message_size does not say it is in bytes. The struct is pub(crate) so this only affects internal readers, but it is still non-obvious state.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:59Z",
+  "updated_at": "2026-04-28T22:29:20Z",
+  "closed_at": "2026-04-28T22:29:20Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:59"
+    }
+  ]
+}

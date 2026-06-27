@@ -1,0 +1,12 @@
+{
+  "id": "crate-sieve-form-elv",
+  "title": "Review: feat: initial extraction from stoa-sieve-native",
+  "status": "in_progress",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:41:18Z",
+  "updated_at": "2026-04-25T02:45:59Z",
+  "notes": "Maintainer risk: MEDIUM \u2014 stoa-sieve reference and dependency doc are wrong but cosmetic; SieveRuntime dead scaffolding will generate confused user questions; KNOWN divergence already caused a bug once and will again.\nConfidence: 30% chance of missed bug. Uncertainty driven by: no integration testing with real-world Sieve scripts or dovecot test corpus; address parsing is minimal (RFC 5322 addresses are complex); multi-action semantics not tested. Would raise confidence if: ran the Pigeonhole test suite against the evaluator; added tests for envelope test with address-part combinations; tested multiline string edge cases (dot-stuffing, CRLF terminator)."
+}

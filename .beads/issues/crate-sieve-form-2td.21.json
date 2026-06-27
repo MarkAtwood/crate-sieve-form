@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.21",
+  "title": "Correct: dot-stuffing in multiline text: strings",
+  "description": "WHY THIS IS CORRECT: RFC 5228 \u00a72.3.1 specifies that in a multiline text block, a line beginning with '..' has the first dot removed (dot-stuffing), and a line consisting solely of '.' terminates the block. The lexer checks line_trimmed == '.' for termination before checking for the '..' prefix, so the terminator is never mistakenly stored as content. The strip_prefix('..') correctly removes exactly one leading dot from stuffed lines. Lines starting with a single '.' that are not the terminator are passed through unchanged, which is correct (only '..' is stuffed). EOF without a terminator returns a clean ParseError.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:19:20Z",
+  "updated_at": "2026-04-28T20:36:14Z",
+  "closed_at": "2026-04-28T20:36:14Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:19:19"
+    }
+  ]
+}

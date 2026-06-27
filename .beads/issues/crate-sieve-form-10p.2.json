@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.2",
+  "title": "extract_headers copies full message body",
+  "description": "message::extract_headers() (message.rs:23) calls String::from_utf8_lossy(raw) which copies the entire raw message \u2014 including body and attachments \u2014 into a heap String before iterating over lines. For a 10 MB message with a 20-byte Subject header, this copies ~10 MB to read ~100 bytes. The fix is to find the header/body separator (\\n\\n or \\r\\n\\r\\n) in raw bytes first and pass only raw[..sep] to from_utf8_lossy, or iterate over raw lines directly without full conversion.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:10Z",
+  "updated_at": "2026-04-28T18:19:39Z",
+  "closed_at": "2026-04-28T18:19:39Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:10"
+    }
+  ]
+}

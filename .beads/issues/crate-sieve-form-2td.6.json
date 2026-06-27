@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.6",
+  "title": "Unbounded recursion via nested allof/anyof test lists",
+  "description": "TRIGGER: read_test_stmt calls read_test_list when it sees LParen; read_test_list calls read_test_stmt for each element. allof(allof(allof(...))) N levels deep causes N stack frames of mutual recursion with no guard. This is a separate recursion path from the block nesting bug. BAD BEHAVIOR: stack overflow panic instead of ParseError. Fix: share the same depth counter fix with the block recursion guard.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:16Z",
+  "updated_at": "2026-04-28T20:30:35Z",
+  "closed_at": "2026-04-28T20:30:35Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:15"
+    }
+  ]
+}

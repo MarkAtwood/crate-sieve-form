@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-xgk",
+  "title": "extlists extension (RFC 6134)",
+  "description": "Implement :list match type for header, address, envelope tests and redirect :list action. Checks message fields against externally-stored lists (LDAP, CardDAV, ACAP). See RFC 6134.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:26Z",
+  "updated_at": "2026-04-25T01:14:26Z"
+}

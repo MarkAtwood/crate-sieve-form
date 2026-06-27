@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.18",
+  "title": "expand_vars Cow::Borrowed fast path is correct",
+  "description": "WHY THIS IS CORRECT AND SHOULD BE DEFENDED: expand_vars returns Cow::Borrowed(s) when variables_enabled is false or the string contains no dollar or backslash. The modified flag is only set when a substitution or escape actually changes the string content. If the only dollar-sequence is an unclosed brace, modified stays false and Cow::Borrowed is returned \u2014 which is the original string, identical to what the out buffer would contain. The logic is correct: no spurious allocations and no loss of content.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:19:03Z",
+  "updated_at": "2026-04-28T20:35:50Z",
+  "closed_at": "2026-04-28T20:35:50Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:19:02"
+    }
+  ]
+}

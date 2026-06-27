@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-20a",
+  "title": "Create Cargo.toml for sieve-form",
+  "description": "Create Cargo.toml with name=sieve-form, version=0.1.0, edition=2021, rust-version=1.80, license=MIT, fancy-regex=0.13 dep. Repository=github.com/MarkAtwood/crate-sieve-form. No stoa-sieve dep, no path deps. See PROJECT.md Step 2 for exact content.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T00:56:23Z",
+  "updated_at": "2026-04-25T00:57:47Z",
+  "closed_at": "2026-04-25T00:57:47Z"
+}

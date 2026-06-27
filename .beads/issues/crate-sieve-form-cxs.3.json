@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-cxs.3",
+  "title": "depth limit is 101 levels not 100 as documented",
+  "description": "TRIGGER: a script with exactly 101 levels of nested if blocks. BAD BEHAVIOR: compiles OK when the error message says the maximum is 100. ROOT CAUSE: form.rs uses 'depth > MAX_NESTING_DEPTH' (strict greater-than). With MAX_NESTING_DEPTH=100, depth=100 passes the check (100 > 100 = false) and depth=101 triggers the error. The actual enforced limit is 101, not 100. The error message 'script nesting depth exceeds maximum (100)' is incorrect. Fix: change to 'depth >= MAX_NESTING_DEPTH' in both read_stmt and read_test_stmt. The existing test at 200 levels passes regardless and does not detect this discrepancy.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:46:32Z",
+  "updated_at": "2026-04-28T20:50:49Z",
+  "closed_at": "2026-04-28T20:50:49Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-cxs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:46:31"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-ado",
+  "title": "vnd.proton.expire (ProtonMail)",
+  "description": "Implement ProtonMail expire extension. Actions: expire \"unit\" \"value\" (units: day/minute/second, max 730 days) and unexpire (remove expiration). Tests: hasexpiration (boolean), expiration :comparator \"i;ascii-numeric\" :value \"le\" \"day\" \"N\" (compare expiration time). Documented at proton.me/support/sieve-advanced-custom-filters and in docs/vendor/protonmail/sieve-extensions.md. No RFC; proprietary.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:15:03Z",
+  "updated_at": "2026-04-25T01:39:50Z"
+}

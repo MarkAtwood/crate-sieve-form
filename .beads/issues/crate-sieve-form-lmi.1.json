@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-lmi.1",
+  "title": "firstline: truncate in place instead of re-alloc",
+  "description": "In apply_set_modifiers (evaluator.rs), the :firstline branch does v[..end].to_string() to shorten an owned String. This forces a new heap allocation and memcpy, then drops the original buffer. The idiomatic approach for an owned String is v.truncate(end); v \u2014 which shortens the existing buffer in place with no allocation. Change: replace 'v[..end].to_string()' with 'v.truncate(end); v'.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:52:03Z",
+  "updated_at": "2026-04-28T19:53:34Z",
+  "closed_at": "2026-04-28T19:53:34Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-lmi",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:52:03"
+    }
+  ]
+}

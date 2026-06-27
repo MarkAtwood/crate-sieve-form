@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.26",
+  "title": "is_some_and() usage is correct for MSRV 1.80",
+  "description": "The lexer uses .is_some_and(|&c| ...) in multiple places (lexer.rs lines 60, 148, 156, 166, 201, 235). This method was stabilized in Rust 1.70. The MSRV is 1.80. A reviewer might flag this as too new and suggest the older .map(|c| ...).unwrap_or(false) pattern. That suggestion is incorrect: is_some_and is well within MSRV, it is more readable, and avoids the unnecessary Option::map allocation of the older idiom. The is_some_and usage is idiomatic for Rust 1.70+.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:24:14Z",
+  "updated_at": "2026-04-28T22:19:08Z",
+  "closed_at": "2026-04-28T22:19:08Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:24:13"
+    }
+  ]
+}

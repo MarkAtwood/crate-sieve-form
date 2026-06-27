@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2jm.7",
+  "title": "find_header_end: use windows(4).position() not manual index",
+  "description": "message.rs find_header_end (lines 126-133) scans for \\r\\n\\r\\n using a manual range iterator with 4 raw index accesses (raw[i], raw[i+1], raw[i+2], raw[i+3]). Idiomatic Rust: raw.windows(4).position(|w| w == b\"\\r\\n\\r\\n\") expresses the same intent without manual bounds arithmetic, uses a safe slice, and is shorter. The \\n\\n fallback follows the same pattern: raw.windows(2).position(|w| w == b\"\\n\\n\").",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:38:05Z",
+  "updated_at": "2026-04-28T19:43:12Z",
+  "closed_at": "2026-04-28T19:43:12Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:38:05"
+    }
+  ]
+}

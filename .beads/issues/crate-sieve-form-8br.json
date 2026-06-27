@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-8br",
+  "title": "body extension (RFC 5173)",
+  "description": "Implement the body test to match against message body content. Supports :raw, :text, :content subtypes. Requires MIME decoding. See RFC 5173.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:13:51Z",
+  "updated_at": "2026-04-25T01:13:51Z"
+}

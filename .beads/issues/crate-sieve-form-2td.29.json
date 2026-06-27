@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.29",
+  "title": "Correct: quotewildcard+firstline precedence order per RFC 5229 \u00a74",
+  "description": "WHY THIS IS CORRECT: apply_set_modifiers sorts all modifiers by descending precedence (40=lower/upper, 30=length, 20=quotewildcard, 10=firstline) using Reverse(precedence) before applying them in order. RFC 5229 \u00a74 requires 'modifiers are applied in order from highest to lowest precedence' regardless of the order they appear in the Sieve script. The implementation correctly uses sort_unstable_by_key rather than relying on input order. Precedence values match the RFC table exactly.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:21:15Z",
+  "updated_at": "2026-04-28T20:36:31Z",
+  "closed_at": "2026-04-28T20:36:31Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:21:14"
+    }
+  ]
+}

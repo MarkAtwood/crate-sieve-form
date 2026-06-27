@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-20w.1",
+  "title": "SieveErrorKind::Parse used for comparator errors \u2014 wrong type",
+  "description": "validate_stmt returns SieveErrorKind::Parse for 'unsupported comparator' errors. Parse is the wrong kind \u2014 this is a semantic validation failure, not a structural parse error. A caller checking kind == SieveErrorKind::Parse to detect malformed syntax will also catch comparator rejections, confusing the two. Fix: add SieveErrorKind::UnsupportedComparator(String) and use it in validate_stmt.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:51:59Z",
+  "updated_at": "2026-04-25T02:53:48Z",
+  "closed_at": "2026-04-25T02:53:48Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-20w",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:51:58"
+    }
+  ]
+}

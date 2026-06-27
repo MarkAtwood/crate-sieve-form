@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.20",
+  "title": "SieveError loses ParseError source chain",
+  "description": "From<ParseError> for SieveError consumes the original ParseError and bakes it into a String message. SieveError::source() returns None (default impl). Callers using anyhow/thiserror error chain tools will lose the original parse position (line/col). Also, the Lex vs Parse kind classification uses a heuristic (line.is_some()) that will silently misclassify if the form parser ever gains position tracking. The original ParseError should be preserved as a Box<dyn Error> source, or SieveError should carry the structured position data directly.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:53Z",
+  "updated_at": "2026-04-28T18:18:44Z",
+  "closed_at": "2026-04-28T18:18:44Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:52"
+    }
+  ]
+}

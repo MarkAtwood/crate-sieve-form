@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.12",
+  "title": "duplicated unknown-extension error in compile()",
+  "description": "In lib.rs compile(), the require extension check has two branches (Form::Str and Form::StringList) that each build the same SieveError inline. Suggested rewrite: extract check_extension(s: &str) -> Result<(), SieveError> and call it from both branches. The StringList branch becomes: for s in v { check_extension(s)?; }",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:11Z",
+  "updated_at": "2026-04-28T22:24:56Z",
+  "closed_at": "2026-04-28T22:24:56Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:10"
+    }
+  ]
+}

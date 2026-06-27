@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-ruj.31",
+  "title": "if/elsif chain: regex validation scans wrong Str",
+  "description": "Trigger: compile(\"if header :regex \\\"Subject\\\" \\\"[invalid\\\" { keep; } elsif header :is \\\"T\\\" \\\"key\\\" { keep; }\"). validate_stmt scans the entire combined if/elsif statement for the last Str/StringList, finds Str(\\\"key\\\") from the elsif clause instead of the actual regex Str(\\\"[invalid\\\"). The invalid regex is never validated at compile time. At runtime, the regex match falls back to on-the-fly compilation which fails, so the test always returns false (silent mismatch). Same root cause affects collect_regex_patterns: the regex pattern is never pre-cached, and the wrong string (the elsif key) is cached instead.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:34Z",
+  "updated_at": "2026-04-28T17:12:52Z",
+  "closed_at": "2026-04-28T17:12:52Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:33"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bkx.4",
+  "title": "eval_size_test takes message_size directly, not Ctx",
+  "description": "eval_size_test(forms, message_size: usize) takes the size value directly rather than a full &Ctx. A reviewer might suggest uniformity with the other test functions (all of which take &Ctx). The narrowed signature is better: the size test has no dependency on headers, variables, or regex_cache; accepting a fat context struct would widen the coupling surface with no benefit. The pattern also makes the dependency explicit and makes the function independently testable.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:04Z",
+  "updated_at": "2026-04-28T22:19:10Z",
+  "closed_at": "2026-04-28T22:19:10Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:04"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-dwv.6",
+  "title": "SieveError.source is pub(crate) \u2014 error chaining via std::error::Error trait only",
+  "description": "SieveError exposes message and kind as pub, but source is pub(crate). This is intentional: callers can inspect the error category via kind and the human-readable message via message. The underlying ParseError is available to library internals for chaining but is not part of the public API surface. Exposing source publicly would commit to ParseError's fields being stable, which is undesirable for a 0.1 release. The std::error::Error::source() impl already provides the chain to any caller using the standard error-reporting infrastructure.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:27:17Z",
+  "updated_at": "2026-04-28T22:19:49Z",
+  "closed_at": "2026-04-28T22:19:49Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-dwv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:27:16"
+    }
+  ]
+}

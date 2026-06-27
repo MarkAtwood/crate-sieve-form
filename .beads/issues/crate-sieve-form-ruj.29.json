@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.29",
+  "title": "Manual Debug impl for CompiledScript is correct",
+  "description": "CompiledScript has a manual Debug impl (lib.rs lines 40-50) that renders the regex_cache as '<N compiled patterns>' rather than exposing regex internals. fancy_regex::Regex does not implement Debug, so a derived impl would fail to compile. The manual impl gives callers useful diagnostic output without coupling the public debug representation to internal regex objects. A reviewer might suggest removing Debug entirely or adding the derive macro, but the manual impl is the correct solution: it compiles, it is informative, and it does not expose implementation details.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:25Z",
+  "updated_at": "2026-04-28T22:19:13Z",
+  "closed_at": "2026-04-28T22:19:13Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:25"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-yme",
+  "title": "vacation extension (RFC 5230)",
+  "description": "Implement the vacation action to send auto-reply messages. Supports :days, :subject, :from, :addresses, :mime, :handle parameters. Must track already-notified senders to avoid loops. See RFC 5230.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:13:54Z",
+  "updated_at": "2026-04-25T01:13:54Z"
+}

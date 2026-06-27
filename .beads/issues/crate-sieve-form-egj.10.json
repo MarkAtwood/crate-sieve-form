@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-egj.10",
+  "title": "str_contains allocates two Strings for case-insensitive search",
+  "description": "evaluator.rs:355-362: str_contains with casemap=true calls haystack.to_ascii_lowercase() and needle.to_ascii_lowercase(), allocating two heap Strings per call. This is called for every (header, field_name, key) triple in every :contains test. A sliding-window ASCII case-insensitive comparison, or using a crate like memchr's case-insensitive search, avoids the allocations entirely.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:22Z",
+  "updated_at": "2026-04-28T16:54:41Z",
+  "closed_at": "2026-04-28T16:54:41Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:21"
+    }
+  ]
+}

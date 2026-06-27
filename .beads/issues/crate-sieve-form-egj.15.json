@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-egj.15",
+  "title": "Arc<form::Script> in CompiledScript enables cheap clone/share",
+  "description": "lib.rs:35: CompiledScript wraps Arc<form::Script>. A reviewer might ask why Arc instead of owning Script directly. The Arc enables: (1) cloning CompiledScript without copying the parse tree, (2) sharing across threads with Send+Sync. The Send+Sync assertion at lib.rs:38-44 is correctly verified at compile time. Compile once, evaluate from many threads is the right design for an MTA. Defend this.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:58Z",
+  "updated_at": "2026-04-28T16:58:32Z",
+  "closed_at": "2026-04-28T16:58:32Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:58"
+    }
+  ]
+}

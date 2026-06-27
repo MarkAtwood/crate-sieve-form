@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.14",
+  "title": "stop->Keep mapping not commented at call site",
+  "description": "evaluator.rs eval_script: StmtResult::Stop falls into the _ => SieveAction::Keep arm with no comment. The RFC 5228 \u00a74.5 rule that 'stop with no prior disposition implies implicit keep' is not obvious at the call site. A contributor seeing the wildcard arm might think Stop is a bug or might break the behavior while adding a new StmtResult variant. Add a comment on the _ arm citing RFC 5228 \u00a74.5, or add an explicit Stop arm with the comment.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:24Z",
+  "updated_at": "2026-04-28T22:29:21Z",
+  "closed_at": "2026-04-28T22:29:21Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:24"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.25",
+  "title": "found_any_name sentinel in eval_exists_test is correct RFC 5228 edge case handling",
+  "description": "eval_exists_test (evaluator.rs:621-647) uses found_any_name to return false when no header names are listed, rather than vacuously returning true. A reviewer might suggest removing it ('just return true for empty list'). That would violate RFC 5228 \u00a75.7 semantics and break the test_exists_empty_list_is_false integration test. The sentinel is the correct and minimal fix. The logic is well-commented and covered by a specific test.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:55:32Z",
+  "updated_at": "2026-04-28T19:24:37Z",
+  "closed_at": "2026-04-28T19:24:37Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:55:31"
+    }
+  ]
+}

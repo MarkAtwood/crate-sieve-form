@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-10p.18",
+  "title": "redirect action absent, undocumented",
+  "description": "RFC 5228 defines four core actions: keep, fileinto, discard, redirect. This crate implements keep/fileinto/discard but silently swallows 'redirect' as an unknown command (eval_stmt catch-all). There is no SieveAction::Redirect variant and no compile-time error for 'redirect \"user@example.com\";'. Callers building a Sieve-compliant MTA will file bugs when redirect silently does nothing. Either add the variant and require the block, or document the omission prominently in crate-level docs and add a compile-time error for redirect usage.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:41Z",
+  "updated_at": "2026-04-28T18:23:18Z",
+  "closed_at": "2026-04-28T18:23:18Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:40"
+    }
+  ]
+}

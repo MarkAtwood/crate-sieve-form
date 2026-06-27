@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-2s2",
+  "title": "subaddress extension (RFC 5233)",
+  "description": "Implement :user and :detail address parts for the address and envelope tests. Allows testing the subaddress component (e.g. user+detail@domain). See RFC 5233.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:00Z",
+  "updated_at": "2026-04-25T01:14:00Z"
+}

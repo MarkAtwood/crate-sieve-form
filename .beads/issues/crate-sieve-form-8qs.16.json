@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.16",
+  "title": "extract_* use push loops instead of filter+collect",
+  "description": "evaluator.rs \u2014 extract_match_type (279-307), extract_comparator (311-332), extract_address_part (335-358) all use the same manual pattern: declare a mutable Vec, for-loop over forms, push non-matching elements. This is filter().collect() in disguise, written three times. Idiomatic Rust expresses this with a mutable accumulator and a single filter pass, or using partition. The push loops obscure the invariant and are three copies of the same structural pattern.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:52:18Z",
+  "updated_at": "2026-04-28T19:21:27Z",
+  "closed_at": "2026-04-28T19:21:27Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:52:18"
+    }
+  ]
+}

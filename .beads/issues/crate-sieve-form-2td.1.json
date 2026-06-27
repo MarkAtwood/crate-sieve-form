@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.1",
+  "title": "set used without require silently succeeds",
+  "description": "TRIGGER: script uses 'set' command without require [\"variables\"]; EVALUATOR runs 'set' unconditionally (eval_stmt line 154 does not gate on variables_enabled); check_extension_use EXTENSION_COMMANDS does not include 'set'. RFC 5229 \u00a76.1 requires declaration before use. BAD BEHAVIOR: the script compiles without error; 'set' stores the variable but variables_enabled=false so expansion is suppressed \u2014 silently no-ops instead of failing at compile time as the RFC requires.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:17:45Z",
+  "updated_at": "2026-04-28T20:29:24Z",
+  "closed_at": "2026-04-28T20:29:24Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:17:44"
+    }
+  ]
+}

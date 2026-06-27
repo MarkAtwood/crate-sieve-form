@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.27",
+  "title": "AddressPart enum is correctly pub(crate), not pub",
+  "description": "AddressPart in message.rs is pub(crate). It is an internal coordination type between the message module and the evaluator. The public API is compile()/evaluate()/SieveAction/SieveError. A reviewer might suggest making it pub, but that would leak an internal enum and create a compatibility obligation. The pub(crate) visibility is correct and intentional.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:02:12Z",
+  "updated_at": "2026-04-28T22:19:12Z",
+  "closed_at": "2026-04-28T22:19:12Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:02:12"
+    }
+  ]
+}

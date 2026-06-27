@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.28",
+  "title": "Internal enums missing Debug derive",
+  "description": "StmtResult (evaluator.rs:42), SizeDir (evaluator.rs:52), PatternKind (lib.rs:344) have no #[derive(Debug)]. Idiomatic Rust derives Debug on virtually every type. Without it these types are invisible in dbg!() and test failures.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:56:05Z",
+  "updated_at": "2026-04-28T19:21:04Z",
+  "closed_at": "2026-04-28T19:21:04Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:56:05"
+    }
+  ]
+}

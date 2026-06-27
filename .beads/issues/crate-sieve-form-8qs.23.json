@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.23",
+  "title": "Cow<str> in expand_vars: zero-alloc fast path is correct and should be kept",
+  "description": "expand_vars (evaluator.rs:686) uses Cow<'a, str> and returns Cow::Borrowed(s) when no substitution occurs. This means the common case (no variables, or a string with no dollar signs) pays zero allocation cost. A reviewer might suggest 'just return String for simplicity.' That would be wrong: evaluate() is called per-message, and most strings in typical Sieve scripts (header names, literal keys) never need substitution. The Cow choice is precisely correct here and should be defended.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:54:55Z",
+  "updated_at": "2026-04-28T19:24:30Z",
+  "closed_at": "2026-04-28T19:24:30Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:54:55"
+    }
+  ]
+}

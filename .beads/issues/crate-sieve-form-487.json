@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-487",
+  "title": "relational extension (RFC 5231)",
+  "description": "Implement relational match types :count and :value with the i;ascii-numeric comparator. Enables numeric and count-based comparisons in header, address, envelope tests. See RFC 5231.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:13:56Z",
+  "updated_at": "2026-04-25T01:13:56Z"
+}

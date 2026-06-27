@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.12",
+  "title": "collect_two_string_lists uses Vec to index [0],[1]",
+  "description": "evaluator.rs:524-536 \u2014 collect_two_string_lists builds a Vec<Vec<&str>> from the form slice and then reads lists.first() and lists.get(1). The only purpose of the intermediate Vec is to hold two elements that are then immediately destructured. Idiomatic Rust expresses this as an iterator: filter the forms to string-list entries, call next() twice, and return a pair \u2014 zero heap allocation and clearer intent. The current pattern allocates a Vec<Vec<&str>> on every call to eval_header_test, eval_address_test, and eval_envelope_test.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:50Z",
+  "updated_at": "2026-04-28T18:56:53Z",
+  "closed_at": "2026-04-28T18:56:53Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:49"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bkx.2",
+  "title": "empty-needle guard in str_contains prevents windows(0) panic",
+  "description": "str_contains returns true immediately when needle is empty before calling hb.windows(nb.len()). This is not a performance shortcut \u2014 windows(0) panics in Rust (window size must be non-zero). Removing the guard would introduce a panic on scripts that use :contains with an empty key string. The guard is load-bearing for correctness.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:36:53Z",
+  "updated_at": "2026-04-28T22:19:09Z",
+  "closed_at": "2026-04-28T22:19:09Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:36:52"
+    }
+  ]
+}

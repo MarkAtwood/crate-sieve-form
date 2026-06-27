@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.3",
+  "title": "glob/regex cache keys alloc at eval time",
+  "description": "str_matches_glob (evaluator.rs:391-393) allocates format!(\"glob:{pat}\") and format!(\"(?i)glob:{pat}\") on every call at evaluation time, used only as HashMap::get keys. str_matches_regex (evaluator.rs:442) similarly allocates format!(\"(?s)\\A(?:{pattern})\\z\") per call. str_matches_regex_pat (evaluator.rs:453) allocates format!(\"(?i){anchored}\") per call when casemap=true. All three allocations are in the hot path (called per pattern per header per message) even though the cache was built at compile() time precisely to avoid this. Fix: restructure cache keys so lookups can use borrowed str, e.g. by storing the regex_str as the key for globs (as cache_pattern does for regex), or by using a two-level map keyed first on is_casemap.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:17:06Z",
+  "updated_at": "2026-04-28T22:19:56Z",
+  "closed_at": "2026-04-28T22:19:56Z",
+  "notes": "Glob cache key allocation (format\\!('glob:{pat}')) is one alloc per pattern\u00d7match call; trivially cheap vs the regex match itself. Downgraded to P3.",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:17:06"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-03l",
+  "title": "Copy source files from stoa-sieve-native",
+  "description": "Copy lib.rs, lexer.rs, form.rs, evaluator.rs, message.rs, parse_error.rs from ~/PROJECT/usenet-ipfs/crates/sieve-native/src/ into src/. Do NOT copy tests/cross_validate.rs (AGPL oracle). This is the foundation step all other issues depend on.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T00:56:21Z",
+  "updated_at": "2026-04-25T00:57:46Z",
+  "closed_at": "2026-04-25T00:57:46Z"
+}

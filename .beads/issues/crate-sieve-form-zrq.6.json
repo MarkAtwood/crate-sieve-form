@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-zrq.6",
+  "title": "split_addresses ignores backslash-quote in quoted strings",
+  "description": "split_addresses (message.rs:141-176) toggles in_quotes on every '\"' character. If a display name contains an escaped quote (RFC 5322 allows \"...\\\"..\"\"), the backslash is ignored and the inner quote prematurely closes the quoted context. A comma that follows inside the same quoted token is then treated as an address separator, producing incorrect splits. Example: '\"Jane \\\"Doe\\\", PhD\" <jane@example.com>, bob@example.com' would split incorrectly. Fix: track backslash state \u2014 when a '\\\\' precedes '\"', do not toggle in_quotes. Note: escaped quotes in display names are rare in practice (most mail agents use RFC 2047 encoding instead), so the practical impact is low, but the parser is not complete for RFC 5322 inputs.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:28:42Z",
+  "updated_at": "2026-04-28T19:33:54Z",
+  "closed_at": "2026-04-28T19:33:54Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-zrq",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:28:42"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-0d4",
+  "title": "imap4flags extension (RFC 5232)",
+  "description": "Implement IMAP flag manipulation: setflag, addflag, removeflag actions; hasflag test; :flags argument for fileinto and keep. Flags stored in internal variable. See RFC 5232.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:13:58Z",
+  "updated_at": "2026-04-25T01:13:58Z"
+}

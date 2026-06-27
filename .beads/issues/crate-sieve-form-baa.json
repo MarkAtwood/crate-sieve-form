@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-baa",
+  "title": "Review: sieve-form 0.1.0 iteration 3 bikeshed check",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:51:20Z",
+  "updated_at": "2026-04-28T20:54:14Z",
+  "closed_at": "2026-04-28T20:54:14Z",
+  "notes": "BIKESHED CONFIRMED: No new correctness bugs in iteration 3. All six targeted questions verified clean.\nIteration 3 confidence: 95%. Least confident: (a) for_each_clause includes TestList form in visit slice but this is harmless since no Tag forms inside TestList; (b) sole unsupported-but-not-checked extension scenario would be if allof/anyof test names themselves were extension-gated but they are base RFC 5228. SEC7: NO (no security issues found)"
+}

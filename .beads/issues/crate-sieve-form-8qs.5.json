@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-8qs.5",
+  "title": "advance() panics in library code",
+  "description": "lexer.rs:333 \u2014 the advance() helper calls .expect(\"advance called on empty iterator\"). The function is only called when callers have verified chars.peek().is_some(), making the panic unreachable in practice, but the panic still lives on the library's call stack with no way for callers to protect against it. Idiomatic Rust library code replaces .expect() in non-test, non-main code with a return type that propagates the failure (Option<char> or Result), or restructures callers to use pattern matching on the peek result directly, so there is no reachable panic path. A library that panics on any input (even 'impossible' input) violates the principle that library code should never crash the caller.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:51:28Z",
+  "updated_at": "2026-04-28T19:21:15Z",
+  "closed_at": "2026-04-28T19:21:15Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-8qs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:51:28"
+    }
+  ]
+}

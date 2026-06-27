@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-egj.11",
+  "title": "eval_script match: 4 of 5 arms map to SieveAction::Keep",
+  "description": "evaluator.rs:90-98: None, Some(Continue), Some(Stop), and Some(Keep) all push SieveAction::Keep \u2014 four separate match arms with identical behavior. A catch-all arm makes the intent clearer: `let action = match eval_stmt_list(...) { Some(StmtResult::Discard) => SieveAction::Discard, Some(StmtResult::FileInto(f)) => SieveAction::FileInto(f), Some(StmtResult::Reject(r)) => SieveAction::Reject(r), _ => SieveAction::Keep }; vec![action]`",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:29Z",
+  "updated_at": "2026-04-28T16:59:14Z",
+  "closed_at": "2026-04-28T16:59:14Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:28"
+    }
+  ]
+}

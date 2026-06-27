@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.3",
+  "title": "doc comment: downcast_ref on &dyn Error does not work as documented",
+  "description": "In parse_error.rs, the SieveError.source field doc says callers can use 'err.source().and_then(|e| e.downcast_ref::<ParseError>())' to get the underlying ParseError. This is incorrect: std::error::Error::source() returns &(dyn Error + 'static) which does not have a downcast_ref() method. The correct pattern requires going through std::any::Any, e.g. '(err.source().unwrap() as &dyn std::any::Any).downcast_ref::<ParseError>()' -- but even that requires a valid coercion. The misleading doc will cause callers to write code that doesn't compile. Fix: remove or correct the downcast example.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:05:03Z",
+  "updated_at": "2026-04-28T21:13:48Z",
+  "closed_at": "2026-04-28T21:13:48Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:05:03"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-egj.12",
+  "title": "ParseError location uses 0 as sentinel instead of Option",
+  "description": "parse_error.rs:9-13: ParseError has line: usize and col: usize where 0 means 'no location available' (form-layer errors). The Display impl checks `if self.line > 0`. An Option<(usize, usize)> for the location would make the 'no position' case explicit in the type, avoid the 0-sentinel check in Display, and correctly reject line=0 col=5 as incoherent. The current sentinel conflates 'no location' with 'location (0,0)' which can't arise in practice but isn't enforced by the type.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:25:37Z",
+  "updated_at": "2026-04-28T16:58:41Z",
+  "closed_at": "2026-04-28T16:58:41Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:25:36"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2jm.8",
+  "title": "expand_vars: wasteful String alloc when no substitution occurs",
+  "description": "evaluator.rs expand_vars (line 660) allocates out = String::with_capacity(s.len()) and pushes every character into it whenever s contains '\\$' or '\\\\', even when no actual substitution ends up occurring (e.g. a bare backslash not followed by '$'). When modified == false the allocated String is discarded and Cow::Borrowed(s) is returned. Fix: either defer the String allocation to the first substitution event, or restructure to only allocate when the fast-path check passes but before the character loop.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:38:11Z",
+  "updated_at": "2026-04-28T19:41:48Z",
+  "closed_at": "2026-04-28T19:41:48Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:38:11"
+    }
+  ]
+}

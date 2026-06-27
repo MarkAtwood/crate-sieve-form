@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-bno",
+  "title": "Review round 2: sieve-form post-fix-wave-1",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:15:45Z",
+  "updated_at": "2026-04-28T17:46:41Z",
+  "closed_at": "2026-04-28T17:46:41Z",
+  "notes": "SEC0 verdict: ISSUES-FOUND \u2014 validate_stmt unconditionally skips i+2 on :comparator, allowing invalid regex patterns to bypass compile-time validation.\nSEC7: Running out of real complaints: NO. Confidence: 20% chance of missed issue. Least confident flags: (1) The rposition-based 'last Str/StringList' heuristic in validate_regex_in_clause and cache_patterns_in_clause \u2014 correctness depends on the Sieve grammar always placing the key-list last; counter-examples with multi-argument tests or future extensions could break this silently. (2) The bare_address rfind('<') approach does not handle nested angle brackets or comments per RFC 5322; the impact is bounded to address tests on malformed headers but could cause false negatives. (3) expand_vars always allocates a new String even when no substitution occurs (the Borrowed branch is taken but the owned branch does not check whether any substitution actually happened before pushing to the output). Uncertainty: no fuzzing or property-based testing visible; regex ReDoS properties of fancy-regex on untrusted patterns not audited; no test coverage for not-test or nested anyof/allof; the stop command interaction with Keep default is tested but the StmtResult::Stop vs None distinction in eval_script is subtle."
+}

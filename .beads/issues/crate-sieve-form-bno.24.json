@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.24",
+  "title": "String::from_utf8_lossy in extract_headers is correct for message tolerance",
+  "description": "extract_headers uses String::from_utf8_lossy rather than from_utf8 or a strict UTF-8 parse. A reviewer might suggest strict UTF-8 for correctness. That is wrong for this use case: real-world email messages frequently contain non-UTF-8 bytes in headers (Latin-1 in old messages, MIME-encoded words not yet decoded). The function's job is best-effort header extraction for matching, not validation. Replacing invalid bytes with U+FFFD is the correct maximally-tolerant approach. The strict UTF-8 check at compile() time applies to the Sieve script itself, which is appropriate. These two different tolerance levels are both correct.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:24:01Z",
+  "updated_at": "2026-04-28T22:19:07Z",
+  "closed_at": "2026-04-28T22:19:07Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:24:00"
+    }
+  ]
+}

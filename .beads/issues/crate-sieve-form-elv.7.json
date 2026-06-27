@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-elv.7",
+  "title": "extract_match_type/comparator/address_part: filter-with-mutation is subtle",
+  "description": "All three extract_* functions use .filter() with a closure that mutates a captured local variable (mt/cmp/part) as a side effect, using the filter's return value to strip matched tokens. This pattern is non-obvious: it works because iterators are sequential and Rust ensures exclusive capture, but a reader unfamiliar with the trick will re-read it twice. Suggested rewrite: a simple for loop that builds a Vec<&Form> of remaining forms and records the tag, making the mutation explicit.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:45:34Z",
+  "updated_at": "2026-04-25T02:53:51Z",
+  "closed_at": "2026-04-25T02:53:51Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-elv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:45:34"
+    }
+  ]
+}

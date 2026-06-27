@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-elv.5",
+  "title": "Crate doc says 'dependency-free' but fancy-regex is a dependency",
+  "description": "lib.rs line 7: 'no external runtime dependencies beyond fancy-regex'. This is a contradictory statement \u2014 fancy-regex IS an external dependency. 'Beyond fancy-regex' is not a meaningful qualifier for a crate with a single dependency. Rewrite to accurately describe what fancy-regex provides and why it is needed.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:45:10Z",
+  "updated_at": "2026-04-25T02:49:58Z",
+  "closed_at": "2026-04-25T02:49:58Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-elv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:45:10"
+    }
+  ]
+}

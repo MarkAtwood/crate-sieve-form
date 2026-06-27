@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bkx.1",
+  "title": "expand_vars: return Cow to avoid alloc",
+  "description": "expand_vars always returns String, forcing a heap allocation on every call. When variables_enabled is false it clones the full string unconditionally. When variables_enabled is true but the input contains no ${...} sequences it still builds a new String char-by-char. Callers (eval_header_test, eval_address_test, eval_envelope_test, eval_exists_test) collect these into Vec<String> on every test evaluation, paying allocation cost even in the common variables-disabled case. Returning Cow<'_, str> and borrowing the input when no substitution is needed would eliminate these allocations on the warm evaluation path.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:36:21Z",
+  "updated_at": "2026-04-28T17:44:22Z",
+  "closed_at": "2026-04-28T17:44:22Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:36:21"
+    }
+  ]
+}

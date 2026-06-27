@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2td.10",
+  "title": "form: empty test stmt accepted in test list",
+  "description": "TRIGGER: read_test_stmt returns Ok([], pos) when the first token is ',' or ')'. read_test_list accepts this empty stmt and pushes it into the result. Input allof(,) or anyof() with a leading comma produces a TestList containing empty Stmt vectors. BAD BEHAVIOR: structurally invalid input passes the form layer and reaches the evaluator as Vec<Stmt> containing empty Stmts, which the evaluator must either handle or panic on. The form layer should reject empty test stmts with a ParseError. Fix: in read_test_list, after calling read_test_stmt, check that the returned Stmt is non-empty and return ParseError if it is.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:18:31Z",
+  "updated_at": "2026-04-28T20:30:42Z",
+  "closed_at": "2026-04-28T20:30:42Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:18:30"
+    }
+  ]
+}

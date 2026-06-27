@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2jm.12",
+  "title": "extract_test_args index loop: justified by lookahead",
+  "description": "evaluator.rs extract_test_args uses a manual while i < forms.len() loop with i += 1 / i += 2 lookahead. This is correct: the :comparator tag requires peeking one position ahead (i+1) to consume the comparator name token as part of the same iteration step. A for-each iterator would require peekable + manual advance, which is more complex. The index loop is the right tool here.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:38:37Z",
+  "updated_at": "2026-04-28T19:44:40Z",
+  "closed_at": "2026-04-28T19:44:40Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:38:36"
+    }
+  ]
+}

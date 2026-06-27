@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-10p",
+  "title": "Review: sieve-form 0.1.0 MY-OSS",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:04:38Z",
+  "updated_at": "2026-04-28T22:29:35Z",
+  "closed_at": "2026-04-28T22:29:35Z",
+  "notes": "Maintainer risk: HIGH \u2014 evaluate() API design mismatch (singleton Vec), three RFC 5228 conformance gaps (redirect missing, undeclared-extension not caught, silent unknown-command), a ReDoS surface via :regex lookaheads, and a semver trap in ParseError; any one of these will generate a repeating class of user issues or a security report.\nS4/S6 review done. Confidence 90%: no missed bug. Least confident flag: 10p.10 (validate vs cache tree-walk may diverge on TestList nesting). Uncertainty: no test for regex/glob inside allof/anyof. Would raise confidence with targeted tests."
+}

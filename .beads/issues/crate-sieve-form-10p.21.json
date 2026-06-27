@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.21",
+  "title": "glob: prefix prevents cache key collisions",
+  "description": "lib.rs/evaluator.rs: raw-regex patterns are cached under their anchored regex string (e.g. '(?s)\\A(?:foo)\\z'); glob patterns are cached under 'glob:{pattern}'. This prefix prevents a collision where a glob pattern string happened to equal an anchored regex string. A future contributor might suggest 'simplifying' the key scheme to use the pattern directly or a shared format. The prefix is load-bearing: removing it would silently produce wrong matches when a glob pattern string coincidentally matches an anchored regex key. The prefix must stay, or the regex and glob caches must be split into separate HashMaps.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:54Z",
+  "updated_at": "2026-04-28T22:19:14Z",
+  "closed_at": "2026-04-28T22:19:14Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:54"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "crate-sieve-form-9bt",
+  "title": "imapsieve extension (RFC 6785)",
+  "description": "Implement IMAP event triggers: run Sieve scripts in response to IMAP events (flag changes, message moves, APPEND). Requires imap_sieve plugin integration. See RFC 6785.",
+  "status": "open",
+  "priority": 4,
+  "issue_type": "epic",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T01:14:28Z",
+  "updated_at": "2026-04-25T01:14:28Z"
+}

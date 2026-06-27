@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-2ix.7",
+  "title": "expand_vars: to_lowercase() allocs when make_ascii_lowercase() works",
+  "description": "evaluator.rs expand_vars() line ~692: ctx.variables.get(&name.to_lowercase()) where name is an owned String we just built. to_lowercase() allocates a new String. RFC 5229 \u00a72 restricts variable names to [A-Za-z][A-Za-z0-9_]* (ASCII identifiers), so make_ascii_lowercase() is correct and avoids the allocation: name.make_ascii_lowercase(); ctx.variables.get(&name). This is called on every ${...} expansion.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:47:07Z",
+  "updated_at": "2026-04-28T19:49:46Z",
+  "closed_at": "2026-04-28T19:49:46Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2ix",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:47:06"
+    }
+  ]
+}

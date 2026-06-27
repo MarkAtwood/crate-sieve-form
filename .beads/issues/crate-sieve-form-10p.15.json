@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.15",
+  "title": "eval_exists_test vacuous-true not commented",
+  "description": "evaluator.rs eval_exists_test: when the form slice contains no Str or StringList forms (empty or only tags), the function returns true because the 'all listed headers must exist' loop never finds a missing header. This vacuous-true is correct per RFC 5228 \u00a75.7 but will surprise a contributor who expects false for an empty input. Add a comment before the for loop noting the vacuous-true behavior and citing RFC 5228 \u00a75.7.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:07:31Z",
+  "updated_at": "2026-04-28T22:26:31Z",
+  "closed_at": "2026-04-28T22:26:31Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:07:31"
+    }
+  ]
+}

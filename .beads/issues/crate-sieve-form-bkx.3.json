@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bkx.3",
+  "title": "if/elsif/else encoded as single flat Stmt is the core design",
+  "description": "A reviewer might suggest parsing if/elsif/else as a recursive tree node (e.g. IfChain { test, then, elseif: Vec<...>, else_: Option<...> }). The flat Stmt encoding is the crate's stated design point: every statement is a Vec<Form> with no command-specific AST nodes. This means the evaluator \u2014 not the parser \u2014 handles command semantics. New extensions (including if-like constructs) require only new evaluator match arms; the parser never changes. Changing to a tree node would collapse the three-layer architecture.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:36:59Z",
+  "updated_at": "2026-04-28T22:19:10Z",
+  "closed_at": "2026-04-28T22:19:10Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:36:59"
+    }
+  ]
+}

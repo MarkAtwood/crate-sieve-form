@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bkx.6",
+  "title": "char.to_string() in sieve_glob_to_regex",
+  "description": "sieve_glob_to_regex allocates a heap String on every character via ch.to_string() just to pass &str to fancy_regex::escape (lines 415, 417, 418, 427 in evaluator.rs). Each call does a heap allocation for a 1\u20134 byte string. Idiomatic Rust: use a stack-local char buffer: let mut buf = [0u8; 4]; let s = ch.encode_utf8(&mut buf); fancy_regex::escape(s). Avoids four heap allocations per pattern character.",
+  "status": "closed",
+  "priority": 2,
+  "issue_type": "chore",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:37:15Z",
+  "updated_at": "2026-04-28T17:44:13Z",
+  "closed_at": "2026-04-28T17:44:13Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bkx",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:37:15"
+    }
+  ]
+}

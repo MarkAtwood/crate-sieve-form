@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-cxs.1",
+  "title": "envelope in elsif test bypasses MissingRequire check",
+  "description": "TRIGGER: compile(b\"if true { keep; } elsif envelope :is \\\"from\\\" \\\"x\\\" { discard; }\") without require [\\\"envelope\\\"]. BAD BEHAVIOR: returns Ok instead of MissingRequire(\\\"envelope\\\"). ROOT CAUSE: check_extension_use scans test forms only up to the FIRST Block in the if-chain. The elsif test forms appear after Block([[keep]]) in the flat Stmt and are never scanned for extension test names. The bottom for-loop only recurses into Form::Block and Form::TestList items, not bare Word items in the middle of the stmt. All extension tests that appear as direct (non-TestList) tests in elsif clauses bypass the check. Confirmed empirically: is_err=false when it should be true.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:46:24Z",
+  "updated_at": "2026-04-28T20:50:41Z",
+  "closed_at": "2026-04-28T20:50:41Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-cxs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:46:23"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.10",
+  "title": "#[non_exhaustive] on SieveErrorKind and SieveAction is correct library discipline",
+  "description": "Both SieveErrorKind and SieveAction are marked #[non_exhaustive]. A reviewer might suggest removing the annotation to avoid requiring callers to write a catch-all '_' arm in match expressions. That is incorrect advice. As a published library, adding new SieveAction variants (e.g. Redirect, Vacation) or new SieveErrorKind variants is a normal extension path. Without #[non_exhaustive], every such addition would be a semver-breaking change requiring a major version bump. The annotation is the correct forward-compatibility mechanism. Do not remove it.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:17:33Z",
+  "updated_at": "2026-04-28T22:19:04Z",
+  "closed_at": "2026-04-28T22:19:04Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:17:33"
+    }
+  ]
+}

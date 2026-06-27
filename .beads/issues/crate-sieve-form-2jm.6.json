@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2jm.6",
+  "title": "PatternKind enum: correct design decision",
+  "description": "lib.rs uses a two-variant PatternKind enum (Regex, Glob) to distinguish how patterns are compiled and cached. This is the correct Rust idiom: two-variant enums are preferable to bool parameters because they are self-documenting at call sites and extensible (e.g. adding Glob case-fold variant). Marked as a positive design decision.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T19:37:48Z",
+  "updated_at": "2026-04-28T19:44:36Z",
+  "closed_at": "2026-04-28T19:44:36Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2jm",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 12:37:48"
+    }
+  ]
+}

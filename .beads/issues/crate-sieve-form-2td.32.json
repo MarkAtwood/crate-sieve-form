@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.32",
+  "title": "Correct: u64 size limit saturates to usize::MAX on 32-bit targets",
+  "description": "WHY THIS IS CORRECT: eval_size_test uses usize::try_from(l).unwrap_or(usize::MAX) to convert the u64 limit to usize. On 32-bit targets, limits exceeding u32::MAX saturate. For :over a saturated limit: message_size > usize::MAX is always false (correct \u2014 no real message can be larger than addressable memory). For :under a saturated limit: message_size < usize::MAX is always true (correct \u2014 a 10 GB size test on a 32-bit host is vacuously true, but no real message will be 10 GB on a 32-bit host). The comment in the code explains this correctly.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:21:37Z",
+  "updated_at": "2026-04-28T20:36:49Z",
+  "closed_at": "2026-04-28T20:36:49Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:21:37"
+    }
+  ]
+}

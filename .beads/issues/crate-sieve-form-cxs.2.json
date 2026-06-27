@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-cxs.2",
+  "title": "not-extension-test inside allof bypasses MissingRequire check",
+  "description": "TRIGGER: compile(b\"if allof(not envelope :is \\\"from\\\" \\\"x\\\") { keep; }\") without require [\\\"envelope\\\"]. BAD BEHAVIOR: returns Ok instead of MissingRequire(\\\"envelope\\\"). ROOT CAUSE: When check_extension_use recurses into a TestList, it calls check_extension_use on each test stmt. For stmt [Word(\\\"not\\\"), Word(\\\"envelope\\\"), ...], the first Word is \\\"not\\\", which is not in EXTENSION_TESTS. The second Word \\\"envelope\\\" is never checked: the first if-let only inspects position 0, the second if-let is guarded by w==\"if\"|\"elsif\", and the bottom for-loop only checks Form::Tag/Block/TestList items, not intermediate Word items. Same root cause as the elsif bypass: extension test names buried after a keyword (not, or in an elsif) are invisible to the checker. Confirmed empirically: is_err=false when it should be true.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:46:28Z",
+  "updated_at": "2026-04-28T20:50:45Z",
+  "closed_at": "2026-04-28T20:50:45Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-cxs",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:46:28"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-2td.27",
+  "title": "expand_vars: \\ RFC 5229 \u00a73.1 compliance unverified",
+  "description": "SCENARIO: RFC 5229 \u00a73.1 gives the example: '\\' => '' => the expansion of variable foo. The Sieve lexer (per RFC 5228 \u00a72.3) does NOT resolve \\$ as an escape sequence \u2014 it passes the literal backslash through, so Form::Str contains the 8-character sequence \\, $, {, f, o, o, }. expand_vars then sees \\$ and consumes the backslash, emitting a bare '$' into out, then continues to push '{', 'f', 'o', 'o', '}' literally. The result is the 6-character string '${foo}' which is NOT subjected to a second-pass variable expansion. MAINTENANCE CONSEQUENCE: If the RFC intent is that '\\' should expand to the value of variable foo (as the RFC example states), the implementation is non-conformant. No test exists for this case. The behavior is not documented. File a test vector against a reference implementation (Dovecot Pigeonhole) to establish ground truth, then either fix the code or document the deviation.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:20:59Z",
+  "updated_at": "2026-04-28T20:32:22Z",
+  "closed_at": "2026-04-28T20:32:22Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-2td",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 13:20:59"
+    }
+  ]
+}

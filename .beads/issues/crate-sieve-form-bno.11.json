@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.11",
+  "title": "CompiledScript missing Clone",
+  "description": "CompiledScript (lib.rs) wraps two Arc fields (Arc<Script> and Arc<HashMap<...>>). Clone on CompiledScript would be O(1) \u2014 just incrementing two reference counts \u2014 and is the expected interface for a type intended to be shared across threads (it already asserts Send+Sync). Without Clone, callers who want to evaluate the same compiled script from multiple threads must wrap it in Arc themselves. Deriving or manually implementing Clone is a straightforward addition to the public API.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:18:00Z",
+  "updated_at": "2026-04-28T17:34:05Z",
+  "closed_at": "2026-04-28T17:34:05Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:18:01"
+    }
+  ]
+}

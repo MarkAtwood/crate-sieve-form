@@ -1,0 +1,13 @@
+{
+  "auto_compact_enabled": "false",
+  "compact_batch_size": "50",
+  "compact_parallel_workers": "5",
+  "compact_tier1_days": "30",
+  "compact_tier1_dep_levels": "2",
+  "compact_tier2_commits": "100",
+  "compact_tier2_days": "90",
+  "compact_tier2_dep_levels": "5",
+  "compaction_enabled": "false",
+  "issue_prefix": "crate-sieve-form",
+  "kv.memory.elsif-else-evaluation-bug-the-form-parser-returns": "elsif/else evaluation bug: FIXED in form.rs Token::LBrace arm. The fix checks if the next token is 'elsif' or 'else' after a block closes, and continues collecting rather than returning. eval_elsif_else() in evaluator.rs is now live code. See closed issue crate-sieve-form-bm8."
+}

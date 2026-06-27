@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-10p.7",
+  "title": "Ctx fields lack doc comments",
+  "description": "evaluator.rs: Ctx struct fields (headers, message_size, envelope_from, envelope_to, variables) have no doc comments. Only variables_enabled has an inline comment. A contributor editing the evaluator must infer the meaning of each field from usage. Add /// doc comments to each field explaining what it holds and where it comes from.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:06:43Z",
+  "updated_at": "2026-04-28T22:29:15Z",
+  "closed_at": "2026-04-28T22:29:15Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-10p",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:06:43"
+    }
+  ]
+}

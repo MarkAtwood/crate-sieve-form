@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-bno.25",
+  "title": "apply_set_modifiers sorts by Reverse(precedence) \u2014 correct RFC 5229 compliance",
+  "description": "RFC 5229 \u00a74 states that when multiple modifiers appear on a set command, they must be applied in precedence order regardless of their order in the script. apply_set_modifiers in evaluator.rs copies the modifier list and sorts it by Reverse(precedence()) before applying. A reviewer might suggest applying modifiers in the order they appear in the script for simplicity. That would violate RFC 5229 \u00a74 for scripts that list modifiers in non-canonical order. The sort is mandatory for spec compliance. The nested fn precedence is also idiomatic: it keeps the mapping local to the function that uses it rather than leaking it as a module-level item.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:24:07Z",
+  "updated_at": "2026-04-28T22:19:07Z",
+  "closed_at": "2026-04-28T22:19:07Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:24:07"
+    }
+  ]
+}

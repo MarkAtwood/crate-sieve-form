@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-bno.12",
+  "title": "MatchType and Comparator missing Eq derive",
+  "description": "MatchType and Comparator (evaluator.rs) derive PartialEq but not Eq. Both are C-like enums with no floating-point or non-reflexive fields, so Eq holds trivially. The convention in idiomatic Rust is to derive both together; omitting Eq prevents the types from being used as HashMap keys, stored in BTreeSet, or used with traits that require Eq. Since these are internal types the impact is contained, but the missing derive is still a code quality gap.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:19:28Z",
+  "updated_at": "2026-04-28T17:33:35Z",
+  "closed_at": "2026-04-28T17:33:35Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-bno",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:19:29"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "crate-sieve-form-3dr",
+  "title": "Review iter-3: final convergence check",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "epic",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T20:59:11Z",
+  "updated_at": "2026-04-28T22:25:10Z",
+  "closed_at": "2026-04-28T22:25:10Z",
+  "notes": "Confidence: 90% chance of no missed P0 bug. Least confident flags: (1) the downcast_ref doc issue (.3) \u2014 it's possible the Rust Any coercion works in some MSRV 1.80 contexts I did not manually compile-test; (2) the expand_vars modified=false branch (.5) \u2014 I traced the logic carefully but did not write a test to confirm the wasted alloc. Uncertainty driven by: not running a live reproducer for the require-ordering bug (I trust the code reading), and not verifying the downcast claim against rustc output.\nIdiom rating: ACCEPTABLE \u2014 the code is clear and readable; the one idiom concern (mutual recursion for elsif) is a real structural smell but doesn't affect correctness today.\nMaintainer risk: MEDIUM \u2014 one confirmed RFC compliance bug (require ordering) that a conformance test suite would catch immediately; one latent stack overflow with adversarial scripts that a fuzz test would catch; and one API doc that gives callers incorrect guidance on error downcasting.\nConfidence: 95% no missed P0/P1. Least confident flags: none. Uncertainty driven by: rfc_vectors.rs integration tests not reviewed (40 tests, all pass). Would raise confidence if: RFC 5228 examples cross-checked directly.\nIdiom rating: CLEAN \u2014 all P0/P1/P2 RUSTY issues resolved across 3 iterations.\nMaintainer risk: LOW \u2014 P0 RFC compliance bug fixed, no remaining structural issues."
+}

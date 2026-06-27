@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.2",
+  "title": "eval_if/eval_elsif_else mutual recursion: stack overflow with many elsif",
+  "description": "eval_if and eval_elsif_else are mutually recursive with no depth limit. Each elsif clause adds two stack frames. A Sieve script with N elsif clauses in a single if-chain (which the parser accepts without limit since only block nesting is depth-guarded) can blow the evaluator stack. Adversarial input: 'if true { } elsif true { } ... x 5000 ...'. Fix: replace the mutual recursion with an iterative loop over the remaining forms slice.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:04:55Z",
+  "updated_at": "2026-04-28T21:13:46Z",
+  "closed_at": "2026-04-28T21:13:46Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:04:55"
+    }
+  ]
+}

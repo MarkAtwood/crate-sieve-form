@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-dwv.5",
+  "title": "eval_exists_test returns false for empty arg list \u2014 not vacuously true",
+  "description": "eval_exists_test tracks found_any_name and returns it at the end, so an empty argument list returns false rather than true. Vacuous truth (true when no headers are named) would mean 'exists []' always passes, which is semantically wrong: the test is asking whether named headers exist, and with no names the question is meaningless \u2014 failing safe is correct. RFC 5228 \u00a75.4 implies the test checks for the listed header names; zero names = zero to check = false is the right call.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:27:08Z",
+  "updated_at": "2026-04-28T22:19:47Z",
+  "closed_at": "2026-04-28T22:19:47Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-dwv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:27:07"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "database": "dolt",
-  "backend": "dolt",
-  "dolt_mode": "embedded",
+  "backend": "flatfile",
+  "dolt_mode": "server",
   "dolt_database": "crate_sieve_form",
   "project_id": "1ab666c3-680f-4827-b61f-cea520029f43"
 }

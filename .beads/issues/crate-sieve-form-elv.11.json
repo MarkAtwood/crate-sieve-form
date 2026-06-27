@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-elv.11",
+  "title": "Validate regex and comparators at compile time, not eval time",
+  "description": "validate_script() walks the entire form tree at compile() time to reject invalid regex patterns and unknown comparators early. A contributor might suggest removing this walk for simplicity and letting errors surface at eval time. This must be resisted: compile() is the explicit contract point for validation. Silent eval-time failures on invalid patterns would be extremely hard for users to debug \u2014 the message might never match the failing pattern.",
+  "status": "closed",
+  "priority": 3,
+  "issue_type": "decision",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-25T02:45:56Z",
+  "updated_at": "2026-04-25T02:54:00Z",
+  "closed_at": "2026-04-25T02:54:00Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-elv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-24 19:45:56"
+    }
+  ]
+}

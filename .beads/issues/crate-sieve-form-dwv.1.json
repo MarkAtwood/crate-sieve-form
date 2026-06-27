@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-dwv.1",
+  "title": "SieveAction::Redirect missing doc comment",
+  "description": "SieveAction::Redirect(String) has no doc comment explaining what the caller is expected to do with the address (forward the message to the contained SMTP address, per RFC 5228 \u00a74.4). All other variants are also undocumented but Redirect is the least obvious. Callers integrating the library will not know whether the address has already been validated, what encoding it is in, or whether forwarding is mandatory or optional \u2014 maintenance consequence: every new integrator must read the RFC to understand the semantics instead of reading the API.",
+  "status": "closed",
+  "priority": 1,
+  "issue_type": "task",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T18:26:54Z",
+  "updated_at": "2026-04-28T18:28:38Z",
+  "closed_at": "2026-04-28T18:28:38Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-dwv",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 11:26:53"
+    }
+  ]
+}

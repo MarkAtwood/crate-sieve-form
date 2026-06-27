@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-ruj.21",
+  "title": "SieveAction variants have no doc comments",
+  "description": "The SieveAction enum variants in lib.rs have no /// doc comments. FileInto(String) does not say the String is a mailbox folder name; Reject(String) does not say the String is the rejection reason text. Form enum variants all have doc comments; SieveAction should too for consistency and for callers reading the public API.",
+  "status": "closed",
+  "priority": 4,
+  "issue_type": "chore",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T17:01:52Z",
+  "updated_at": "2026-04-28T22:27:13Z",
+  "closed_at": "2026-04-28T22:27:13Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-ruj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 10:01:52"
+    }
+  ]
+}

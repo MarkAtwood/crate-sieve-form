@@ -1,0 +1,20 @@
+{
+  "id": "crate-sieve-form-3dr.1",
+  "title": "require-after-commands accepted (RFC 5228 \u00a76.1)",
+  "description": "RFC 5228 \u00a76.1 mandates that all require statements MUST appear before any other command. compile() scans all stmts (not just leading ones) for require declarations, with no ordering check. A script like 'keep; require [\"fileinto\"]; fileinto \"x\";' is accepted when it must be rejected. Fix: during the require-collection loop, reject any non-require statement seen before the first require is encountered, or equivalently verify all require stmts appear only at the head of the parsed script.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T21:04:48Z",
+  "updated_at": "2026-04-28T21:12:40Z",
+  "closed_at": "2026-04-28T21:12:40Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-3dr",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 14:04:47"
+    }
+  ]
+}

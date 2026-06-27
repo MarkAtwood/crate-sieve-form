@@ -1,0 +1,21 @@
+{
+  "id": "crate-sieve-form-egj.1",
+  "title": "eval_size_test: u64 as usize silently truncates on 32-bit",
+  "description": "evaluator.rs:572: `let limit = l as usize` \u2014 on 32-bit targets a u64 value > 2^32 (e.g. `size :over 5G` = 5368709120) truncates silently to 1073741824 (1G), making the comparison wrong. Use `usize::try_from(l).unwrap_or(usize::MAX)` so the semantics are correct on all targets.",
+  "status": "closed",
+  "priority": 0,
+  "issue_type": "bug",
+  "assignee": "Mark Atwood",
+  "created_by": "Mark Atwood",
+  "created_at": "2026-04-28T16:24:21Z",
+  "updated_at": "2026-04-28T16:50:42Z",
+  "closed_at": "2026-04-28T16:50:42Z",
+  "dependencies": [
+    {
+      "depends_on_id": "crate-sieve-form-egj",
+      "dep_type": "parent_child",
+      "created_by": "Mark Atwood",
+      "created_at": "2026-04-28 09:24:21"
+    }
+  ]
+}
